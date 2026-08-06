@@ -27,6 +27,10 @@ app.get('/', (req, res) => {
   res.send('Palagunitaan API running');
 });
 
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Connected!' });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
