@@ -1,20 +1,36 @@
-import { useEffect } from 'react';
-import api from './api/axios';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-console.log('API URL:', process.env.REACT_APP_API_URL);
 
-function App() {
-  useEffect(() => {
+function AuthHeader() {
+  const { user, loading, login, logout } = useAuth();
 
-    api.get('/api/test')
-      .then(res => console.log(res.data))
-      .catch(err => console.error(err));
-  }, []);
+  if (loading) return null;
 
   return (
-    <div>
-      <h1>Palagunitaan</h1>
+    <div className="flex items-center justify-between p-4 border-b">
+      <h1 className="text-xl font-semibold">Palagunitaan</h1>
+      {user ? (
+        <div className="flex items-center gap-3">
+          
+          <span className="text-sm text-gray-600">{user.name}</span>
+          <button onClick={logout} className="text-sm text-red-600">
+            Log out
+          </button>
+        </div>
+      ) : (
+        <button onClick={login} className="text-sm text-blue-600">
+          Sign in with Google
+        </button>
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AuthHeader />
+    </AuthProvider>
   );
 }
 
