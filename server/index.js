@@ -5,6 +5,9 @@ const session = require('express-session');
 
 dotenv.config();
 
+const passport = require('./config/passport');
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
 
 app.use(cors({
@@ -22,6 +25,9 @@ app.use(session({
   cookie: { secure: false }
 }));
 
+app.use(passport.initialize()); 
+app.use(passport.session());
+
 // Health check
 app.get('/', (req, res) => {
   res.send('Palagunitaan API running');
@@ -30,6 +36,8 @@ app.get('/', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Connected!' });
 });
+
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
