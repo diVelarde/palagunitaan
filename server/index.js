@@ -7,6 +7,8 @@ dotenv.config();
 
 const passport = require('./config/passport');
 const authRoutes = require('./routes/authRoutes');
+const { requireAuth } = require('./middleware/authMiddleware'); 
+const { requireRole } = require('./middleware/roleMiddleware');
 
 const app = express();
 
@@ -38,6 +40,18 @@ app.get('/api/test', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+app.get('/api/protected', requireAuth, (req, res) => { 
+  res.json({ 
+    message: 'You are authenticated', 
+    user: req.user 
+  }); 
+}); 
+
+app.get('/api/admin-only', requireAuth, requireRole('admin'), (req, res) => { 
+  res.json({ message: 'Admin access granted' }); 
+});
+
 
 const PORT = process.env.PORT || 5000;
 
