@@ -1,8 +1,9 @@
 import { AuthProvider, useAuth } from './context/AuthContext';
-
+import RoleBadge from './components/RoleBadge';
+import RoleSwitcher from './components/RoleSwitcher';
 
 function AuthHeader() {
-  const { user, loading, login, logout } = useAuth();
+  const { user, viewRole, loading, login, logout } = useAuth();
 
   if (loading) return null;
 
@@ -11,7 +12,8 @@ function AuthHeader() {
       <h1 className="text-xl font-semibold">Palagunitaan</h1>
       {user ? (
         <div className="flex items-center gap-3">
-          
+          <RoleBadge role={viewRole} />
+          <RoleSwitcher />
           <span className="text-sm text-gray-600">{user.name}</span>
           <button onClick={logout} className="text-sm text-red-600">
             Log out
