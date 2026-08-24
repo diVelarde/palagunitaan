@@ -71,4 +71,15 @@ const db = require('./config/db');
 
 db.query('SELECT 1')
     .then(() => console.log('DB connected'))
-    .catch(err => console.error(err));
+    .catch(err => {
+        console.error('DB connection failed:', {
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME,
+            port: process.env.DB_PORT,
+            passwordExists: !!process.env.DB_PASSWORD,
+            passwordLength: process.env.DB_PASSWORD?.length
+        });
+
+        console.error(err);
+    });
