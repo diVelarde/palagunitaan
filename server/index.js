@@ -11,6 +11,11 @@ const { requireAuth } = require('./middleware/authMiddleware');
 const { requireRole } = require('./middleware/roleMiddleware');
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 
 app.use(cors({
   origin: process.env.CLIENT_URL,
@@ -24,7 +29,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: {
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax'
+  }
 }));
 
 app.use(passport.initialize()); 
