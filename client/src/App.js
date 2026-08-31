@@ -1,38 +1,76 @@
-import { AuthProvider, useAuth } from './context/AuthContext';
-import RoleBadge from './components/RoleBadge';
-import RoleSwitcher from './components/RoleSwitcher';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar.js';
+import Footer from './components/Footer.js';
+import ProtectedRoute from './components/ProtectedRoute.js';
+import DashboardLayout from './layouts/DashboardLayout';
 
-function AuthHeader() {
-  const { user, viewRole, loading, login, logout } = useAuth();
+import LandingPage from './pages/LandingPage.js';
+import DashboardPage from './pages/DashboardPage.js';
+import NotFoundPage from './pages/NotFoundPage.js';
+import StubPage from './pages/StubPage.js';
+import { ErrorBoundary } from './pages/ErrorPage.js';
 
-  if (loading) return null;
-
+function AppShell() {
   return (
-    <div className="flex items-center justify-between p-4 border-b">
-      <h1 className="text-xl font-semibold">Palagunitaan</h1>
-      {user ? (
-        <div className="flex items-center gap-3">
-          <RoleBadge role={viewRole} />
-          <RoleSwitcher />
-          <span className="text-sm text-gray-600">{user.name}</span>
-          <button onClick={logout} className="text-sm text-red-600">
-            Log out
-          </button>
-        </div>
-      ) : (
-        <button onClick={login} className="text-sm text-blue-600">
-          Sign in with Google
-        </button>
-      )}
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Public, read-only pages — built out in HTG/MAP/SRC/BLG phases */}
+          <Route path="/browse" element={<StubPage title="Browse Heritage Entries" phase="HTG" />} />
+          <Route path="/map" element={<StubPage title="Heritage Map" phase="MAP" />} />
+          <Route path="/timeline" element={<StubPage title="Timeline" phase="SRC" />} />
+          <Route path="/blog" element={<StubPage title="Community Blog" phase="BLG" />} />
+
+          {/* Logged-in area */}
+          <Route element={<ProtectedRoute minRole="public" />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/dashboard/submissions"
+                element={<StubPage title="My Submissions" phase="HTG" />}
+              />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute minRole="contributor" />}>
+            <Route path="/submit" element={<StubPage title="Submit an Entry" phase="HTG" />} />
+          </Route>
+
+          <Route element={<ProtectedRoute minRole="validator" />}>
+            <Route
+              element={<DashboardLayout />}
+            >
+              <Route path="/validate" element={<StubPage title="Validation Queue" phase="VAL" />} />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute minRole="admin" />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/admin" element={<StubPage title="Administration" phase="ADM" />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </div>
+      <Footer />
     </div>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AuthHeader />
-    </AuthProvider>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

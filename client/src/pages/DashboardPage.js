@@ -1,4 +1,4 @@
-import RoleBadge from './RoleBadge';
+import RoleBadge from '../components/RoleBadge'; 
 import { useAuth } from '../context/AuthContext';
 
 export default function ProfilePanel() {
