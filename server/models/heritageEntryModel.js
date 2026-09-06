@@ -1,0 +1,61 @@
+const db = require('../config/db');
+
+async function findById(id) {
+  const [rows] = await db.query('SELECT * FROM heritage_entries WHERE id = ?', [id]);
+  return rows[0] || null;
+}
+
+async function findByUser(userId) {
+  const [rows] = await db.query(
+    'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY created_at DESC',
+    [userId]
+  );
+  return rows;
+}
+
+async function findPublished({ limit = 20, offset = 0 } = {}) {
+  const [rows] = await db.query(
+    `SELECT * FROM heritage_entries
+     WHERE status = 'published'
+     ORDER BY published_at DESC
+     LIMIT ? OFFSET ?`,
+    [limit, offset]
+  );
+  return rows;
+}
+
+async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod }) {
+  const [result] = await db.query(
+    `INSERT INTO heritage_entries
+      (user_id, title, raw_content, source_type, source_description, historical_period, status, submitted_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null]
+  );
+  return findById(result.insertId);
+}
+
+async function updateStatus(id, status) {
+  const publishedAtClause = status === 'published' ? ', published_at = NOW()' : '';
+  await db.query(`UPDATE heritage_entries SET status = ? ${publishedAtClause} WHERE id = ?`, [status, id]);
+  return findById(id);
+}
+
+async function updateCategoryAuto(id, categoryAuto) {
+  await db.query('UPDATE heritage_entries SET category_auto = ? WHERE id = ?', [categoryAuto, id]);
+  return findById(id);
+}
+
+async function updateEuphemisticContent(id, euphemisticContent) {
+  await db.query('UPDATE heritage_entries SET euphemistic_content = ? WHERE id = ?', [euphemisticContent, id]);
+  return findById(id);
+}
+
+module.exports = {
+  findById,
+  findByUser,
+  findPublished,
+  create,
+  updateStatus,
+  updateCategoryAuto,
+  updateEuphemisticContent,
+};
