@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const userModel = require('../models/userModel');
 
 function googleCallback(req, res) {
   res.redirect(process.env.CLIENT_URL);
@@ -35,9 +36,19 @@ function switchViewRole(req, res) {
   res.json({ viewRole });
 }
 
-module.exports = {
-  googleCallback,
-  getCurrentUser,
-  logout,
-  switchViewRole,
+async function becomeContributor(req, res) {
+  if (req.user.role !== 'public') {
+    return res.status(400).json({ message: 'Only public accounts can become contributors this way.' });
+  }
+  const updated = await userModel.updateRole(req.user.id, 'contributor');
+  res.json({ role: updated.role });
+}
+
+
+module.exports = { 
+  googleCallback, 
+  getCurrentUser, 
+  logout, 
+  switchViewRole, 
+  becomeContributor 
 };

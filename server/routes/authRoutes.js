@@ -24,4 +24,6 @@ router.post('/logout', authController.logout);
 
 router.patch('/view-role', requireAuth, validateViewRole, authController.switchViewRole);
 
+router.post('/become-contributor', requireAuth, authController.becomeContributor);
+
 module.exports = router;
