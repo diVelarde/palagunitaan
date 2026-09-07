@@ -24,3 +24,17 @@ async function categorizeContent(rawContent) {
     return { category: 'Other', flaggedWords: [] };
   }
 }
+
+async function generateEuphemisticVersion(rawContent) {
+  const model = getModel();
+  const prompt =
+    'Rewrite the following Philippine folklore submission in plain, accessible ' +
+    'language for a general public audience unfamiliar with regional terms or ' +
+    'context. Preserve every factual claim and cultural detail exactly — add ' +
+    'brief clarifications in parentheses where helpful, but do not remove or ' +
+    'soften content. Respond with the rewritten text only, no preamble.\n\n' +
+    'Submission:\n' + rawContent;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().trim();
+}
