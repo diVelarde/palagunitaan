@@ -1,7 +1,11 @@
 const heritageEntryModel = require('../models/heritageEntryModel');
 const geminiService = require('./geminiService');
+const duplicateDetectionService = require('./duplicateDetectionService');
 
 async function submitEntry({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod }) {
+
+  const possibleDuplicates = await duplicateDetectionService.findPossibleDuplicates(title);
+
   const entry = await heritageEntryModel.create({
     userId,
     title: title.trim(),
@@ -27,7 +31,7 @@ async function submitEntry({ userId, title, rawContent, sourceType, sourceDescri
     console.error('Dual-version generation failed for entry', entry.id, err.message);
   }
 
-  return entry;
+  return { entry, possibleDuplicates };
 }
 
 module.exports = { submitEntry };

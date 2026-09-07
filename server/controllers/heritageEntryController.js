@@ -4,7 +4,7 @@ const heritageEntryModel = require('../models/heritageEntryModel');
 async function submitEntry(req, res, next) {
   try {
     const { title, rawContent, sourceType, sourceDescription, historicalPeriod } = req.body;
-    const entry = await heritageEntryService.submitEntry({
+    const { entry, possibleDuplicates } = await heritageEntryService.submitEntry({
       userId: req.user.id,
       title,
       rawContent,
@@ -12,11 +12,15 @@ async function submitEntry(req, res, next) {
       sourceDescription,
       historicalPeriod,
     });
-    res.status(201).json({ entry });
+    res.status(201).json({
+      entry,
+      possibleDuplicates: possibleDuplicates.map((d) => ({ id: d.id, title: d.title, score: d.score })),
+    });
   } catch (err) {
     next(err);
   }
 }
+
 
 async function listPublished(req, res, next) {
   try {
