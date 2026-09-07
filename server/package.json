@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.19.0",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
@@ -21,7 +22,6 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "mysql2": "^3.23.2",
-    "openai": "^7.4.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
