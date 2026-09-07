@@ -42,4 +42,18 @@ async function listMine(req, res, next) {
   }
 }
 
-module.exports = { submitEntry, listPublished, listMine };
+async function getEntryById(req, res, next) {
+  try {
+    const entry = await heritageEntryModel.findById(req.params.id);
+    if (!entry || (entry.status !== 'published' && entry.user_id !== req.user?.id)) {
+      // Not published and not the owner viewing their own pending entry -> not found.
+      return res.status(404).json({ entry: null });
+    }
+    res.json({ entry });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+module.exports = { submitEntry, listPublished, listMine, getEntryById };

@@ -11,6 +11,10 @@ import NotFoundPage from './pages/NotFoundPage.js';
 import StubPage from './pages/StubPage.js';
 import { ErrorBoundary } from './pages/ErrorPage.js';
 
+import SubmitEntryPage from './pages/SubmitEntryPage';
+import EntryDetailPage from './pages/EntryDetailPage';
+import heritageService from './services/heritageService';
+
 function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -21,6 +25,7 @@ function AppShell() {
 
           {/* Public, read-only pages — built out in HTG/MAP/SRC/BLG phases */}
           <Route path="/browse" element={<StubPage title="Browse Heritage Entries" phase="HTG" />} />
+          <Route path="/entries/:id" element={<EntryDetailPage fetchEntry={heritageService.getEntryById} />} />
           <Route path="/map" element={<StubPage title="Heritage Map" phase="MAP" />} />
           <Route path="/timeline" element={<StubPage title="Timeline" phase="SRC" />} />
           <Route path="/blog" element={<StubPage title="Community Blog" phase="BLG" />} />
@@ -37,7 +42,7 @@ function AppShell() {
           </Route>
 
           <Route element={<ProtectedRoute minRole="contributor" />}>
-            <Route path="/submit" element={<StubPage title="Submit an Entry" phase="HTG" />} />
+            <Route path="/submit" element={<SubmitEntryPage onSubmit={heritageService.submitEntry} />} />
           </Route>
 
           <Route element={<ProtectedRoute minRole="validator" />}>

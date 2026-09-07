@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', controller.listPublished);
 router.get('/mine', requireAuth, controller.listMine);
+router.get('/:id', controller.getEntryById);
 router.post('/', requireAuth, validateSubmission, controller.submitEntry);
 
 module.exports = router;
