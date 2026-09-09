@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const { requireAuth } = require('./middleware/authMiddleware'); 
 const { requireRole } = require('./middleware/roleMiddleware');
 const heritageEntryRoutes = require('./routes/heritageEntryRoutes');
+const mapRoutes = require('./routes/mapRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -50,6 +51,7 @@ app.get('/api/test', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/heritage-entries', heritageEntryRoutes);
+app.use('/api/map', mapRoutes);
 
 app.get('/api/protected', requireAuth, (req, res) => { 
   res.json({ 
