@@ -55,5 +55,22 @@ async function getEntryById(req, res, next) {
   }
 }
 
+async function searchEntries(req, res, next) {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+    const offset = parseInt(req.query.offset, 10) || 0;
+    const entries = await heritageEntryModel.search({
+      keyword: req.query.keyword,
+      category: req.query.category,
+      region: req.query.region,
+      verificationStatus: req.query.verificationStatus,
+      limit,
+      offset,
+    });
+    res.json({ entries });
+  } catch (err) {
+    next(err);
+  }
+}
 
-module.exports = { submitEntry, listPublished, listMine, getEntryById };
+module.exports = { submitEntry, listPublished, listMine, getEntryById, searchEntries };

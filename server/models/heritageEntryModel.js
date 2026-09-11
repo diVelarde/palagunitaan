@@ -24,6 +24,38 @@ async function findPublished({ limit = 20, offset = 0 } = {}) {
   return rows;
 }
 
+async function search({ keyword, category, region, verificationStatus, limit = 20, offset = 0 } = {}) {
+  const conditions = [`status = 'published'`];
+  const params = [];
+
+  if (keyword) {
+    conditions.push('(title LIKE ? OR raw_content LIKE ? OR euphemistic_content LIKE ?)');
+    const like = `%${keyword}%`;
+    params.push(like, like, like);
+  }
+  if (category) {
+    conditions.push('category_auto = ?');
+    params.push(category);
+  }
+  if (region) {
+    conditions.push('region_id = ?');
+    params.push(region);
+  }
+  if (verificationStatus) {
+    conditions.push('verification_status = ?');
+    params.push(verificationStatus);
+  }
+
+  const [rows] = await db.query(
+    `SELECT * FROM heritage_entries
+     WHERE ${conditions.join(' AND ')}
+     ORDER BY published_at DESC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  );
+  return rows;
+}
+
 async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod }) {
   const [result] = await db.query(
     `INSERT INTO heritage_entries
@@ -50,12 +82,13 @@ async function updateEuphemisticContent(id, euphemisticContent) {
   return findById(id);
 }
 
-module.exports = {
-  findById,
-  findByUser,
-  findPublished,
-  create,
-  updateStatus,
-  updateCategoryAuto,
-  updateEuphemisticContent,
+module.exports = { 
+  findById, 
+  findByUser, 
+  findPublished, 
+  search, 
+  create, 
+  updateStatus, 
+  updateCategoryAuto, 
+  updateEuphemisticContent 
 };
