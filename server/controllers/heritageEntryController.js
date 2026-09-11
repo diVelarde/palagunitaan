@@ -47,7 +47,6 @@ async function getEntryById(req, res, next) {
   try {
     const entry = await heritageEntryModel.findById(req.params.id);
     if (!entry || (entry.status !== 'published' && entry.user_id !== req.user?.id)) {
-      // Not published and not the owner viewing their own pending entry -> not found.
       return res.status(404).json({ entry: null });
     }
     res.json({ entry });
@@ -65,6 +64,7 @@ async function searchEntries(req, res, next) {
       category: req.query.category,
       region: req.query.region,
       verificationStatus: req.query.verificationStatus,
+      historicalPeriod: req.query.historicalPeriod,
       limit,
       offset,
     });
