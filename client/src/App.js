@@ -14,6 +14,7 @@ import { ErrorBoundary } from './pages/ErrorPage.js';
 import SubmitEntryPage from './pages/SubmitEntryPage';
 import EntryDetailPage from './pages/EntryDetailPage';
 import heritageService from './services/heritageService';
+import MapPage from './pages/MapPage';
 
 function AppShell() {
   return (
@@ -26,7 +27,7 @@ function AppShell() {
           {/* Public, read-only pages — built out in HTG/MAP/SRC/BLG phases */}
           <Route path="/browse" element={<StubPage title="Browse Heritage Entries" phase="HTG" />} />
           <Route path="/entries/:id" element={<EntryDetailPage fetchEntry={heritageService.getEntryById} />} />
-          <Route path="/map" element={<StubPage title="Heritage Map" phase="MAP" />} />
+          <Route path="/map" element={<MapPage />} /> 
           <Route path="/timeline" element={<StubPage title="Timeline" phase="SRC" />} />
           <Route path="/blog" element={<StubPage title="Community Blog" phase="BLG" />} />
 
