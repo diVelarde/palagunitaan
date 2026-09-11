@@ -1,5 +1,6 @@
 const heritageEntryService = require('../services/heritageEntryService');
 const heritageEntryModel = require('../models/heritageEntryModel');
+const timelineService = require('../services/timelineService');
 
 async function submitEntry(req, res, next) {
   try {
@@ -73,4 +74,14 @@ async function searchEntries(req, res, next) {
   }
 }
 
-module.exports = { submitEntry, listPublished, listMine, getEntryById, searchEntries };
+async function getTimeline(req, res, next) {
+  try {
+    const entries = await heritageEntryModel.findAllPublishedForTimeline();
+    const timeline = timelineService.buildTimeline(entries);
+    res.json({ timeline });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { submitEntry, listPublished, listMine, getEntryById, searchEntries, getTimeline };

@@ -82,6 +82,17 @@ async function updateEuphemisticContent(id, euphemisticContent) {
   return findById(id);
 }
 
+async function findAllPublishedForTimeline() {
+  const [rows] = await db.query(
+    `SELECT id, title, historical_period, verification_status, category_auto, published_at
+     FROM heritage_entries
+     WHERE status = 'published' AND historical_period IS NOT NULL
+     ORDER BY published_at DESC
+     LIMIT 500`
+  );
+  return rows;
+}
+
 module.exports = { 
   findById, 
   findByUser, 
@@ -90,5 +101,6 @@ module.exports = {
   create, 
   updateStatus, 
   updateCategoryAuto, 
-  updateEuphemisticContent 
+  updateEuphemisticContent,
+  findAllPublishedForTimeline
 };

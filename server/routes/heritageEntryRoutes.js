@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', controller.listPublished);
 router.get('/mine', requireAuth, controller.listMine);
 router.get('/search', controller.searchEntries);
+router.get('/timeline', controller.getTimeline);
 router.get('/:id', controller.getEntryById);
 router.post('/', requireAuth, validateSubmission, controller.submitEntry);
 
