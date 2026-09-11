@@ -5,4 +5,6 @@ async function getMapData() {
   return res.data.markers;
 }
 
-export default { getMapData };
+const mapService = { getMapData };
+
+export default mapService;

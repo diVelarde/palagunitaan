@@ -14,4 +14,6 @@ async function deleteSite(id) {
   await api.delete(`/api/heritage-sites/${id}`);
 }
 
-export default { createSite, updateSite, deleteSite };
+const heritageSiteService = { createSite, updateSite, deleteSite };
+
+export default heritageSiteService;
