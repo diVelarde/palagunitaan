@@ -42,18 +42,11 @@ async function translateEntry(entryId, targetLanguage) {
   return res.data;
 }
 
-async function searchEntries({ keyword, verificationStatus, historicalPeriod, category, region, limit, offset } = {}) {
-  const res = await api.get('/api/heritage-entries/search', {
-    params: { keyword, verificationStatus, historicalPeriod, category, region, limit, offset },
-  });
-  return res.data.entries;
-}
-
 async function getTimeline() {
   const res = await api.get('/api/heritage-entries/timeline');
   return res.data.timeline;
 }
 
-const heritageService = { submitEntry, getEntryById, getPublishedEntries, getMyEntries, searchEntries, getTimeline, translateEntry, searchEntries, getTimeline };
+const heritageService = { submitEntry, getEntryById, getPublishedEntries, getMyEntries, searchEntries, getTimeline, translateEntry, getTimeline };
 
 export default heritageService;
