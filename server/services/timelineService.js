@@ -1,4 +1,7 @@
-const CANONICAL_ORDER = ['Pre-colonial', 'Spanish Era', 'American Era', 'Japanese Occupation', 'Post-war', 'Contemporary'];
+const CANONICAL_ORDER = [
+  'Pre-Colonial', 'Spanish Colonial Period', 'American Occupation',
+  'Japanese Occupation', 'Post-Independence', 'Contemporary', 'Unknown',
+];
 
 function normalizePeriodLabel(period) {
   const match = CANONICAL_ORDER.find((p) => p.toLowerCase() === period.trim().toLowerCase());
