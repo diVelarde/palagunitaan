@@ -15,6 +15,8 @@ import SubmitEntryPage from './pages/SubmitEntryPage';
 import EntryDetailPage from './pages/EntryDetailPage';
 import heritageService from './services/heritageService';
 import MapPage from './pages/MapPage';
+import BrowsePage from './pages/BrowsePage';
+import TimelinePage from './pages/TimelinePage';
 
 function AppShell() {
   return (
@@ -25,10 +27,10 @@ function AppShell() {
           <Route path="/" element={<LandingPage />} />
 
           {/* Public, read-only pages — built out in HTG/MAP/SRC/BLG phases */}
-          <Route path="/browse" element={<StubPage title="Browse Heritage Entries" phase="HTG" />} />
+          <Route path="/browse" element={<BrowsePage searchEntries={heritageService.searchEntries} />} />
           <Route path="/entries/:id" element={<EntryDetailPage fetchEntry={heritageService.getEntryById} />} />
           <Route path="/map" element={<MapPage />} /> 
-          <Route path="/timeline" element={<StubPage title="Timeline" phase="SRC" />} />
+          <Route path="/timeline" element={<TimelinePage fetchTimeline={heritageService.getTimeline} />} />
           <Route path="/blog" element={<StubPage title="Community Blog" phase="BLG" />} />
 
           {/* Logged-in area */}
