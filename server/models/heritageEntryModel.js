@@ -82,6 +82,21 @@ async function findAllPublishedForTimeline() {
   return rows;
 }
 
+async function findPending() {
+  const [rows] = await db.query(`SELECT * FROM heritage_entries WHERE status = 'pending' ORDER BY submitted_at ASC`);
+  return rows;
+}
+
+async function updateVerification(id, { status, verificationStatus }) {
+  const publishedAtClause = status === 'published' ? ', published_at = NOW()' : '';
+  await db.query(
+    `UPDATE heritage_entries SET status = ?, verification_status = ? ${publishedAtClause} WHERE id = ?`,
+    [status, verificationStatus, id]
+  );
+  return findById(id);
+}
+
+
 module.exports = { 
   findById, 
   findByUser, 
@@ -91,5 +106,7 @@ module.exports = {
   updateStatus, 
   updateCategoryAuto, 
   updateEuphemisticContent,
-  findAllPublishedForTimeline
+  findAllPublishedForTimeline,
+  findPending,
+  updateVerification
 };
