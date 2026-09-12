@@ -11,6 +11,7 @@ const { requireAuth } = require('./middleware/authMiddleware');
 const { requireRole } = require('./middleware/roleMiddleware');
 const heritageEntryRoutes = require('./routes/heritageEntryRoutes');
 const mapRoutes = require('./routes/mapRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -52,6 +53,7 @@ app.get('/api/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/heritage-entries', heritageEntryRoutes);
 app.use('/api/map', mapRoutes);
+app.use('/api/review', reviewRoutes);
 
 app.get('/api/protected', requireAuth, (req, res) => { 
   res.json({ 
@@ -63,7 +65,6 @@ app.get('/api/protected', requireAuth, (req, res) => {
 app.get('/api/admin-only', requireAuth, requireRole('admin'), (req, res) => { 
   res.json({ message: 'Admin access granted' }); 
 });
-
 
 const PORT = process.env.PORT || 5000;
 
