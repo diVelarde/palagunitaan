@@ -42,11 +42,6 @@ async function translateEntry(entryId, targetLanguage) {
   return res.data;
 }
 
-async function getTimeline() {
-  const res = await api.get('/api/heritage-entries/timeline');
-  return res.data.timeline;
-}
-
-const heritageService = { submitEntry, getEntryById, getPublishedEntries, getMyEntries, searchEntries, getTimeline, translateEntry, getTimeline };
+const heritageService = { submitEntry, getEntryById, getPublishedEntries, getMyEntries, searchEntries, getTimeline, translateEntry };
 
 export default heritageService;
