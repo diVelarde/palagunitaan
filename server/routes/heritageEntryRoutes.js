@@ -10,6 +10,7 @@ router.get('/mine', requireAuth, controller.listMine);
 router.get('/search', controller.searchEntries);
 router.get('/timeline', controller.getTimeline);
 router.get('/:id', controller.getEntryById);
+router.post('/:id/translate', requireAuth, requireRole('validator', 'admin'), controller.translateEntry);
 router.post('/', requireAuth, validateSubmission, controller.submitEntry);
 
 module.exports = router;

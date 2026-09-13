@@ -96,6 +96,13 @@ async function updateVerification(id, { status, verificationStatus }) {
   return findById(id);
 }
 
+async function updateTranslation(id, { translatedContent, translatedLanguage }) {
+  await db.query(
+    'UPDATE heritage_entries SET translated_content = ?, translated_language = ? WHERE id = ?',
+    [translatedContent, translatedLanguage, id]
+  );
+  return findById(id);
+}
 
 module.exports = { 
   findById, 
@@ -108,5 +115,6 @@ module.exports = {
   updateEuphemisticContent,
   findAllPublishedForTimeline,
   findPending,
-  updateVerification
+  updateVerification,
+  updateTranslation
 };

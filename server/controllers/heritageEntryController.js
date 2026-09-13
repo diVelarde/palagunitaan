@@ -84,4 +84,32 @@ async function getTimeline(req, res, next) {
   }
 }
 
-module.exports = { submitEntry, listPublished, listMine, getEntryById, searchEntries, getTimeline };
+async function translateEntry(req, res, next) {
+  try {
+    const { targetLanguage } = req.body;
+    if (!targetLanguage || !targetLanguage.trim()) {
+      return res.status(400).json({ message: 'targetLanguage is required.' });
+    }
+    const entry = await heritageEntryModel.findById(req.params.id);
+    if (!entry) return res.status(404).json({ message: 'Entry not found.' });
+
+    const translatedContent = await geminiService.translateContent(entry.raw_content, targetLanguage.trim());
+    const updated = await heritageEntryModel.updateTranslation(entry.id, {
+      translatedContent,
+      translatedLanguage: targetLanguage.trim(),
+    });
+    res.json({ entry: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { 
+  submitEntry, 
+  listPublished, 
+  listMine, 
+  getEntryById, 
+  searchEntries, 
+  getTimeline,
+  translateEntry 
+};
