@@ -15,4 +15,10 @@ async function getEntryHistory(entryId) {
   return res.data.history;
 }
 
-export default { getPendingEntries, submitReview, getEntryHistory };
+const reviewService = {
+  getPendingEntries,
+  submitReview,
+  getEntryHistory
+};
+
+export default reviewService;

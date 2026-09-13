@@ -14,4 +14,10 @@ async function markRead(id) {
   await api.patch(`/api/notifications/${id}/read`);
 }
 
-export default { getMyNotifications, getUnreadCount, markRead };
+const notificationService = {
+  getMyNotifications,
+  getUnreadCount,
+  markRead
+};
+
+export default notificationService;
