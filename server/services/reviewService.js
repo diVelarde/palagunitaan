@@ -20,6 +20,12 @@ async function reviewEntry({ entryId, validatorId, decision, comment }) {
   const updatedEntry = await heritageEntryModel.updateVerification(entryId, { status: entryStatus, verificationStatus });
   const action = await editorialActionModel.create({ heritageEntryId: entryId, validatorId, actionType: decision, comment });
 
+  try {
+    await notificationService.notifyReviewDecision({ entry: updatedEntry, decision });
+  } catch (err) {
+    console.error('Failed to notify contributor for entry', entryId, err.message);
+  }
+
   return { entry: updatedEntry, action };
 }
 
