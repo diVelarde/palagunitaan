@@ -42,6 +42,13 @@ async function translateEntry(entryId, targetLanguage) {
   return res.data;
 }
 
-const heritageService = { submitEntry, getEntryById, getPublishedEntries, getMyEntries, searchEntries, getTimeline, translateEntry };
+const heritageService = { 
+  submitEntry, 
+  getEntryById, 
+  getPublishedEntries, 
+  getMyEntries, 
+  searchEntries, 
+  getTimeline, 
+  translateEntry };
 
 export default heritageService;

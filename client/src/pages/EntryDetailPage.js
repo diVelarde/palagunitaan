@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import TranslationPanel from '../components/TranslationPanel';
+import { useAuth } from '../context/AuthContext';
+import heritageService from '../services/heritageService';
 
 const VERIFICATION_STYLES = {
   verified: 'bg-green-100 text-green-800',
@@ -17,8 +20,9 @@ function VerificationBadge({ status }) {
 
 export default function EntryDetailPage({ fetchEntry = async () => null }) {
   const { id } = useParams();
-  const [entry, setEntry] = useState(undefined); // undefined = loading, null = not found
-  const [view, setView] = useState('plain'); // 'plain' | 'raw'
+  const { user } = useAuth();
+  const [entry, setEntry] = useState(undefined); 
+  const [view, setView] = useState('plain'); 
 
   useEffect(() => {
     let active = true;
@@ -81,6 +85,18 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
           <span className="font-medium text-gray-700">Source notes: </span>{entry.source_description}
         </p>
       )}
+
+      {(user?.role === 'validator' || user?.role === 'admin') && (
+        <div className="mt-8">
+          <TranslationPanel
+            entryId={entry.id}
+            initialTranslation={entry.translated_content}
+            initialLanguage={entry.translated_language}
+            translateEntry={heritageService.translateEntry}
+          />
+        </div>
+      )}
+      
     </article>
   );
 }

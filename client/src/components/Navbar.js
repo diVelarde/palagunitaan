@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import RoleBadge from './RoleBadge';
 import RoleSwitcher from './RoleSwitcher';
 import NotificationDropdown from './NotificationDropdown';
+import { useNotifications } from '../hooks/useNotifications';
 
 const ROLE_LEVEL = { public: 0, contributor: 1, validator: 2, admin: 3 };
 
@@ -30,6 +31,8 @@ export default function Navbar() {
     (link) => ROLE_LEVEL[effectiveRole] >= ROLE_LEVEL[link.minRole]
   );
 
+  const { notifications, unreadCount, onOpen, onMarkRead } = useNotifications();
+
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
@@ -48,7 +51,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {loading ? null : user ? (
             <>
-              <NotificationDropdown />
+              <NotificationDropdown notifications={notifications} unreadCount={unreadCount} onOpen={onOpen} onMarkRead={onMarkRead} />
               <RoleBadge role={viewRole} />
               <RoleSwitcher />
               <Link to="/dashboard" className="text-sm font-medium text-gray-700 hover:text-gray-900">

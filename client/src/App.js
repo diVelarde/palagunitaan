@@ -18,6 +18,9 @@ import MapPage from './pages/MapPage';
 import BrowsePage from './pages/BrowsePage';
 import TimelinePage from './pages/TimelinePage';
 
+import ValidatorDashboardPage from './pages/ValidatorDashboardPage';
+import reviewService from './services/reviewService';
+
 function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -49,10 +52,16 @@ function AppShell() {
           </Route>
 
           <Route element={<ProtectedRoute minRole="validator" />}>
-            <Route
-              element={<DashboardLayout />}
-            >
-              <Route path="/validate" element={<StubPage title="Validation Queue" phase="VAL" />} />
+            <Route element={<DashboardLayout />}>
+              <Route
+                path="/validate"
+                element={
+                  <ValidatorDashboardPage
+                    fetchPending={reviewService.getPendingEntries}
+                    submitReview={reviewService.submitReview}
+                  />
+                }
+              />
             </Route>
           </Route>
 
