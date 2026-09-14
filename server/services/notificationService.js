@@ -1,4 +1,4 @@
-const notificationModel = require('./notificationModel');
+const notificationModel = require('../models/notificationModel');
 
 const DECISION_MESSAGES = {
   approved: (title) => `Your entry "${title}" was reviewed and published.`,

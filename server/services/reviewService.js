@@ -1,6 +1,7 @@
 const heritageEntryModel = require('../models/heritageEntryModel');
 const editorialActionModel = require('../models/editorialActionModel');
 const verificationStatusService = require('./verificationStatusService');
+const notificationService = require('./notificationService');
 
 class ReviewError extends Error {
   constructor(message, statusCode) {
