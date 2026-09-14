@@ -28,10 +28,16 @@ async function updateRole(id, role) {
   return findById(id);
 }
 
+async function findAll() {
+  const [rows] = await db.query('SELECT * FROM users ORDER BY created_at DESC');
+  return rows;
+}
+
 module.exports = {
   findByGoogleId,
   findById,
   findByEmail,
   createUser,
   updateRole,
+  findAll
 };
