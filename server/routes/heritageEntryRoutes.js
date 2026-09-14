@@ -1,5 +1,6 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/authMiddleware');
+const { requireRole } = require('../middleware/roleMiddleware');
 const { validateSubmission } = require('../validators/heritageEntryValidators');
 const controller = require('../controllers/heritageEntryController');
 
