@@ -42,4 +42,27 @@ async function findTagsForPublishedEntries() {
   return rows;
 }
 
-module.exports = { findAllRegions, findRegionById, findTagByEntry, setTag, findTagsForPublishedEntries };
+async function createRegion({ name, province, coordinates }) {
+  const [result] = await db.query('INSERT INTO regions (name, province, coordinates) VALUES (?, ?, ?)', [name, province, coordinates || null]);
+  return findRegionById(result.insertId);
+}
+
+async function updateRegion(id, { name, province, coordinates }) {
+  await db.query('UPDATE regions SET name = ?, province = ?, coordinates = ? WHERE id = ?', [name, province, coordinates || null, id]);
+  return findRegionById(id);
+}
+
+async function deleteRegion(id) {
+  await db.query('DELETE FROM regions WHERE id = ?', [id]);
+}
+
+module.exports = { 
+  findAllRegions, 
+  findRegionById, 
+  findTagByEntry, 
+  setTag, 
+  findTagsForPublishedEntries, 
+  createRegion,
+  updateRegion,
+  deleteRegion 
+};
