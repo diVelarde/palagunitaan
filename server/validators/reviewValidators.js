@@ -15,4 +15,14 @@ function validateReview(req, res, next) {
   next();
 }
 
-module.exports = { validateReview };
+function validateFlag(req, res, next) {
+  const { comment } = req.body;
+
+  if (!comment || !comment.trim()) {
+    return res.status(400).json({ message: 'Comment is required when flagging an entry.' });
+  }
+
+  next();
+}
+
+module.exports = { validateReview, validateFlag };
