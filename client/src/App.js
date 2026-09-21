@@ -21,6 +21,10 @@ import TimelinePage from './pages/TimelinePage';
 import ValidatorDashboardPage from './pages/ValidatorDashboardPage';
 import reviewService from './services/reviewService';
 
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AuditLogPage from './pages/AuditLogPage';
+import adminService from './services/adminService';
+
 function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,7 +71,21 @@ function AppShell() {
 
           <Route element={<ProtectedRoute minRole="admin" />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/admin" element={<StubPage title="Administration" phase="ADM" />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminDashboardPage
+                    fetchUsers={adminService.getUsers}
+                    updateUserRole={adminService.updateUserRole}
+                    fetchRegions={adminService.getRegions}
+                    createRegion={adminService.createRegion}
+                    fetchCategories={adminService.getCategories}
+                    createCategory={adminService.createCategory}
+                  />
+                }
+              />
+
+              <Route path="/admin/audit-log" element={<AuditLogPage fetchAuditLog={adminService.getAuditLog} />} />
             </Route>
           </Route>
 
