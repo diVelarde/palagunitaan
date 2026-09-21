@@ -3,6 +3,7 @@ const passport = require('passport');
 const { requireAuth } = require('../middleware/authMiddleware');
 const { validateViewRole } = require('../validators/authValidators');
 const authController = require('../controllers/authController');
+const { selfServeRouter: roleRequestRoutes } = require('../routes/roleRequestRoutes');
 
 const router = express.Router();
 
@@ -25,5 +26,7 @@ router.post('/logout', authController.logout);
 router.patch('/view-role', requireAuth, validateViewRole, authController.switchViewRole);
 
 router.post('/become-contributor', requireAuth, authController.becomeContributor);
+
+router.use('/role-requests', roleRequestRoutes);
 
 module.exports = router;

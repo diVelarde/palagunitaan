@@ -18,4 +18,8 @@ async function notifyReviewDecision({ entry, decision }) {
   });
 }
 
-module.exports = { notifyReviewDecision };
+async function notifyRoleRequestDecision({ userId, message }) {
+  return notificationModel.create({ userId, heritageEntryId: null, type: 'role_request_reviewed', message });
+}
+
+module.exports = { notifyReviewDecision, notifyRoleRequestDecision };
