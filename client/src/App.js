@@ -25,6 +25,8 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import AuditLogPage from './pages/AuditLogPage';
 import adminService from './services/adminService';
 import highlightService from './services/highlightService';
+import BlogFeedPage from './pages/BlogFeedPage';
+import blogService from './services/blogService';
 
 function AppShell() {
   return (
@@ -39,7 +41,7 @@ function AppShell() {
           <Route path="/entries/:id" element={<EntryDetailPage fetchEntry={heritageService.getEntryById} />} />
           <Route path="/map" element={<MapPage />} /> 
           <Route path="/timeline" element={<TimelinePage fetchTimeline={heritageService.getTimeline} />} />
-          <Route path="/blog" element={<StubPage title="Community Blog" phase="BLG" />} />
+          <Route path="/blog" element={<BlogFeedPage fetchPosts={blogService.getPosts} />} />
 
           {/* Logged-in area */}
           <Route element={<ProtectedRoute minRole="public" />}>
