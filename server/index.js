@@ -13,6 +13,7 @@ const heritageEntryRoutes = require('./routes/heritageEntryRoutes');
 const mapRoutes = require('./routes/mapRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const highlightRoutes = require('./routes/highlightRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -55,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/heritage-entries', heritageEntryRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/review', reviewRoutes);
+app.use('/api/highlights', highlightRoutes);
 
 app.get('/api/protected', requireAuth, (req, res) => { 
   res.json({ 
