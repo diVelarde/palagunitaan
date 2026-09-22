@@ -24,6 +24,7 @@ import reviewService from './services/reviewService';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AuditLogPage from './pages/AuditLogPage';
 import adminService from './services/adminService';
+import highlightService from './services/highlightService';
 
 function AppShell() {
   return (
@@ -81,6 +82,8 @@ function AppShell() {
                     createRegion={adminService.createRegion}
                     fetchCategories={adminService.getCategories}
                     createCategory={adminService.createCategory}
+                    searchEntries={heritageService.searchEntries}
+                    createHighlight={highlightService.createHighlight}
                   />
                 }
               />

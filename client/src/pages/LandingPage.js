@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import HighlightSection from '../components/HighlightSection';
+import highlightService from '../services/highlightService';
 
 export default function LandingPage() {
   const { user, login } = useAuth();
 
   return (
+    <>
     <div className="flex flex-col items-center text-center px-6 py-20 max-w-3xl mx-auto">
       <span className="text-sm uppercase tracking-wide text-amber-700 font-medium mb-3">
         Cultural Heritage Information System
@@ -41,5 +44,8 @@ export default function LandingPage() {
         )}
       </div>
     </div>
+
+    <HighlightSection fetchCurrentHighlights={highlightService.getCurrentHighlights} />
+    </>
   );
 }

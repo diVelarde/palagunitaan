@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import HighlightSelector from '../components/HighlightSelector';
 
-const TABS = ['Users', 'Regions', 'Categories'];
+const TABS = ['Users', 'Regions', 'Categories', 'Highlights'];
 
 function RoleSelect({ value, onChange, disabled }) {
   return (
@@ -168,6 +169,14 @@ function CategoriesTab({ fetchCategories, createCategory }) {
   );
 }
 
+function HighlightsTab({ searchEntries, createHighlight }) {
+  return (
+    <div className="max-w-md">
+      <HighlightSelector searchEntries={searchEntries} createHighlight={createHighlight} />
+    </div>
+  );
+}
+
 export default function AdminDashboardPage({
   fetchUsers = async () => [],
   updateUserRole = async (id, role) => ({ id, role }),
@@ -175,6 +184,8 @@ export default function AdminDashboardPage({
   createRegion = async (data) => ({ id: Date.now(), ...data }),
   fetchCategories = async () => [],
   createCategory = async (data) => ({ id: Date.now(), ...data, fields: [] }),
+  searchEntries = async () => [],                                   
+  createHighlight = async (data) => ({ id: Date.now(), ...data }),
 }) {
   const [tab, setTab] = useState('Users');
 
@@ -199,6 +210,7 @@ export default function AdminDashboardPage({
       {tab === 'Users' && <UsersTab fetchUsers={fetchUsers} updateUserRole={updateUserRole} />}
       {tab === 'Regions' && <RegionsTab fetchRegions={fetchRegions} createRegion={createRegion} />}
       {tab === 'Categories' && <CategoriesTab fetchCategories={fetchCategories} createCategory={createCategory} />}
+      {tab === 'Highlights' && <HighlightsTab searchEntries={searchEntries} createHighlight={createHighlight} />}
     </div>
   );
 }
