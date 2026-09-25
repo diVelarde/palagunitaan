@@ -44,26 +44,28 @@ function UsersTab({ fetchUsers, updateUserRole }) {
   return (
     <div>
       {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
-            <th className="py-2">Name</th>
-            <th className="py-2">Email</th>
-            <th className="py-2">Role</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id} className="border-b border-gray-100">
-              <td className="py-2.5">{u.name}</td>
-              <td className="py-2.5 text-gray-500">{u.email}</td>
-              <td className="py-2.5">
-                <RoleSelect value={u.role} disabled={savingId === u.id} onChange={(role) => handleRoleChange(u.id, role)} />
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
+          <thead>
+            <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
+              <th className="py-2">Name</th>
+              <th className="py-2">Email</th>
+              <th className="py-2">Role</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} className="border-b border-gray-100">
+                <td className="py-2.5">{u.name}</td>
+                <td className="py-2.5 text-gray-500">{u.email}</td>
+                <td className="py-2.5">
+                  <RoleSelect value={u.role} disabled={savingId === u.id} onChange={(role) => handleRoleChange(u.id, role)} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

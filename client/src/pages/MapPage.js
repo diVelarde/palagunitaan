@@ -84,11 +84,11 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
         )}
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 pb-12 flex gap-6">
+       <div className="max-w-6xl mx-auto px-6 pb-12 flex flex-col md:flex-row gap-6">
         <MapFilterSidebar markers={markers} onChange={setFilters} />
 
-        <div className="flex-1 flex gap-6">
-          <div className="flex-1 rounded-lg overflow-hidden border border-gray-200" style={{ height: '560px' }}>
+        <div className="flex-1 flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 rounded-lg overflow-hidden border border-gray-200 h-[400px] md:h-[560px]">
             {addingSite && (
               <div className="bg-amber-50 text-amber-800 text-xs text-center py-1.5">
                 Click anywhere on the map to place the new site
@@ -135,7 +135,7 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
         {!loading && visibleMarkers.length === 0 && (
           <p className="text-sm text-gray-500 text-center">No entries or sites match the current filters.</p>
         )}
-        <div className="flex items-center gap-6 text-xs text-gray-500">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-500">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-900 inline-block" /> Heritage entry</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#B98A2E' }} /> Heritage site</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#7A2430' }} /> Highlighted site</span>
