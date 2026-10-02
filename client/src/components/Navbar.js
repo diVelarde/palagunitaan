@@ -1,47 +1,37 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import RoleBadge from './RoleBadge';
-import RoleSwitcher from './RoleSwitcher';
 import NotificationDropdown from './NotificationDropdown';
+import RoleBadge from './RoleBadge';
 import { useNotifications } from '../hooks/useNotifications';
 
-const ROLE_LEVEL = { public: 0, contributor: 1, validator: 2, admin: 3 };
-
 const NAV_LINKS = [
-  { to: '/browse', label: 'Browse', minRole: 'public' },
-  { to: '/map', label: 'Map', minRole: 'public' },
-  { to: '/timeline', label: 'Timeline', minRole: 'public' },
-  { to: '/blog', label: 'Community Blog', minRole: 'public' },
-  { to: '/submit', label: 'Submit Entry', minRole: 'contributor' },
-  { to: '/validate', label: 'Validation Queue', minRole: 'validator' },
-  { to: '/admin', label: 'Admin', minRole: 'admin' },
+  { to: '/browse', label: 'Browse' },
+  { to: '/map', label: 'Map' },
+  { to: '/timeline', label: 'Timeline' },
+  { to: '/blog', label: 'Blog' },
 ];
 
 function linkClass({ isActive }) {
-  return `text-sm font-medium transition ${
-    isActive ? 'text-blue-900' : 'text-gray-600 hover:text-gray-900'
+  return `text-[15px] font-medium transition ${
+    isActive ? 'text-[#a9472e]' : 'text-[#625953] hover:text-[#a9472e]'
   }`;
 }
 
 export default function Navbar() {
-  const { user, viewRole, loading, login, logout } = useAuth();
-  const effectiveRole = viewRole || 'public';
-
-  const visibleLinks = NAV_LINKS.filter(
-    (link) => ROLE_LEVEL[effectiveRole] >= ROLE_LEVEL[link.minRole]
-  );
-
-  const { notifications, unreadCount, onOpen, onMarkRead } = useNotifications();
+  const { user, loading, login } = useAuth();
+  const { notifications, unreadCount, onOpen, onMarkRead, notificationError } = useNotifications();
+  const firstName = (user?.name || '').trim().split(/\s+/)[0] || 'Account';
 
   return (
-    <header className="border-b border-gray-200 bg-white">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link to="/" className="text-lg font-bold text-gray-900">
-          Palagunitaan
+    <header className="sticky top-0 z-50 border-b border-[#e8e0d6] bg-[#f8f5ef]/95 backdrop-blur">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-5 px-6 py-3.5">
+        <Link to="/" className="flex shrink-0 items-center gap-3 font-serif text-[21px] font-bold text-[#382920]">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-[#ad482d] font-serif text-xl text-white">P</span>
+          <span>Palagunitaan</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
-          {visibleLinks.map((link) => (
+        <nav className="hidden md:flex items-center justify-center gap-7">
+          {NAV_LINKS.map((link) => (
             <NavLink key={link.to} to={link.to} className={linkClass}>
               {link.label}
             </NavLink>
@@ -51,22 +41,42 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {loading ? null : user ? (
             <>
-              <NotificationDropdown notifications={notifications} unreadCount={unreadCount} onOpen={onOpen} onMarkRead={onMarkRead} />
-              <RoleBadge role={viewRole} />
-              <RoleSwitcher />
-              <Link to="/dashboard" className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                {user.name}
+              <RoleBadge role={user.role} />
+              <NotificationDropdown
+                notifications={notifications}
+                unreadCount={unreadCount}
+                onOpen={onOpen}
+                onMarkRead={onMarkRead}
+                error={notificationError}
+              />
+              <Link
+                to="/dashboard"
+                aria-label={`Dashboard for ${user.name || firstName}`}
+                className="flex items-center gap-2 rounded-full text-sm font-medium text-[#493126] hover:text-[#a9472e] focus:outline-none focus:ring-2 focus:ring-[#b97554] focus:ring-offset-2"
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    className="h-9 w-9 rounded-full border border-[#e9dfd2] object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="grid h-9 w-9 place-items-center rounded-full bg-[#ad482d] font-semibold text-white"
+                  >
+                    {firstName[0].toUpperCase()}
+                  </span>
+                )}
+                <span>{firstName}</span>
               </Link>
-              <button onClick={logout} className="text-sm text-red-600 hover:text-red-700">
-                Log out
-              </button>
             </>
           ) : (
             <button
               onClick={login}
-              className="px-4 py-2 rounded-md bg-blue-900 text-white text-sm font-medium hover:bg-blue-800 transition"
+              className="rounded-xl border border-[#d9c7b7] px-5 py-2.5 text-sm font-semibold text-[#a9472e] transition hover:bg-[#f3e9df]"
             >
-              Sign in with Google
+              Sign In
             </button>
           )}
         </div>

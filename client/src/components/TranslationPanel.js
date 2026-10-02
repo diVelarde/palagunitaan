@@ -36,7 +36,7 @@ export default function TranslationPanel({
         <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} className="border border-gray-300 rounded-md px-2.5 py-1.5 text-sm flex-1">
           {COMMON_LANGUAGES.map((lang) => <option key={lang} value={lang}>{lang}</option>)}
         </select>
-        <button onClick={handleTranslate} disabled={loading} className="px-3 py-1.5 bg-blue-900 text-white text-sm rounded-md hover:bg-blue-800 disabled:opacity-50">
+        <button onClick={handleTranslate} disabled={loading} className="px-3 py-1.5 bg-[#ad482d] text-white text-sm rounded-md hover:bg-[#873720] disabled:opacity-50">
           {loading ? 'Translating…' : 'Translate'}
         </button>
       </div>

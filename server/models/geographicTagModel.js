@@ -34,9 +34,11 @@ async function setTag({ heritageEntryId, latitude, longitude, locationName }) {
 async function findTagsForPublishedEntries() {
   const [rows] = await db.query(
     `SELECT gt.id, gt.latitude, gt.longitude, gt.location_name,
-            he.id AS entry_id, he.title, he.category_auto, he.verification_status
+            he.id AS entry_id, he.title, he.category_auto, he.verification_status,
+            r.name AS region_name, r.province AS region_province
      FROM geographic_tags gt
      JOIN heritage_entries he ON he.id = gt.heritage_entry_id
+     LEFT JOIN regions r ON r.id = he.region_id
      WHERE he.status = 'published'`
   );
   return rows;

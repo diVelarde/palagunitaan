@@ -20,6 +20,10 @@ async function createRegion(data) {
   return res.data.region;
 }
 
+async function deleteRegion(id) {
+  await api.delete(`/api/admin/regions/${id}`);
+}
+
 async function getCategories() {
   const res = await api.get('/api/admin/categories');
   return res.data.categories;
@@ -28,6 +32,10 @@ async function getCategories() {
 async function createCategory(data) {
   const res = await api.post('/api/admin/categories', data);
   return res.data.category;
+}
+
+async function deleteCategory(id) {
+  await api.delete(`/api/admin/categories/${id}`);
 }
 
 async function getAuditLog({ limit, offset } = {}) {
@@ -40,8 +48,10 @@ const adminService = {
   updateUserRole,
   getRegions,
   createRegion,
+  deleteRegion,
   getCategories,
   createCategory,
+  deleteCategory,
   getAuditLog
 };
 

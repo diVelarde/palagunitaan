@@ -13,14 +13,25 @@ async function findById(id) {
   return rows[0] || null;
 }
 
+async function incrementViewCount(id) {
+  const [result] = await db.query(
+    'UPDATE blog_posts SET view_count = view_count + 1 WHERE id = ?',
+    [id]
+  );
+  return result.affectedRows > 0;
+}
+
 async function findByUser(userId) {
   const [rows] = await db.query('SELECT * FROM blog_posts WHERE user_id = ? ORDER BY published_at DESC', [userId]);
   return rows;
 }
 
-async function create({ userId, title, content }) {
-  const [result] = await db.query('INSERT INTO blog_posts (user_id, title, content) VALUES (?, ?, ?)', [userId, title, content]);
+async function create({ userId, title, content, coverImageUrl }) {
+  const [result] = await db.query(
+    'INSERT INTO blog_posts (user_id, title, content, cover_image_url) VALUES (?, ?, ?, ?)',
+    [userId, title, content, coverImageUrl || null]
+  );
   return findById(result.insertId);
 }
 
-module.exports = { findAll, findById, findByUser, create };
+module.exports = { findAll, findById, incrementViewCount, findByUser, create };

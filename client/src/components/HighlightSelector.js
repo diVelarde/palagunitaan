@@ -93,8 +93,8 @@ export default function HighlightSelector({
       )}
 
       <div className="flex gap-2">
-        <button type="button" onClick={() => handlePeriodChange('week')} className={`px-3 py-1.5 text-sm rounded-md ${periodType === 'week' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700'}`}>Week</button>
-        <button type="button" onClick={() => handlePeriodChange('month')} className={`px-3 py-1.5 text-sm rounded-md ${periodType === 'month' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700'}`}>Month</button>
+        <button type="button" onClick={() => handlePeriodChange('week')} className={`px-3 py-1.5 text-sm rounded-md ${periodType === 'week' ? 'bg-[#ad482d] text-white' : 'bg-[#f4eee6] text-[#71655c]'}`}>Week</button>
+        <button type="button" onClick={() => handlePeriodChange('month')} className={`px-3 py-1.5 text-sm rounded-md ${periodType === 'month' ? 'bg-[#ad482d] text-white' : 'bg-[#f4eee6] text-[#71655c]'}`}>Month</button>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -108,7 +108,7 @@ export default function HighlightSelector({
         </div>
       </div>
 
-      <button type="submit" disabled={submitting} className="px-4 py-2 bg-blue-900 text-white text-sm rounded-md hover:bg-blue-800 disabled:opacity-50">
+      <button type="submit" disabled={submitting} className="px-4 py-2 bg-[#ad482d] text-white text-sm rounded-md hover:bg-[#873720] disabled:opacity-50">
         {submitting ? 'Saving…' : 'Set highlight'}
       </button>
     </form>

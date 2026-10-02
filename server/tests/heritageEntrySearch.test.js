@@ -1,7 +1,19 @@
 jest.mock('../config/db', () => ({ query: jest.fn() }));
 
 const db = require('../config/db');
-const { search } = require('../models/heritageEntryModel');
+const { findByUser, search } = require('../models/heritageEntryModel');
+
+describe('heritageEntryModel.findByUser', () => {
+  beforeEach(() => db.query.mockReset().mockResolvedValue([[]]));
+
+  it('orders a user’s submissions by the timestamp set when submissions are created', async () => {
+    await findByUser(7);
+    expect(db.query).toHaveBeenCalledWith(
+      'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY submitted_at DESC',
+      [7]
+    );
+  });
+});
 
 describe('heritageEntryModel.search', () => {
   beforeEach(() => db.query.mockReset().mockResolvedValue([[]]));
@@ -33,6 +45,14 @@ describe('heritageEntryModel.search', () => {
     const [sql] = db.query.mock.calls[0];
     expect(sql).not.toMatch(/verification_status/);
     expect(sql).not.toMatch(/historical_period/);
+  });
+
+  it('filters by the selected region name through the regions table', async () => {
+    await search({ region: 'Camarines Sur' });
+    const [sql, params] = db.query.mock.calls[0];
+    expect(sql).toMatch(/region_id IN \(SELECT id FROM regions WHERE name = \? OR province = \?\)/);
+    expect(sql).toMatch(/gt\.location_name = \?/);
+    expect(params).toEqual(expect.arrayContaining(['Camarines Sur', 'Camarines Sur', 'Camarines Sur']));
   });
 
   it('respects limit/offset with sane defaults', async () => {

@@ -5,6 +5,11 @@ async function getMapData() {
   return res.data.markers;
 }
 
-const mapService = { getMapData };
+async function getRegions() {
+  const res = await api.get('/api/map/regions');
+  return res.data.regions;
+}
+
+const mapService = { getMapData, getRegions };
 
 export default mapService;

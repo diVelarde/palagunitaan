@@ -115,7 +115,7 @@ export default function MediaUploader({
             accept="image/*,audio/*"
             disabled={uploading}
             onChange={(e) => handleFile(e.target.files)}
-            className="block text-xs text-gray-600 file:mr-2 file:px-2.5 file:py-1 file:rounded-md file:border-0 file:text-xs file:bg-blue-900 file:text-white hover:file:bg-blue-800 disabled:opacity-50"
+            className="block text-xs text-[#71655c] file:mr-2 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#ad482d] file:text-white hover:file:bg-[#873720] disabled:opacity-50"
           />
           {uploading && (
             <span className="text-xs text-gray-500">

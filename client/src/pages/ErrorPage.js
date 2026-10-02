@@ -15,12 +15,12 @@ export function ErrorPage({ onRetry }) {
         {onRetry && (
           <button
             onClick={onRetry}
-            className="px-4 py-2 rounded-md bg-blue-900 text-white text-sm font-medium hover:bg-blue-800"
+            className="px-4 py-2 rounded-md bg-[#ad482d] text-white text-sm font-medium hover:bg-[#873720]"
           >
             Try again
           </button>
         )}
-        <Link to="/" className="text-blue-900 font-medium hover:underline">
+        <Link to="/" className="text-[#8f3e29] font-medium hover:underline">
           Back to home
         </Link>
       </div>

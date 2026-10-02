@@ -17,6 +17,7 @@ async function getMapData(req, res, next) {
       latitude: Number(row.latitude),
       longitude: Number(row.longitude),
       locationName: row.location_name,
+      regionName: row.region_province || row.region_name,
     }));
 
     const siteMarkers = sites.map((site) => ({
@@ -35,4 +36,12 @@ async function getMapData(req, res, next) {
   }
 }
 
-module.exports = { getMapData };
+async function getRegions(req, res, next) {
+  try {
+    res.json({ regions: await geographicTagModel.findAllRegions() });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getMapData, getRegions };

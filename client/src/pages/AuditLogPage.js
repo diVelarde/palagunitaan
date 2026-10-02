@@ -11,18 +11,25 @@ const ACTION_STYLES = {
 export default function AuditLogPage({ fetchAuditLog = async () => [] }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let active = true;
-    fetchAuditLog().then((data) => { if (active) { setEntries(data || []); setLoading(false); } });
+    fetchAuditLog()
+      .then((data) => { if (active) setEntries(data || []); })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || 'Could not load the audit log.');
+      })
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [fetchAuditLog]);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="dashboard-admin-audit-log max-w-4xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-semibold text-gray-900 mb-1">Audit log</h1>
       <p className="text-sm text-gray-600 mb-8">Every editorial decision, across every entry.</p>
 
+      {error && <p className="dashboard-error" role="alert">{error}</p>}
       {loading && <p className="text-sm text-gray-500">Loading…</p>}
       {!loading && entries.length === 0 && <p className="text-sm text-gray-500">No editorial actions recorded yet.</p>}
 

@@ -33,11 +33,11 @@ export default function BecomeContributorPrompt() {
         <button
           onClick={handleUpgrade}
           disabled={loading}
-          className="px-3 py-1.5 bg-blue-900 text-white text-sm rounded-md hover:bg-blue-800 disabled:opacity-50"
+          className="px-3 py-1.5 bg-[#ad482d] text-white text-sm rounded-md hover:bg-[#873720] disabled:opacity-50"
         >
           {loading ? 'Upgrading…' : 'Become a contributor'}
         </button>
-        <button onClick={() => setDismissed(true)} className="text-sm text-blue-700 hover:text-blue-900" aria-label="Dismiss">
+        <button onClick={() => setDismissed(true)} className="text-sm text-[#8f3e29] hover:text-[#6f2e1e]" aria-label="Dismiss">
           ✕
         </button>
       </div>

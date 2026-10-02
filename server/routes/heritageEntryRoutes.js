@@ -15,7 +15,7 @@ router.get('/timeline', controller.getTimeline);
 router.get('/:id', controller.getEntryById);
 router.post('/:id/translate', requireAuth, requireRole('validator', 'admin'), controller.translateEntry);
 router.patch('/:id/cover-image', requireAuth, uploadSingle('coverImage', { imagesOnly: true }), controller.updateCoverImage);
-router.post('/', requireAuth, validateSubmission, controller.submitEntry);
+router.post('/', requireAuth, requireRole('contributor', 'validator', 'admin'), validateSubmission, controller.submitEntry);
 router.use('/:id/media', multimediaAssetRoutes);
 
 module.exports = router;

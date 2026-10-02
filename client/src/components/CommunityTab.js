@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
-import BlogComposer from './BlogComposer';
 import BlogPostPreview from './BlogPostPreview';
 
-export default function CommunityTab({ fetchMyPosts = async () => [], createPost = async () => {} }) {
+export default function CommunityTab({ fetchMyPosts = async () => [] }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   function reload() {
     setLoading(true);
-    return fetchMyPosts().then((data) => { setPosts(data || []); setLoading(false); });
+    setError(null);
+    return fetchMyPosts()
+      .then((data) => setPosts(data || []))
+      .catch((err) => setError(err.response?.data?.message || 'Could not load your community posts.'))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
@@ -16,16 +20,11 @@ export default function CommunityTab({ fetchMyPosts = async () => [], createPost
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchMyPosts]);
 
-  function handlePosted(newPost) {
-    setPosts((prev) => [newPost, ...prev]);
-  }
-
   return (
     <div className="space-y-6">
-      <BlogComposer onSubmit={createPost} onPosted={handlePosted} />
-
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-2">Your posts</h3>
+        {error && <p className="dashboard-error" role="alert">{error}</p>}
         {loading ? (
           <p className="text-sm text-gray-500">Loading…</p>
         ) : posts.length === 0 ? (

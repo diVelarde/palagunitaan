@@ -1,5 +1,10 @@
 import api from '../api/axios';
 
+async function getSites() {
+  const res = await api.get('/api/heritage-sites');
+  return res.data.sites;
+}
+
 async function createSite(data) {
   const res = await api.post('/api/heritage-sites', data);
   return res.data.site;
@@ -14,6 +19,6 @@ async function deleteSite(id) {
   await api.delete(`/api/heritage-sites/${id}`);
 }
 
-const heritageSiteService = { createSite, updateSite, deleteSite };
+const heritageSiteService = { getSites, createSite, updateSite, deleteSite };
 
 export default heritageSiteService;

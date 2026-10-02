@@ -1,13 +1,21 @@
 const db = require('../config/db');
 
 async function findById(id) {
-  const [rows] = await db.query('SELECT * FROM heritage_entries WHERE id = ?', [id]);
+  const [rows] = await db.query(
+    `SELECT he.*, gt.latitude AS location_latitude, gt.longitude AS location_longitude,
+            gt.location_name, r.name AS region_name, r.province AS region_province
+     FROM heritage_entries he
+     LEFT JOIN geographic_tags gt ON gt.heritage_entry_id = he.id
+     LEFT JOIN regions r ON r.id = he.region_id
+     WHERE he.id = ?`,
+    [id]
+  );
   return rows[0] || null;
 }
 
 async function findByUser(userId) {
   const [rows] = await db.query(
-    'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY created_at DESC',
+    'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY submitted_at DESC',
     [userId]
   );
   return rows;
@@ -34,7 +42,16 @@ async function search({ keyword, category, region, verificationStatus, historica
     params.push(like, like, like);
   }
   if (category) { conditions.push('category_auto = ?'); params.push(category); }
-  if (region) { conditions.push('region_id = ?'); params.push(region); }
+  if (region) {
+    conditions.push(`(
+      region_id IN (SELECT id FROM regions WHERE name = ? OR province = ?)
+      OR EXISTS (
+        SELECT 1 FROM geographic_tags gt
+        WHERE gt.heritage_entry_id = heritage_entries.id AND gt.location_name = ?
+      )
+    )`);
+    params.push(region, region, region);
+  }
   if (verificationStatus) { conditions.push('verification_status = ?'); params.push(verificationStatus); }
   if (historicalPeriod) { conditions.push('historical_period = ?'); params.push(historicalPeriod); }
 
@@ -45,12 +62,12 @@ async function search({ keyword, category, region, verificationStatus, historica
   return rows;
 }
 
-async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod, categoryAuto }) {
+async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod, categoryAuto, regionId }) {
   const [result] = await db.query(
     `INSERT INTO heritage_entries
-      (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, status, submitted_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null]
+      (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, region_id, status, submitted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null]
   );
   return findById(result.insertId);
 }

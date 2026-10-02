@@ -11,7 +11,13 @@ function timeAgo(dateStr) {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-export default function NotificationDropdown({ notifications = [], unreadCount = 0, onOpen = () => {}, onMarkRead = async () => {} }) {
+export default function NotificationDropdown({
+  notifications = [],
+  unreadCount = 0,
+  onOpen = () => {},
+  onMarkRead = async () => {},
+  error = '',
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -46,6 +52,7 @@ export default function NotificationDropdown({ notifications = [], unreadCount =
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
           <div className="px-4 py-3 border-b border-gray-100"><h3 className="text-sm font-semibold text-gray-900">Notifications</h3></div>
+          {error && <p className="px-4 py-3 text-xs text-red-700" role="alert">{error}</p>}
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">Nothing yet.</p>

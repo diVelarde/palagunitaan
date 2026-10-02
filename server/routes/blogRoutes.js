@@ -3,12 +3,13 @@ const { requireAuth } = require('../middleware/authMiddleware');
 const { validateBlogPost } = require('../validators/blogPostValidators');
 const controller = require('../controllers/blogPostController');
 const { requireRole } = require('../middleware/roleMiddleware');
+const { uploadSingle } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
 router.get('/', controller.listPosts);
 router.get('/mine', requireAuth, controller.listMine);
 router.get('/:id', controller.getPostById);
-router.post('/', requireAuth, requireRole('contributor', 'validator', 'admin'), validateBlogPost, controller.createPost);
+router.post('/', requireAuth, requireRole('contributor', 'validator', 'admin'), uploadSingle('coverImage', { imagesOnly: true }), validateBlogPost, controller.createPost);
 
 module.exports = router;

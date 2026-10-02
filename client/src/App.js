@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar.js';
 import Footer from './components/Footer.js';
@@ -18,31 +18,42 @@ import reviewService from './services/reviewService';
 import adminService from './services/adminService';
 import highlightService from './services/highlightService';
 import blogService from './services/blogService';
+import heritageSiteService from './services/heritageSiteService';
 
-const SubmitEntryPage = lazy(() => import('./pages/SubmitEntryPage'));
 const EntryDetailPage = lazy(() => import('./pages/EntryDetailPage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const BrowsePage = lazy(() => import('./pages/BrowsePage'));
 const TimelinePage = lazy(() => import('./pages/TimelinePage'));
 const BlogFeedPage = lazy(() => import('./pages/BlogFeedPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const ValidatorDashboardPage = lazy(() => import('./pages/ValidatorDashboardPage'));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
-const AuditLogPage = lazy(() => import('./pages/AuditLogPage'));
 
 function AppShell() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="site-app-shell min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1">
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
 
-            <Route path="/browse" element={<BrowsePage searchEntries={heritageService.searchEntries} />} />
+            <Route
+              path="/browse"
+              element={
+                <BrowsePage
+                  searchEntries={heritageService.searchEntries}
+                />
+              }
+            />
             <Route path="/entries/:id" element={<EntryDetailPage fetchEntry={heritageService.getEntryById} />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/timeline" element={<TimelinePage fetchTimeline={heritageService.getTimeline} />} />
-            <Route path="/blog" element={<BlogFeedPage fetchPosts={blogService.getPosts} />} />
+            <Route
+              path="/blog"
+              element={<BlogFeedPage fetchPosts={blogService.getPosts} createPost={blogService.createPost} />}
+            />
+            <Route path="/blog/:id" element={<BlogPostPage fetchPost={blogService.getPostById} />} />
 
             <Route element={<ProtectedRoute minRole="public" />}>
               <Route element={<DashboardLayout />}>
@@ -55,15 +66,12 @@ function AppShell() {
             </Route>
 
             <Route element={<ProtectedRoute minRole="contributor" />}>
-              <Route
-                path="/submit"
-                element={
-                  <SubmitEntryPage
-                    onSubmit={heritageService.submitEntry}
-                    uploadCoverImage={heritageService.updateCoverImage}
-                  />
-                }
-              />
+              <Route element={<DashboardLayout />}>
+                <Route
+                  path="/submit"
+                  element={<Navigate to="/dashboard/submissions" replace />}
+                />
+              </Route>
             </Route>
 
             <Route element={<ProtectedRoute minRole="validator" />}>
@@ -90,15 +98,26 @@ function AppShell() {
                       updateUserRole={adminService.updateUserRole}
                       fetchRegions={adminService.getRegions}
                       createRegion={adminService.createRegion}
+                      deleteRegion={adminService.deleteRegion}
                       fetchCategories={adminService.getCategories}
                       createCategory={adminService.createCategory}
+                      deleteCategory={adminService.deleteCategory}
                       searchEntries={heritageService.searchEntries}
                       createHighlight={highlightService.createHighlight}
+                      fetchPending={reviewService.getPendingEntries}
+                      fetchPosts={blogService.getPosts}
+                      fetchSites={heritageSiteService.getSites}
+                      createSite={heritageSiteService.createSite}
+                      deleteSite={heritageSiteService.deleteSite}
+                      fetchAuditLog={adminService.getAuditLog}
                     />
                   }
                 />
 
-                <Route path="/admin/audit-log" element={<AuditLogPage fetchAuditLog={adminService.getAuditLog} />} />
+                <Route
+                  path="/admin/audit-log"
+                  element={<Navigate to="/admin?tab=audit-log" replace />}
+                />
               </Route>
             </Route>
 

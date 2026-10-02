@@ -51,12 +51,8 @@ async function updateCoverImage(entryId, file) {
 }
 
 async function getCategories() {
-  try {
-    const res = await api.get('/api/ai/categories');
-    return res.data.categories;
-  } catch (err) {
-    return ['Legend', 'Folk Tale', 'Folk Belief', 'Other'];
-  }
+  const res = await api.get('/api/ai/categories');
+  return res.data.categories;
 }
 
 async function enrichEntry(entryId) {

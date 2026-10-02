@@ -11,6 +11,7 @@ export function defaultFilters() {
     types: TYPE_OPTIONS.map((t) => t.value),
     verificationStatuses: [...VERIFICATION_OPTIONS],
     categories: [], // empty = "all categories"
+    regions: [],
   };
 }
 
@@ -21,6 +22,7 @@ export function applyFilters(markers, filters) {
       if (!filters.verificationStatuses.includes(m.verificationStatus)) return false;
       if (filters.categories.length && !filters.categories.includes(m.category)) return false;
     }
+    if (filters.regions?.length && !filters.regions.includes(m.regionName)) return false;
     return true;
   });
 }
@@ -50,13 +52,21 @@ function CheckboxGroup({ label, options, selected, onToggle }) {
   );
 }
 
-export default function MapFilterSidebar({ markers, onChange }) {
+export default function MapFilterSidebar({ markers, regions = [], onChange }) {
   const [filters, setFilters] = useState(defaultFilters());
 
   const availableCategories = useMemo(() => {
     const set = new Set(markers.filter((m) => m.type === 'entry' && m.category).map((m) => m.category));
     return [...set].sort();
   }, [markers]);
+
+  const availableRegions = useMemo(() => {
+    const regionNames = new Set(
+      markers.map((marker) => marker.regionName).filter(Boolean)
+    );
+    regions.forEach((region) => regionNames.add(region.province || region.name));
+    return [...regionNames].sort();
+  }, [markers, regions]);
 
   function update(next) {
     setFilters(next);
@@ -70,23 +80,40 @@ export default function MapFilterSidebar({ markers, onChange }) {
   }
 
   return (
-    <aside className="w-56 shrink-0 pr-6">
-      <CheckboxGroup label="Show" options={TYPE_OPTIONS} selected={filters.types} onToggle={(v) => toggleIn('types', v)} />
-      <CheckboxGroup label="Verification" options={VERIFICATION_OPTIONS} selected={filters.verificationStatuses} onToggle={(v) => toggleIn('verificationStatuses', v)} />
-      {availableCategories.length > 0 && (
-        <CheckboxGroup
-          label="Category"
-          options={availableCategories}
-          selected={filters.categories.length ? filters.categories : availableCategories}
-          onToggle={(v) => {
-            const base = filters.categories.length ? filters.categories : availableCategories;
-            const next = base.includes(v) ? base.filter((c) => c !== v) : [...base, v];
-            update({ ...filters, categories: next.length === availableCategories.length ? [] : next });
-          }}
-        />
-      )}
-      {(filters.categories.length > 0 || filters.types.length < TYPE_OPTIONS.length || filters.verificationStatuses.length < VERIFICATION_OPTIONS.length) && (
-        <button onClick={() => update(defaultFilters())} className="text-xs text-blue-800 hover:underline">
+    <aside className="map-filter-sidebar">
+      <h2 className="map-sidebar-title"><span aria-hidden="true">⌖</span> Heritage Map</h2>
+      <p className="map-sidebar-label">Filters</p>
+      <label className="map-filter-field">
+        <span>Category</span>
+        <select
+          value={filters.categories.length === 1 ? filters.categories[0] : ''}
+          onChange={(event) => update({ ...filters, categories: event.target.value ? [event.target.value] : [] })}
+        >
+          <option value="">All Categories</option>
+          {availableCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
+      </label>
+      <label className="map-filter-field">
+        <span>Region</span>
+        <select
+          value={filters.regions.length === 1 ? filters.regions[0] : ''}
+          onChange={(event) => update({ ...filters, regions: event.target.value ? [event.target.value] : [] })}
+        >
+          <option value="">All Regions</option>
+          {availableRegions.map((region) => <option key={region} value={region}>{region}</option>)}
+        </select>
+      </label>
+      <details className="map-advanced-filters">
+        <summary>More filters</summary>
+        <CheckboxGroup label="Show" options={TYPE_OPTIONS} selected={filters.types} onToggle={(v) => toggleIn('types', v)} />
+        <CheckboxGroup label="Verification" options={VERIFICATION_OPTIONS} selected={filters.verificationStatuses} onToggle={(v) => toggleIn('verificationStatuses', v)} />
+      </details>
+      <div className="map-filter-counts">
+        <p>{markers.filter((marker) => marker.type === 'entry').length} heritage entries</p>
+        <p>{markers.filter((marker) => marker.type === 'site').length} heritage sites</p>
+      </div>
+      {(filters.categories.length > 0 || filters.regions.length > 0 || filters.types.length < TYPE_OPTIONS.length || filters.verificationStatuses.length < VERIFICATION_OPTIONS.length) && (
+        <button onClick={() => update(defaultFilters())} className="map-reset-filters">
           Reset filters
         </button>
       )}

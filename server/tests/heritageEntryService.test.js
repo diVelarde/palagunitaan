@@ -12,14 +12,22 @@ const BASE_ENTRY = {
   raw_content: 'Noon pa man, may kwento tungkol sa isang aswang...',
 };
 
+let storedEntry;
+
 beforeEach(() => {
   jest.clearAllMocks();
-  heritageEntryModel.create.mockResolvedValue({ ...BASE_ENTRY });
+  storedEntry = { ...BASE_ENTRY };
+  heritageEntryModel.create.mockImplementation(async () => ({ ...storedEntry }));
+  heritageEntryModel.findById.mockImplementation(async () => ({ ...storedEntry }));
   duplicateDetectionService.findPossibleDuplicates.mockResolvedValue([]);
   geminiService.categorizeContent.mockResolvedValue({ category: 'Legend', flaggedWords: [] });
   geminiService.generateEuphemisticVersion.mockResolvedValue('A long time ago, there was a story about a shapeshifter...');
-  heritageEntryModel.updateCategoryAuto.mockResolvedValue();
-  heritageEntryModel.updateEuphemisticContent.mockResolvedValue();
+  heritageEntryModel.updateCategoryAuto.mockImplementation(async (id, categoryAuto) => {
+    storedEntry = { ...storedEntry, category_auto: categoryAuto };
+  });
+  heritageEntryModel.updateEuphemisticContent.mockImplementation(async (id, euphemisticContent) => {
+    storedEntry = { ...storedEntry, euphemistic_content: euphemisticContent };
+  });
 });
 
 describe('submitEntry', () => {

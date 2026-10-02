@@ -3,17 +3,36 @@ const heritageEntryModel = require('../models/heritageEntryModel');
 const timelineService = require('../services/timelineService');
 const geminiService = require('../services/geminiService');
 const cloudinaryService = require('../services/cloudinaryService');
+const geographicTagModel = require('../models/geographicTagModel');
 
 async function submitEntry(req, res, next) {
   try {
-    const { title, rawContent, sourceType, sourceDescription, historicalPeriod, category } = req.body;
+    const {
+      title, rawContent, sourceType, sourceDescription, historicalPeriod, category,
+      regionId, latitude, longitude, locationName,
+    } = req.body;
     const { entry, possibleDuplicates, ai } = await heritageEntryService.submitEntry({
-      userId: req.user.id, title, rawContent, sourceType, sourceDescription, historicalPeriod, category,
+      userId: req.user.id, title, rawContent, sourceType, sourceDescription, historicalPeriod, category, regionId,
     });
+    let locationWarning = null;
+    if (latitude != null && longitude != null) {
+      try {
+        await geographicTagModel.setTag({
+          heritageEntryId: entry.id,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+          locationName,
+        });
+      } catch (err) {
+        console.error('Entry saved, but location could not be attached for entry', entry.id, '-', err.message);
+        locationWarning = 'The entry was saved, but its map location could not be attached.';
+      }
+    }
     res.status(201).json({
       entry,
       possibleDuplicates: possibleDuplicates.map((d) => ({ id: d.id, title: d.title, score: d.score })),
       ai,
+      locationWarning,
     });
   } catch (err) {
     next(err);
@@ -44,7 +63,13 @@ async function getEntryById(req, res, next) {
     if (!entry || (entry.status !== 'published' && entry.user_id !== req.user?.id)) {
       return res.status(404).json({ entry: null });
     }
-    res.json({ entry });
+    res.json({
+      entry: {
+        ...entry,
+        latitude: entry.location_latitude,
+        longitude: entry.location_longitude,
+      },
+    });
   } catch (err) {
     next(err);
   }

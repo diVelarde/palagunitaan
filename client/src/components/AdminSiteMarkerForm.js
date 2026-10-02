@@ -110,7 +110,7 @@ export default function AdminSiteMarkerForm({
       )}
 
       <div className="flex items-center gap-2 pt-1">
-        <button type="submit" disabled={submitting} className="px-3 py-1.5 bg-blue-900 text-white text-sm rounded-md hover:bg-blue-800 disabled:opacity-50">
+        <button type="submit" disabled={submitting} className="px-3 py-1.5 bg-[#ad482d] text-white text-sm rounded-md hover:bg-[#873720] disabled:opacity-50">
           {submitting ? 'Saving…' : 'Save site'}
         </button>
         <button type="button" onClick={onCancel} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900">

@@ -10,6 +10,7 @@ import heritageSiteService from '../services/heritageSiteService';
 import MapFilterSidebar, { defaultFilters, applyFilters } from '../components/MapFilterSidebar';
 import AddSiteClickListener from '../components/AddSiteClickListener';
 import AdminSiteMarkerForm from '../components/AdminSiteMarkerForm';
+import './MapPage.css';
 
 const DEFAULT_CENTER = [13.6218, 123.1948];
 const DEFAULT_ZOOM = 11;
@@ -22,19 +23,26 @@ function dotIcon(color) {
   });
 }
 
-const ICONS = { entry: dotIcon('#1e3a8a'), site: dotIcon('#B98A2E'), siteHighlighted: dotIcon('#7A2430') };
+const ICONS = { entry: dotIcon('#ad482d'), site: dotIcon('#b88b3c'), siteHighlighted: dotIcon('#493126') };
 function iconFor(marker) {
   if (marker.type === 'site') return marker.isHighlighted ? ICONS.siteHighlighted : ICONS.site;
   return ICONS.entry;
 }
 
-export default function MapPage({ fetchMapData = mapService.getMapData, createSite = heritageSiteService.createSite }) {
+export default function MapPage({
+  fetchMapData = mapService.getMapData,
+  fetchRegions = mapService.getRegions,
+  createSite = heritageSiteService.createSite,
+}) {
   const { user } = useAuth(); // real DB role, not the view-role — admin tools must not be spoofable via the switcher
   const isAdmin = user?.role === 'admin';
 
   const [markers, setMarkers] = useState([]);
+  const [regions, setRegions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(defaultFilters());
+  const [loadError, setLoadError] = useState('');
+  const [regionsError, setRegionsError] = useState('');
 
   const [addingSite, setAddingSite] = useState(false);
   const [pickedCoords, setPickedCoords] = useState(null);
@@ -42,15 +50,40 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
 
   function loadMarkers() {
     setLoading(true);
-    return fetchMapData().then((data) => { setMarkers(data || []); setLoading(false); });
+    return fetchMapData()
+      .then((data) => {
+        setMarkers(data || []);
+        setLoadError('');
+      })
+      .catch((err) => {
+        setLoadError(err.response?.data?.message || 'Could not refresh map data. Please try again later.');
+        throw err;
+      })
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
     let active = true;
-    loadMarkers().catch(() => active && setLoading(false));
+    Promise.allSettled([fetchMapData(), fetchRegions()])
+      .then(([mapResult, regionResult]) => {
+        if (!active) return;
+        if (mapResult.status === 'fulfilled') {
+          setMarkers(mapResult.value || []);
+          setLoadError('');
+        } else {
+          setLoadError(mapResult.reason.response?.data?.message || 'Could not load map data. Please try again later.');
+        }
+        if (regionResult.status === 'fulfilled') {
+          setRegions(regionResult.value || []);
+          setRegionsError('');
+        } else {
+          setRegionsError('Region filters could not be loaded.');
+        }
+      })
+      .finally(() => active && setLoading(false));
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMapData]);
+  }, [fetchMapData, fetchRegions]);
 
   const visibleMarkers = useMemo(() => applyFilters(markers, filters), [markers, filters]);
 
@@ -58,43 +91,58 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
     setSaveError(null);
     try {
       await createSite(siteData);
-      setAddingSite(false);
-      setPickedCoords(null);
-      await loadMarkers();
     } catch (err) {
       setSaveError(err.response?.data?.message || 'Could not save this site.');
       throw err;
     }
+    setAddingSite(false);
+    setPickedCoords(null);
+    try {
+      await loadMarkers();
+    } catch {
+      // loadMarkers surfaces refresh failures in the map error banner.
+    }
   }
 
   return (
-    <div className="relative">
-      <div className="max-w-6xl mx-auto px-6 pt-8 pb-4 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Heritage Map</h1>
-          <p className="text-sm text-gray-600">Documented entries and marked heritage sites across Camarines Sur.</p>
+    <main className="heritage-map-page">
+      <aside className="heritage-map-sidebar">
+        <MapFilterSidebar markers={markers} regions={regions} onChange={setFilters} />
+        <div className="map-sidebar-footer">
+          <span><i className="map-legend-dot map-legend-entry" />Heritage entry</span>
+          <span><i className="map-legend-dot map-legend-site" />Heritage site</span>
+          <span><i className="map-legend-dot map-legend-highlighted" />Featured site</span>
         </div>
-        {isAdmin && (
-          <button
-            onClick={() => { setAddingSite((v) => !v); setPickedCoords(null); }}
-            className={`px-4 py-2 text-sm rounded-md font-medium ${addingSite ? 'bg-gray-200 text-gray-800' : 'bg-blue-900 text-white hover:bg-blue-800'}`}
-          >
-            {addingSite ? 'Cancel adding site' : '+ Add site'}
-          </button>
-        )}
-      </div>
+      </aside>
 
-       <div className="max-w-6xl mx-auto px-6 pb-12 flex flex-col md:flex-row gap-6">
-        <MapFilterSidebar markers={markers} onChange={setFilters} />
-
-        <div className="flex-1 flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 rounded-lg overflow-hidden border border-gray-200 h-[400px] md:h-[560px]">
+      <section className="heritage-map-stage">
+        {regionsError && <p className="map-load-error" role="status">{regionsError} The map is still available.</p>}
+        <div className="heritage-map-toolbar">
+          <div>
+            <h1>Explore the Heritage Map</h1>
+            <p>Stories and heritage sites across Camarines Sur and the Bicol Region.</p>
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => { setAddingSite((v) => !v); setPickedCoords(null); }}
+              className={`map-add-site-button ${addingSite ? 'map-add-site-cancel' : ''}`}
+            >
+              {addingSite ? 'Cancel adding site' : '+ Add heritage site'}
+            </button>
+          )}
+        </div>
+        {loadError && <p className="map-load-error" role="alert">{loadError}</p>}
+        <div className="heritage-map-canvas">
+          {addingSite && (
+            <div className="map-place-hint">
+              Click anywhere on the map to place the new site
+            </div>
+          )}
+          <div className="heritage-map-leaflet">
             {addingSite && (
-              <div className="bg-amber-50 text-amber-800 text-xs text-center py-1.5">
-                Click anywhere on the map to place the new site
-              </div>
+              pickedCoords && <div className="map-picked-coordinates">Pinned at {pickedCoords.latitude.toFixed(4)}, {pickedCoords.longitude.toFixed(4)}</div>
             )}
-            <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} style={{ height: addingSite ? 'calc(100% - 28px)' : '100%', width: '100%' }}>
+            <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -108,7 +156,7 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
                       {marker.type === 'entry' ? (
                         <>
                           {marker.category && <p className="text-gray-500 text-xs mb-2">{marker.category}</p>}
-                          <Link to={`/entries/${marker.id}`} className="text-blue-800 text-xs hover:underline">View entry →</Link>
+                          <Link to={`/entries/${marker.id}`} className="map-popup-link">View entry →</Link>
                         </>
                       ) : (
                         marker.description && <p className="text-gray-600 text-xs">{marker.description}</p>
@@ -128,19 +176,11 @@ export default function MapPage({ fetchMapData = mapService.getMapData, createSi
             />
           )}
         </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-6 pb-8 -mt-6">
-        {saveError && <p className="text-sm text-red-600 mb-2">{saveError}</p>}
-        {!loading && visibleMarkers.length === 0 && (
-          <p className="text-sm text-gray-500 text-center">No entries or sites match the current filters.</p>
+        {saveError && <p className="map-load-error" role="alert">{saveError}</p>}
+        {!loading && !loadError && visibleMarkers.length === 0 && (
+          <p className="map-empty-state">No entries or sites match the current filters.</p>
         )}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-500">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-900 inline-block" /> Heritage entry</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#B98A2E' }} /> Heritage site</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#7A2430' }} /> Highlighted site</span>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

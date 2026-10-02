@@ -29,7 +29,7 @@ describe('getMapData', () => {
 
   it('merges entries and sites into a single markers array with correct shape', async () => {
     geographicTagModel.findTagsForPublishedEntries.mockResolvedValue([
-      { entry_id: 1, title: 'The Aswang of San Isidro', category_auto: 'Legend', verification_status: 'verified', latitude: '13.62', longitude: '123.19', location_name: 'San Isidro' },
+      { entry_id: 1, title: 'The Aswang of San Isidro', category_auto: 'Legend', verification_status: 'verified', latitude: '13.62', longitude: '123.19', location_name: 'San Isidro', region_name: 'Bicol Region', region_province: 'Camarines Sur' },
     ]);
     heritageSiteModel.findAll.mockResolvedValue([
       { id: 5, name: 'Peñafrancia Basilica', description: 'Shrine', is_highlighted: 1, latitude: '13.63', longitude: '123.18' },
@@ -42,7 +42,13 @@ describe('getMapData', () => {
     expect(markers).toHaveLength(2);
 
     const entryMarker = markers.find((m) => m.type === 'entry');
-    expect(entryMarker).toMatchObject({ id: 1, title: 'The Aswang of San Isidro', latitude: 13.62, longitude: 123.19 });
+    expect(entryMarker).toMatchObject({
+      id: 1,
+      title: 'The Aswang of San Isidro',
+      latitude: 13.62,
+      longitude: 123.19,
+      regionName: 'Camarines Sur',
+    });
     expect(typeof entryMarker.latitude).toBe('number');
 
     const siteMarker = markers.find((m) => m.type === 'site');

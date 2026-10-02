@@ -1,4 +1,5 @@
 const blogPostModel = require('../models/blogPostModel');
+const cloudinaryService = require('../services/cloudinaryService');
 
 async function listPosts(req, res, next) {
   try {
@@ -10,6 +11,8 @@ async function listPosts(req, res, next) {
 
 async function getPostById(req, res, next) {
   try {
+    const viewed = await blogPostModel.incrementViewCount(req.params.id);
+    if (!viewed) return res.status(404).json({ message: 'Post not found.' });
     const post = await blogPostModel.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found.' });
     res.json({ post });
@@ -23,7 +26,20 @@ async function listMine(req, res, next) {
 async function createPost(req, res, next) {
   try {
     const { title, content } = req.body;
-    const post = await blogPostModel.create({ userId: req.user.id, title: title.trim(), content: content.trim() });
+    let coverImageUrl = null;
+    if (req.file) {
+      const uploaded = await cloudinaryService.uploadBuffer(req.file.buffer, {
+        mimetype: req.file.mimetype,
+        folder: 'palagunitaan/blog-covers',
+      });
+      coverImageUrl = uploaded.secure_url;
+    }
+    const post = await blogPostModel.create({
+      userId: req.user.id,
+      title: title.trim(),
+      content: content.trim(),
+      coverImageUrl,
+    });
     res.status(201).json({ post });
   } catch (err) { next(err); }
 }

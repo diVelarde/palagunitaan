@@ -1,39 +1,63 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import './DashboardLayout.css';
 
-const ROLE_LEVEL = { public: 0, contributor: 1, validator: 2, admin: 3 };
-
-const SIDEBAR_LINKS = [
-  { to: '/dashboard', label: 'Overview', minRole: 'public', end: true },
-  { to: '/dashboard/submissions', label: 'My Submissions', minRole: 'contributor' },
-  { to: '/validate', label: 'Validation Queue', minRole: 'validator' },
-  { to: '/admin', label: 'Admin', minRole: 'admin' },
-];
+const ROLE_WORKSPACES = {
+  public: [
+    { to: '/dashboard', label: 'Overview', end: true },
+  ],
+  contributor: [
+    { to: '/dashboard', label: 'Overview', end: true },
+    { to: '/dashboard/submissions', label: 'My Submissions' },
+  ],
+  validator: [
+    { to: '/dashboard', label: 'Overview', end: true },
+    { to: '/validate', label: 'Validation Queue' },
+    { to: '/dashboard/submissions', label: 'My Submissions' },
+  ],
+  admin: [
+    { to: '/dashboard', label: 'Overview', end: true },
+    { to: '/admin', label: 'Admin' },
+    { to: '/dashboard/submissions', label: 'My Submissions' },
+  ],
+};
 
 function linkClass({ isActive }) {
-  return `block px-3 py-2 rounded-md text-sm font-medium transition ${
-    isActive ? 'bg-blue-50 text-blue-900' : 'text-gray-600 hover:bg-gray-50'
+  return `dashboard-nav-link ${
+    isActive ? 'dashboard-nav-link-active' : ''
   }`;
 }
 
 export default function DashboardLayout() {
   const { user, viewRole } = useAuth();
   const effectiveRole = viewRole || user?.role || 'public';
-
-  const links = SIDEBAR_LINKS.filter((l) => ROLE_LEVEL[effectiveRole] >= ROLE_LEVEL[l.minRole]);
+  const links = ROLE_WORKSPACES[effectiveRole] || ROLE_WORKSPACES.public;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8">
-      <aside>
-        <nav className="flex flex-col gap-1">
+    <div className="dashboard-shell">
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar-heading">
+          <span className="dashboard-sidebar-mark">P</span>
+          <div>
+            <p>PALAGUNITAAN</p>
+            <span>Heritage workspace</span>
+          </div>
+        </div>
+        <p className="dashboard-nav-label">YOUR WORKSPACE</p>
+        <nav className="dashboard-nav">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to} end={link.end} className={linkClass}>
+              <span className="dashboard-nav-indicator" aria-hidden="true" />
               {link.label}
             </NavLink>
           ))}
         </nav>
+        <div className="dashboard-sidebar-note">
+          <span>Stories worth keeping.</span>
+          <p>Document and share the living heritage of Bicol.</p>
+        </div>
       </aside>
-      <main>
+      <main className="dashboard-content">
         <Outlet />
       </main>
     </div>

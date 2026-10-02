@@ -1,8 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
+import './BrowsePage.css';
 
 const VERIFICATION_OPTIONS = ['verified', 'disputed', 'unverified'];
+const CATEGORY_OPTIONS = [
+  'Legends & Myths',
+  'Folk Songs & Chants',
+  'Rituals & Ceremonies',
+  'Folk Dance',
+  'Culinary Heritage',
+  'Oral Traditions',
+  'Beliefs & Superstitions',
+  'Crafts',
+];
+const REGION_OPTIONS = ['Naga City', 'Camarines Sur', 'Pili', 'Iriga City'];
 const DEBOUNCE_MS = 350;
 
 const VERIFICATION_STYLES = {
@@ -13,7 +25,7 @@ const VERIFICATION_STYLES = {
 
 function EntryCard({ entry }) {
   return (
-    <Link to={`/entries/${entry.id}`} className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-shadow">
+    <Link to={`/entries/${entry.id}`} className="browse-entry-card">
       {entry.cover_image_url && (
         <img
           src={entry.cover_image_url}
@@ -28,7 +40,7 @@ function EntryCard({ entry }) {
           </span>
           {entry.category_auto && <span className="text-xs text-gray-500 uppercase tracking-wide">{entry.category_auto}</span>}
         </div>
-        <h3 className="font-medium text-gray-900 mb-1">{entry.title}</h3>
+        <h2>{entry.title}</h2>
         <p className="text-sm text-gray-500 line-clamp-2">
           {(entry.euphemistic_content || entry.raw_content || '').slice(0, 160)}
           {(entry.euphemistic_content || entry.raw_content || '').length > 160 ? '…' : ''}
@@ -38,57 +50,100 @@ function EntryCard({ entry }) {
   );
 }
 
-export default function BrowsePage({ searchEntries = async () => [] }) {
-  const [keyword, setKeyword] = useState('');
+export default function BrowsePage({
+  searchEntries = async () => [],
+}) {
+  const [searchParams] = useSearchParams();
+  const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '');
+  const [category, setCategory] = useState(() => searchParams.get('category') || '');
+  const [region, setRegion] = useState(() => searchParams.get('region') || '');
   const [verificationStatus, setVerificationStatus] = useState('');
   const [historicalPeriod, setHistoricalPeriod] = useState('');
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchError, setSearchError] = useState('');
   const debounceRef = useRef(null);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
+    setSearchError('');
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      searchEntries({ keyword, verificationStatus, historicalPeriod }).then((results) => {
-        setEntries(results || []);
-        setLoading(false);
-      });
+      searchEntries({ keyword, verificationStatus, historicalPeriod, category, region })
+        .then((results) => {
+          if (active) setEntries(results || []);
+        })
+        .catch((err) => {
+          if (active) setSearchError(err.response?.data?.message || 'Could not search the archive. Please try again.');
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
     }, DEBOUNCE_MS);
-    return () => clearTimeout(debounceRef.current);
-  }, [keyword, verificationStatus, historicalPeriod, searchEntries]);
+    return () => {
+      active = false;
+      clearTimeout(debounceRef.current);
+    };
+  }, [keyword, verificationStatus, historicalPeriod, category, region, searchEntries]);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Browse the archive</h1>
-      <p className="text-sm text-gray-600 mb-6">Search documented folklore from across Camarines Sur.</p>
-
-      <div className="flex flex-wrap gap-3 mb-8">
-        <input
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="Search by title or content…"
-          className="flex-1 min-w-[200px] border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-        />
-        <select value={verificationStatus} onChange={(e) => setVerificationStatus(e.target.value)} className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800">
-          <option value="">Any verification status</option>
-          {VERIFICATION_OPTIONS.map((v) => <option key={v} value={v} className="capitalize">{v}</option>)}
-        </select>
-        <div className="w-48">
-          <HistoricalPeriodSelector value={historicalPeriod} onChange={setHistoricalPeriod} includeAllOption />
+    <main className="browse-page site-page-surface">
+      <div className="browse-page-content">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="mb-1">Browse Heritage</h1>
+            <p>Explore published folklore and cultural heritage entries from the Bicol Region.</p>
+          </div>
         </div>
+
+        <div className="browse-filter-bar">
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="Search by title or content…"
+            aria-label="Search heritage entries"
+            className="browse-filter-control browse-search-control"
+          />
+          <select aria-label="Filter by verification status" value={verificationStatus} onChange={(e) => setVerificationStatus(e.target.value)} className="browse-filter-control">
+            <option value="">Any verification status</option>
+            {VERIFICATION_OPTIONS.map((v) => <option key={v} value={v} className="capitalize">{v}</option>)}
+          </select>
+          <select aria-label="Filter by category" value={category} onChange={(e) => setCategory(e.target.value)} className="browse-filter-control">
+            <option value="">Any category</option>
+            {CATEGORY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+          <select aria-label="Filter by region" value={region} onChange={(e) => setRegion(e.target.value)} className="browse-filter-control">
+            <option value="">Any region</option>
+            {REGION_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+          <div className="browse-period-select">
+            <HistoricalPeriodSelector
+              value={historicalPeriod}
+              onChange={setHistoricalPeriod}
+              includeAllOption
+              className="browse-filter-control"
+            />
+          </div>
+        </div>
+
+        {searchError && (
+          <p className="mb-5 rounded-lg border border-[#eccdc2] bg-[#fff1eb] p-4 text-sm text-[#8b3b2b]" role="alert">
+            {searchError}
+          </p>
+        )}
+        {loading ? (
+          <p className="text-sm text-gray-500">Searching…</p>
+        ) : searchError ? null : entries.length === 0 ? (
+          <p className="text-sm text-gray-500">No entries match your search.</p>
+        ) : (
+          <div className="grid gap-4">
+            {entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)}
+          </div>
+        )}
+
       </div>
-
-      {loading ? (
-        <p className="text-sm text-gray-500">Searching…</p>
-      ) : entries.length === 0 ? (
-        <p className="text-sm text-gray-500">No entries match your search.</p>
-      ) : (
-        <div className="grid gap-4">
-          {entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)}
-        </div>
-      )}
-    </div>
+    </main>
   );
 }

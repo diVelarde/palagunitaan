@@ -25,7 +25,7 @@ function PendingEntryRow({ entry, onReview }) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-5">
+    <div className="dashboard-submission-card">
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
           <Link to={`/entries/${entry.id}`} className="font-medium text-gray-900 hover:underline">{entry.title}</Link>
@@ -49,13 +49,13 @@ function PendingEntryRow({ entry, onReview }) {
       {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
 
       <div className="flex items-center gap-2">
-        <button onClick={() => handleDecision('approved')} disabled={submitting !== null} className="px-3 py-1.5 bg-green-700 text-white text-sm rounded-md hover:bg-green-800 disabled:opacity-50">
+        <button onClick={() => handleDecision('approved')} disabled={submitting !== null} className="dashboard-review-approve disabled:opacity-50">
           {submitting === 'approved' ? 'Approving…' : 'Approve'}
         </button>
-        <button onClick={() => (expanded ? handleDecision('disputed') : setExpanded(true))} disabled={submitting !== null} className="px-3 py-1.5 bg-amber-600 text-white text-sm rounded-md hover:bg-amber-700 disabled:opacity-50">
+        <button onClick={() => (expanded ? handleDecision('disputed') : setExpanded(true))} disabled={submitting !== null} className="dashboard-review-dispute disabled:opacity-50">
           {submitting === 'disputed' ? 'Flagging…' : 'Dispute'}
         </button>
-        <button onClick={() => handleDecision('rejected')} disabled={submitting !== null} className="px-3 py-1.5 bg-red-700 text-white text-sm rounded-md hover:bg-red-800 disabled:opacity-50">
+        <button onClick={() => handleDecision('rejected')} disabled={submitting !== null} className="dashboard-review-reject disabled:opacity-50">
           {submitting === 'rejected' ? 'Rejecting…' : 'Reject'}
         </button>
         {!expanded && <button onClick={() => setExpanded(true)} className="text-xs text-gray-500 hover:text-gray-700 ml-2">+ add note</button>}
@@ -67,10 +67,15 @@ function PendingEntryRow({ entry, onReview }) {
 export default function ValidatorDashboardPage({ fetchPending = async () => [], submitReview = async () => {} }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   function reload() {
     setLoading(true);
-    return fetchPending().then((data) => { setEntries(data || []); setLoading(false); });
+    setError(null);
+    return fetchPending()
+      .then((data) => setEntries(data || []))
+      .catch((err) => setError(err.response?.data?.message || 'Could not load the review queue.'))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => {
@@ -84,11 +89,12 @@ export default function ValidatorDashboardPage({ fetchPending = async () => [], 
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Pending review</h1>
-      <p className="text-sm text-gray-600 mb-8">
+    <div className="space-y-4">
+      <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
+      <p className="mb-6 text-sm text-gray-600">
         {loading ? 'Loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} awaiting your review.`}
       </p>
+      {error && <div className="dashboard-error" role="alert">{error}</div>}
       {!loading && entries.length === 0 && <p className="text-sm text-gray-500">Nothing waiting on you right now.</p>}
       <div className="space-y-4">
         {entries.map((entry) => <PendingEntryRow key={entry.id} entry={entry} onReview={handleReview} />)}

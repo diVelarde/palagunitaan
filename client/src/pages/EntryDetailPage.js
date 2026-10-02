@@ -4,115 +4,176 @@ import TranslationPanel from '../components/TranslationPanel';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
 import MediaUploader from '../components/MediaUploader';
+import './EntryDetailPage.css';
 
 const VERIFICATION_STYLES = {
-  verified: 'bg-green-100 text-green-800',
-  disputed: 'bg-amber-100 text-amber-800',
-  unverified: 'bg-gray-100 text-gray-700',
+  verified: 'entry-status-verified',
+  disputed: 'entry-status-disputed',
+  unverified: 'entry-status-unverified',
 };
 
-function VerificationBadge({ status }) {
-  return (
-    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium capitalize ${VERIFICATION_STYLES[status] || VERIFICATION_STYLES.unverified}`}>
-      {status || 'unverified'}
-    </span>
-  );
+function formatLocation(entry) {
+  return [entry.location_name, entry.region_name, entry.region_province]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
+    .join(', ');
 }
 
 export default function EntryDetailPage({ fetchEntry = async () => null }) {
   const { id } = useParams();
   const { user } = useAuth();
-  const [entry, setEntry] = useState(undefined); 
-  const [view, setView] = useState('plain'); 
+  const [entry, setEntry] = useState(undefined);
+  const [view, setView] = useState('educational');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let active = true;
     setEntry(undefined);
-    fetchEntry(id).then((data) => { if (active) setEntry(data); });
-    return () => { active = false; };
+    setError('');
+    fetchEntry(id)
+      .then((data) => {
+        if (active) setEntry(data);
+      })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || 'Could not load this heritage entry. Please try again later.');
+      });
+    return () => {
+      active = false;
+    };
   }, [id, fetchEntry]);
 
   if (entry === undefined) {
-    return <div className="max-w-3xl mx-auto px-6 py-16 text-sm text-gray-500">Loading…</div>;
+    return <div className="entry-detail-message">Loading heritage entry…</div>;
   }
 
-  if (entry === null) {
+  if (error || entry === null) {
     return (
-      <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <p className="text-gray-600 mb-4">This entry doesn't exist, or hasn't been published yet.</p>
-        <Link to="/browse" className="text-blue-800 text-sm hover:underline">Back to the archive</Link>
+      <div className="entry-detail-message" role={error ? 'alert' : undefined}>
+        <p>{error || "This entry doesn't exist, or hasn't been published yet."}</p>
+        <Link to="/browse">← Back to Browse</Link>
       </div>
     );
   }
 
-  const hasBothVersions = Boolean(entry.euphemistic_content) && entry.euphemistic_content !== entry.raw_content;
-  const bodyText = view === 'plain' && entry.euphemistic_content ? entry.euphemistic_content : entry.raw_content;
+  const location = formatLocation(entry);
+  const hasEducationalVersion = Boolean(entry.euphemistic_content?.trim());
+  const bodyText = view === 'educational' && hasEducationalVersion
+    ? entry.euphemistic_content
+    : entry.raw_content;
+  const mapUrl = entry.latitude != null && entry.longitude != null
+    ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(entry.latitude)}&mlon=${encodeURIComponent(entry.longitude)}#map=14/${encodeURIComponent(entry.latitude)}/${encodeURIComponent(entry.longitude)}`
+    : null;
 
   return (
-    <article className="max-w-3xl mx-auto px-6 py-12">
-      <div className="flex items-center gap-3 mb-4">
-        <VerificationBadge status={entry.verification_status} />
-        {entry.category_auto && <span className="text-xs text-gray-500 uppercase tracking-wide">{entry.category_auto}</span>}
-      </div>
-
-      <h1 className="text-3xl font-semibold text-gray-900 mb-4">{entry.title}</h1>
-
-      {entry.cover_image_url && (
-        <img
-          src={entry.cover_image_url}
-          alt={entry.title}
-          className="w-full max-h-96 object-cover rounded-lg border border-gray-200 mb-8"
-        />
-      )}
-
-      <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500 mb-8">
-        {entry.historical_period && (
-          <div><dt className="inline font-medium text-gray-700">Period: </dt><dd className="inline">{entry.historical_period}</dd></div>
-        )}
-        {entry.source_type && (
-          <div><dt className="inline font-medium text-gray-700">Source: </dt><dd className="inline">{entry.source_type}</dd></div>
-        )}
-      </dl>
-
-      {hasBothVersions && (
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setView('plain')} className={`px-3 py-1.5 text-sm rounded-md ${view === 'plain' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700'}`}>
-            Plain-language version
-          </button>
-          <button onClick={() => setView('raw')} className={`px-3 py-1.5 text-sm rounded-md ${view === 'raw' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-700'}`}>
-            As submitted
-          </button>
+    <main className="entry-detail-page">
+      <header
+        className="entry-detail-hero"
+        style={entry.cover_image_url ? { '--entry-hero-image': `url("${entry.cover_image_url}")` } : undefined}
+      >
+        <div className="entry-detail-hero-inner">
+          <Link to="/browse" className="entry-back-link">← Back to Browse</Link>
+          <h1>{entry.title}</h1>
+          <div className="entry-hero-meta">
+            {entry.category_auto && <span>{entry.category_auto}</span>}
+            {location && <span>⌖ &nbsp;{location}</span>}
+            {entry.historical_period && <span>◷ &nbsp;{entry.historical_period}</span>}
+          </div>
         </div>
-      )}
+      </header>
 
-      <div className="prose prose-gray max-w-none whitespace-pre-wrap text-gray-800 leading-relaxed">
-        {bodyText}
+      <div className="entry-detail-layout">
+        <article className="entry-story-card">
+          {entry.cover_image_url && (
+            <img className="entry-cover-image" src={entry.cover_image_url} alt={`Cover for ${entry.title}`} />
+          )}
+
+          <div className="entry-status-row">
+            {entry.verification_status && (
+              <span className={`entry-status ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
+                {entry.verification_status}
+              </span>
+            )}
+            {entry.category_auto && <span className="entry-category-label">{entry.category_auto}</span>}
+          </div>
+
+          <section className="entry-reading-copy" aria-live="polite">
+            {view === 'community' && (
+              <p className="entry-reading-label">RAW FIELD ACCOUNT · UNEDITED</p>
+            )}
+            <p className="entry-story-text">{bodyText}</p>
+            {view === 'educational' && hasEducationalVersion && entry.raw_content !== entry.euphemistic_content && (
+              <p className="entry-editorial-note">
+                This educational summary was AI-generated from the original community account.
+              </p>
+            )}
+            {view === 'educational' && !hasEducationalVersion && (
+              <p className="entry-editorial-note">
+                An educational summary is not available yet, so the original account is shown.
+              </p>
+            )}
+          </section>
+
+          {entry.source_description && (
+            <p className="entry-source-note"><strong>Source notes:</strong> {entry.source_description}</p>
+          )}
+        </article>
+
+        <aside className="entry-detail-sidebar">
+          <section className="entry-info-card">
+            <h2>Entry Details</h2>
+            <dl>
+              {entry.category_auto && <div><dt>Category</dt><dd>{entry.category_auto}</dd></div>}
+              {location && <div><dt>Region</dt><dd>{location}</dd></div>}
+              {entry.historical_period && <div><dt>Period</dt><dd>{entry.historical_period}</dd></div>}
+              <div><dt>Verification</dt><dd>{entry.verification_status || 'Not yet reviewed'}</dd></div>
+              {entry.source_type && <div><dt>Source</dt><dd>{entry.source_type}</dd></div>}
+            </dl>
+          </section>
+
+          <section className="entry-info-card entry-reading-mode-card">
+            <h2>Reading Mode</h2>
+            <p>Read the public educational summary or switch to the original account collected in the field.</p>
+            <div className="entry-reading-switch" role="group" aria-label="Choose reading mode">
+              <button
+                type="button"
+                aria-pressed={view === 'educational'}
+                className={view === 'educational' ? 'entry-reading-active' : ''}
+                onClick={() => setView('educational')}
+              >
+                Educational
+              </button>
+              <button
+                type="button"
+                aria-pressed={view === 'community'}
+                className={view === 'community' ? 'entry-reading-active' : ''}
+                onClick={() => setView('community')}
+              >
+                Community Voice
+              </button>
+            </div>
+          </section>
+
+          <section className="entry-info-card">
+            <h2>Location</h2>
+            {location ? <p>{location}</p> : <p>No location has been pinned for this entry.</p>}
+            {mapUrl && <a href={mapUrl} target="_blank" rel="noreferrer">View pinned location on map →</a>}
+          </section>
+        </aside>
       </div>
 
-      {entry.source_description && (
-        <p className="mt-10 pt-6 border-t border-gray-200 text-sm text-gray-500">
-          <span className="font-medium text-gray-700">Source notes: </span>{entry.source_description}
-        </p>
-      )}
-
-      <div className="mt-8 pt-6 border-t border-gray-200">
+      <div className="entry-detail-extras">
         <MediaUploader
           entryId={entry.id}
           disabled={!user || (entry.user_id !== user.id && user.role !== 'admin')}
         />
-      </div>
-
-      {(user?.role === 'validator' || user?.role === 'admin') && (
-        <div className="mt-8">
+        {(user?.role === 'validator' || user?.role === 'admin') && (
           <TranslationPanel
             entryId={entry.id}
             initialTranslation={entry.translated_content}
             initialLanguage={entry.translated_language}
             translateEntry={heritageService.translateEntry}
           />
-        </div>
-      )}
-
-    </article>
+        )}
+      </div>
+    </main>
   );
 }

@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
 import MediaUploader from '../components/MediaUploader';
 import CoverImagePicker from '../components/CoverImagePicker';
+import ActionDialog from '../components/ActionDialog';
+
+const SubmitEntryPage = lazy(() => import('./SubmitEntryPage'));
 
 const STATUS_STYLES = {
   pending: 'bg-amber-100 text-amber-800',
@@ -19,6 +22,14 @@ const VERIFICATION_LABELS = {
 };
 
 const CONTRIBUTOR_ROLES = ['contributor', 'validator', 'admin'];
+
+function getLoadErrorMessage(err) {
+  if (err.response?.status === 401) return 'Your session has expired. Sign in again to view your submissions.';
+  if (err.response?.status === 403) return 'Your account does not have permission to view these submissions.';
+  if (err.response?.data?.message) return err.response.data.message;
+  if (!err.response) return 'Could not connect to the server to load your submissions. Check your connection and try again.';
+  return `The server could not load your submissions (HTTP ${err.response.status}). Please try again later.`;
+}
 
 function StatusBadge({ status }) {
   const style = STATUS_STYLES[status] || 'bg-gray-100 text-gray-700';
@@ -50,8 +61,10 @@ export default function MySubmissionsPage({
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [actionError, setActionError] = useState(null);
   const [busyEntryId, setBusyEntryId] = useState(null);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -59,12 +72,12 @@ export default function MySubmissionsPage({
     setError(null);
     fetchMyEntries()
       .then((data) => { if (active) setEntries(data || []); })
-      .catch(() => {
-        if (active) setError('Could not load your submissions. Please refresh the page.');
+      .catch((err) => {
+        if (active) setError(getLoadErrorMessage(err));
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [fetchMyEntries]);
+  }, [fetchMyEntries, reloadVersion]);
 
   useEffect(() => {
     let active = true;
@@ -128,7 +141,7 @@ export default function MySubmissionsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">My Submissions</h1>
           <p className="text-sm text-gray-600">
@@ -136,18 +149,26 @@ export default function MySubmissionsPage({
           </p>
         </div>
         {isContributor && (
-          <Link
-            to="/submit"
-            className="px-4 py-2 bg-blue-900 text-white rounded-md text-sm font-medium hover:bg-blue-800 whitespace-nowrap"
+          <button
+            type="button"
+            onClick={() => setIsSubmitDialogOpen(true)}
+            className="dashboard-action-link dashboard-action-primary"
           >
-            + New entry
-          </Link>
+            Submit an entry
+          </button>
         )}
       </div>
 
       {error && (
-        <div className="p-4 rounded-md bg-red-50 border border-red-200 text-sm text-red-700">
-          {error}
+        <div className="dashboard-error flex flex-wrap items-center justify-between gap-3" role="alert">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => setReloadVersion((version) => version + 1)}
+            className="font-semibold underline underline-offset-2"
+          >
+            Try again
+          </button>
         </div>
       )}
       {actionError && (
@@ -159,12 +180,7 @@ export default function MySubmissionsPage({
       {!error && entries.length === 0 && (
         <div className="border border-dashed border-gray-300 rounded-lg p-10 text-center">
           {isContributor ? (
-            <>
-              <p className="text-sm text-gray-600 mb-3">You haven't submitted any entries yet.</p>
-              <Link to="/submit" className="text-sm text-blue-800 hover:underline">
-                Submit your first entry →
-              </Link>
-            </>
+            <p className="text-sm text-gray-600">You haven't submitted any entries yet. Use “Submit an entry” above to get started.</p>
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-3">
@@ -186,7 +202,7 @@ export default function MySubmissionsPage({
             const needsPlainVersion = !entry.euphemistic_content;
 
             return (
-              <li key={entry.id} className="border border-gray-200 rounded-lg p-5">
+              <li key={entry.id} className="dashboard-submission-card">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 min-w-0">
                     {entry.cover_image_url ? (
@@ -211,7 +227,7 @@ export default function MySubmissionsPage({
 
                       <div className="flex flex-wrap items-center gap-2 mt-2">
                         {entry.category_auto ? (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-900 uppercase tracking-wide font-medium">
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#f7ece3] text-[#8f3e29] uppercase tracking-wide font-medium">
                             {entry.category_auto}
                           </span>
                         ) : (
@@ -268,7 +284,7 @@ export default function MySubmissionsPage({
                         type="button"
                         disabled={busy}
                         onClick={() => handleRegenerate(entry.id)}
-                        className="px-3 py-1.5 bg-blue-900 text-white text-xs rounded-md hover:bg-blue-800 disabled:opacity-50"
+                        className="dashboard-action-link dashboard-action-primary text-xs disabled:opacity-50"
                       >
                         {busy ? 'Working…' : 'Generate with AI'}
                       </button>
@@ -302,6 +318,19 @@ export default function MySubmissionsPage({
             );
           })}
         </ul>
+      )}
+
+      {isSubmitDialogOpen && (
+        <ActionDialog title="Submit a heritage entry" onClose={() => setIsSubmitDialogOpen(false)}>
+          <Suspense fallback={<p className="text-sm text-[#82766c]">Loading submission form…</p>}>
+            <SubmitEntryPage
+              embedded
+              onSubmit={heritageService.submitEntry}
+              uploadCoverImage={heritageService.updateCoverImage}
+              onSubmitted={() => setReloadVersion((version) => version + 1)}
+            />
+          </Suspense>
+        </ActionDialog>
       )}
     </div>
   );

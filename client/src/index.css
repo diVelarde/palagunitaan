@@ -1,3 +1,35 @@
 @tailwind base; 
 @tailwind components; 
 @tailwind utilities;
+
+:root {
+  --site-paper: #f8f5ef;
+  --site-card: #fffefa;
+  --site-ink: #35251f;
+  --site-muted: #82766c;
+  --site-rust: #ad482d;
+  --site-border: #e9dfd2;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--site-ink);
+  background: var(--site-paper);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.site-app-shell,
+.site-page-surface {
+  background-color: var(--site-paper);
+}
+
+.site-page-surface {
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}

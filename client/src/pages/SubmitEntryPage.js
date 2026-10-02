@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { validateImageFile } from '../utils/mediaValidation';
 import CoverImagePicker from '../components/CoverImagePicker';
 import heritageService from '../services/heritageService';
+import mapService from '../services/mapService';
+import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
+import './SubmitEntryPage.css';
 
 const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Other'];
 
@@ -19,6 +22,7 @@ function validate({ title, rawContent }) {
 const EMPTY_FORM = {
   title: '', rawContent: '', sourceType: SOURCE_TYPES[0],
   sourceDescription: '', historicalPeriod: '', category: '',
+  regionId: '', locationName: '', latitude: '', longitude: '',
 };
 
 function describeAi(ai) {
@@ -40,6 +44,9 @@ export default function SubmitEntryPage({
   onSubmit = async (data) => console.log('submit', data),
   uploadCoverImage = async () => null,
   fetchCategories = heritageService.getCategories,
+  fetchRegions = mapService.getRegions,
+  embedded = false,
+  onSubmitted = () => {},
 }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
@@ -47,6 +54,11 @@ export default function SubmitEntryPage({
   const [result, setResult] = useState(null);
 
   const [categories, setCategories] = useState([]);
+  const [categoriesError, setCategoriesError] = useState('');
+  const [regions, setRegions] = useState([]);
+  const [regionsError, setRegionsError] = useState('');
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [locationMessage, setLocationMessage] = useState('');
 
   const [coverImage, setCoverImage] = useState(null);
   const [coverError, setCoverError] = useState(null);
@@ -55,10 +67,35 @@ export default function SubmitEntryPage({
   useEffect(() => {
     let active = true;
     fetchCategories()
-      .then((list) => { if (active) setCategories(list || []); })
-      .catch(() => { if (active) setCategories([]); });
+      .then((list) => {
+        if (active) {
+          setCategories(list || []);
+          setCategoriesError('');
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setCategoriesError(err.response?.data?.message || 'Could not load categories. You can still submit without selecting one.');
+        }
+      });
     return () => { active = false; };
   }, [fetchCategories]);
+
+  useEffect(() => {
+    let active = true;
+    fetchRegions()
+      .then((list) => {
+        if (active) setRegions(list || []);
+      })
+      .catch((err) => {
+        if (active) {
+          setRegionsError(err.response?.data?.message || 'Could not load regions. You can still submit without selecting one.');
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [fetchRegions]);
 
   const field = (key) => ({
     value: form[key],
@@ -71,6 +108,37 @@ export default function SubmitEntryPage({
     if (!problem) setCoverImage(file);
   }
 
+  function useCurrentLocation() {
+    setLocationMessage('');
+    if (!navigator.geolocation) {
+      setLocationMessage('Location is not available in this browser. You can enter coordinates manually.');
+      return;
+    }
+
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setForm((current) => ({
+          ...current,
+          latitude: coords.latitude.toFixed(6),
+          longitude: coords.longitude.toFixed(6),
+        }));
+        setLocationMessage('Current coordinates added. Confirm they point to the heritage location before submitting.');
+        setGettingLocation(false);
+      },
+      (error) => {
+        const message = error.code === error.PERMISSION_DENIED
+          ? 'Location permission was denied. Enter the coordinates manually if you still want to add a map pin.'
+          : error.code === error.TIMEOUT
+            ? 'Could not determine your location in time. Try again or enter coordinates manually.'
+            : 'Could not determine your location. Enter coordinates manually instead.';
+        setLocationMessage(message);
+        setGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    );
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const fieldErrors = validate(form);
@@ -80,9 +148,16 @@ export default function SubmitEntryPage({
     setSubmitting(true);
     setCoverWarning(null);
     try {
-      const payload = { ...form, category: form.category || undefined };
+      const payload = {
+        ...form,
+        category: form.category || undefined,
+        regionId: form.regionId ? Number(form.regionId) : undefined,
+        latitude: form.latitude === '' ? undefined : Number(form.latitude),
+        longitude: form.longitude === '' ? undefined : Number(form.longitude),
+      };
       const res = await onSubmit(payload);
       setResult(res || null);
+      if (res?.locationWarning) setLocationMessage(res.locationWarning);
 
       const createdEntry = res && res.entry;
       if (coverImage && createdEntry && createdEntry.id) {
@@ -99,8 +174,11 @@ export default function SubmitEntryPage({
       setForm(EMPTY_FORM);
       setCoverImage(null);
       setCoverError(null);
+      onSubmitted();
     } catch (err) {
-      setErrors({ form: err.message || 'Something went wrong. Please try again.' });
+      setErrors({
+        form: err.response?.data?.message || err.message || 'Something went wrong. Please try again.',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -109,30 +187,31 @@ export default function SubmitEntryPage({
   const aiSummary = result ? describeAi(result.ai) : null;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1">Submit a heritage entry</h1>
-      <p className="text-sm text-gray-600 mb-8">
-        Write in your own words. A validator will review it before it's published.
-      </p>
+    <div className={embedded ? 'submit-entry-embedded' : 'max-w-2xl mx-auto px-6 py-12'}>
+    <header className={`submit-entry-heading ${embedded ? 'submit-entry-heading-embedded' : ''}`}>
+      <p className="submit-entry-eyebrow">Contribute to the archive</p>
+      <h1>Submit Heritage Entry</h1>
+      <p>Share a piece of cultural heritage. Your submission will be AI-processed and reviewed by validators before publication.</p>
+    </header>
 
       {result?.possibleDuplicates?.length > 0 && (
-        <div className="mb-6 p-4 rounded-md bg-amber-50 border border-amber-200 text-sm text-amber-800">
+        <div className="submit-entry-notice submit-entry-notice-warning">
           Your entry was submitted, but it looks similar to {result.possibleDuplicates.length} existing{' '}
           {result.possibleDuplicates.length === 1 ? 'entry' : 'entries'}. A validator will check for overlap.
         </div>
       )}
       {result && !result.possibleDuplicates?.length && (
-        <div className="mb-6 p-4 rounded-md bg-green-50 border border-green-200 text-sm text-green-800">
+        <div className="submit-entry-notice submit-entry-notice-success">
           Submitted — thank you. You can track its status from your dashboard.
         </div>
       )}
 
       {aiSummary && (
         <div
-          className={`mb-6 p-4 rounded-md border text-sm ${
+          className={`submit-entry-notice mb-6 ${
             result?.ai?.aiConfigured
-              ? 'bg-blue-50 border-blue-200 text-blue-900'
-              : 'bg-amber-50 border-amber-200 text-amber-800'
+              ? 'submit-entry-notice-info'
+              : 'submit-entry-notice-warning'
           }`}
         >
           <p>{aiSummary}</p>
@@ -146,103 +225,146 @@ export default function SubmitEntryPage({
       )}
 
       {coverWarning && (
-        <div className="mb-6 p-4 rounded-md bg-amber-50 border border-amber-200 text-sm text-amber-800">
+        <div className="submit-entry-notice submit-entry-notice-warning">
           {coverWarning}
         </div>
       )}
+      {locationMessage && (
+        <div className={`submit-entry-notice ${result?.locationWarning ? 'submit-entry-notice-warning' : 'submit-entry-notice-info'}`} role="status">
+          {locationMessage}
+        </div>
+      )}
       {errors.form && (
-        <div className="mb-6 p-4 rounded-md bg-red-50 border border-red-200 text-sm text-red-700">
+        <div className="submit-entry-notice submit-entry-notice-error" role="alert">
           {errors.form}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {regionsError && <div className="submit-entry-notice submit-entry-notice-warning" role="status">{regionsError}</div>}
+      {categoriesError && <div className="submit-entry-notice submit-entry-notice-warning" role="status">{categoriesError}</div>}
+      <form onSubmit={handleSubmit} className="submit-entry-form">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label className="submit-entry-label" htmlFor="entry-title">Title <span>*</span></label>
           <input
+            id="entry-title"
             type="text"
             {...field('title')}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+            className="submit-entry-control"
             placeholder="e.g. The Aswang of Barangay San Isidro"
           />
-          {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title}</p>}
+          {errors.title && <p className="submit-entry-field-error">{errors.title}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tell the story</label>
+          <label className="submit-entry-label" htmlFor="entry-content">Content <span>*</span></label>
           <textarea
+            id="entry-content"
             rows={8}
             {...field('rawContent')}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-            placeholder="Write it as it was told to you, or as you remember it."
+            className="submit-entry-control submit-entry-textarea"
+            placeholder="Describe the heritage item in detail. Write it as it was told to you, or as you remember it."
           />
-          {errors.rawContent && <p className="text-xs text-red-600 mt-1">{errors.rawContent}</p>}
+          {errors.rawContent && <p className="submit-entry-field-error">{errors.rawContent}</p>}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="submit-entry-cover">
+          <CoverImagePicker
+            file={coverImage}
+            error={coverError}
+            busy={submitting}
+            onSelect={handleCoverSelect}
+            onError={setCoverError}
+            label="Cover Image"
+            hint="Shown on the archive card and at the top of your entry."
+          />
+        </div>
+
+        <div className="submit-entry-grid">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="submit-entry-label" htmlFor="entry-category">Category</label>
             <select
+              id="entry-category"
               {...field('category')}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+              className="submit-entry-control"
             >
-              <option value="">Let the AI decide</option>
+              <option value="">Select or let AI classify</option>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <p className="text-[11px] text-gray-400 mt-1">
-              Leave this and we'll assign one automatically.
-            </p>
+            <p className="submit-entry-help">Leave blank to have AI suggest a category.</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
+            <label className="submit-entry-label" htmlFor="entry-region">Region</label>
+            <select id="entry-region" {...field('regionId')} className="submit-entry-control">
+              <option value="">Select region</option>
+              {regions.map((region) => (
+                <option key={region.id} value={region.id}>{region.name}{region.province ? `, ${region.province}` : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="submit-entry-label" htmlFor="entry-period">Historical Period</label>
+            <HistoricalPeriodSelector
+              id="entry-period"
+              value={form.historicalPeriod}
+              onChange={(historicalPeriod) => setForm((current) => ({ ...current, historicalPeriod }))}
+              className="submit-entry-control"
+            />
+          </div>
+          <div>
+            <label className="submit-entry-label" htmlFor="entry-source">Source Type</label>
             <select
+              id="entry-source"
               {...field('sourceType')}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+              className="submit-entry-control"
             >
+              <option value="">Select source</option>
               {SOURCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Historical period</label>
-            <input
-              type="text"
-              {...field('historicalPeriod')}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-              placeholder="e.g. Spanish era"
-            />
-          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Source notes <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
+          <label className="submit-entry-label" htmlFor="entry-source-notes">Source Description</label>
           <input
+            id="entry-source-notes"
             type="text"
             {...field('sourceDescription')}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-            placeholder="Who told you this, or where you found it"
+            className="submit-entry-control"
+            placeholder="e.g., Interview with Lola Maria, 87, Naga City"
           />
         </div>
 
-        <div className="pt-2 border-t border-gray-100">
-          <div className="pt-4">
-            <CoverImagePicker
-              file={coverImage}
-              error={coverError}
-              busy={submitting}
-              onSelect={handleCoverSelect}
-              onError={setCoverError}
-              label="Entry photo"
-              hint="Shown on the archive card and at the top of your entry."
-            />
+        <section className="submit-entry-location">
+          <div className="submit-entry-location-heading">
+            <div>
+              <h2>Location <span className="submit-entry-optional">Optional</span></h2>
+              <p>Pin the place connected to this story. Location is only used if you choose to add it.</p>
+            </div>
+            <button type="button" onClick={useCurrentLocation} disabled={gettingLocation} className="submit-entry-location-button">
+              {gettingLocation ? 'Finding location…' : '◎ Use current location'}
+            </button>
           </div>
-        </div>
+          <div className="submit-entry-grid">
+            <div>
+              <label className="submit-entry-label" htmlFor="entry-location-name">Place name</label>
+              <input id="entry-location-name" type="text" {...field('locationName')} className="submit-entry-control" placeholder="e.g., Naga City" />
+            </div>
+            <div>
+              <label className="submit-entry-label" htmlFor="entry-latitude">Latitude</label>
+              <input id="entry-latitude" type="number" step="any" {...field('latitude')} className="submit-entry-control" placeholder="e.g., 13.6218" />
+            </div>
+            <div>
+              <label className="submit-entry-label" htmlFor="entry-longitude">Longitude</label>
+              <input id="entry-longitude" type="number" step="any" {...field('longitude')} className="submit-entry-control" placeholder="e.g., 123.1948" />
+            </div>
+          </div>
+          <p className="submit-entry-help">Browser location requires your permission. Confirm the pin points to the heritage location; you can edit the coordinates.</p>
+        </section>
 
         <button
           type="submit"
           disabled={submitting}
-          className="px-5 py-2.5 bg-blue-900 text-white rounded-md text-sm font-medium hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="submit-entry-submit"
         >
           {submitting ? 'Submitting…' : 'Submit entry'}
         </button>
