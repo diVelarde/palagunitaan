@@ -50,10 +50,10 @@ export default function CoverImagePicker({
       <div className="flex items-center gap-4">
         <div className="w-24 h-24 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
           {shown ? (
-            <img src={shown} alt="Entry photo preview" className="w-full h-full object-cover" />
-          ) : (
+            <img src={shown} alt="" className="w-full h-full object-cover" />
+            ) : (
             <span className="text-[11px] text-gray-400 text-center px-1">No photo</span>
-          )}
+            )}
         </div>
 
         <div className="min-w-0">
