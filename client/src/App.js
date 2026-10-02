@@ -10,7 +10,7 @@ import RouteLoadingFallback from './components/RouteLoadingFallback';
 import LandingPage from './pages/LandingPage.js';
 import DashboardPage from './pages/DashboardPage.js';
 import NotFoundPage from './pages/NotFoundPage.js';
-import StubPage from './pages/StubPage.js';
+import MySubmissionsPage from './pages/MySubmissionsPage.js';
 import { ErrorBoundary } from './pages/ErrorPage.js';
 
 import heritageService from './services/heritageService';
@@ -49,13 +49,21 @@ function AppShell() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route
                   path="/dashboard/submissions"
-                  element={<StubPage title="My Submissions" phase="HTG" />}
+                  element={<MySubmissionsPage fetchMyEntries={heritageService.getMyEntries} />}
                 />
               </Route>
             </Route>
 
             <Route element={<ProtectedRoute minRole="contributor" />}>
-              <Route path="/submit" element={<SubmitEntryPage onSubmit={heritageService.submitEntry} />} />
+              <Route
+                path="/submit"
+                element={
+                  <SubmitEntryPage
+                    onSubmit={heritageService.submitEntry}
+                    uploadCoverImage={heritageService.updateCoverImage}
+                  />
+                }
+              />
             </Route>
 
             <Route element={<ProtectedRoute minRole="validator" />}>

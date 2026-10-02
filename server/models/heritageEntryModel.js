@@ -45,14 +45,24 @@ async function search({ keyword, category, region, verificationStatus, historica
   return rows;
 }
 
-async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod }) {
+async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod, categoryAuto }) {
   const [result] = await db.query(
     `INSERT INTO heritage_entries
-      (user_id, title, raw_content, source_type, source_description, historical_period, status, submitted_at)
-     VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null]
+      (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, status, submitted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null]
   );
   return findById(result.insertId);
+}
+
+async function findNeedingAiEnrichment({ limit = 25 } = {}) {
+  const [rows] = await db.query(
+    `SELECT * FROM heritage_entries
+     WHERE category_auto IS NULL OR euphemistic_content IS NULL
+     ORDER BY id ASC LIMIT ?`,
+    [limit]
+  );
+  return rows;
 }
 
 async function updateStatus(id, status) {
@@ -104,6 +114,11 @@ async function updateTranslation(id, { translatedContent, translatedLanguage }) 
   return findById(id);
 }
 
+async function updateCoverImage(id, coverImageUrl) {
+  await db.query('UPDATE heritage_entries SET cover_image_url = ? WHERE id = ?', [coverImageUrl, id]);
+  return findById(id);
+}
+
 module.exports = { 
   findById, 
   findByUser, 
@@ -116,5 +131,7 @@ module.exports = {
   findAllPublishedForTimeline,
   findPending,
   updateVerification,
-  updateTranslation
+  updateTranslation,
+  updateCoverImage,
+  findNeedingAiEnrichment
 };

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import TranslationPanel from '../components/TranslationPanel';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
+import MediaUploader from '../components/MediaUploader';
 
 const VERIFICATION_STYLES = {
   verified: 'bg-green-100 text-green-800',
@@ -56,6 +57,14 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
 
       <h1 className="text-3xl font-semibold text-gray-900 mb-4">{entry.title}</h1>
 
+      {entry.cover_image_url && (
+        <img
+          src={entry.cover_image_url}
+          alt={entry.title}
+          className="w-full max-h-96 object-cover rounded-lg border border-gray-200 mb-8"
+        />
+      )}
+
       <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500 mb-8">
         {entry.historical_period && (
           <div><dt className="inline font-medium text-gray-700">Period: </dt><dd className="inline">{entry.historical_period}</dd></div>
@@ -86,6 +95,13 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
         </p>
       )}
 
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <MediaUploader
+          entryId={entry.id}
+          disabled={!user || (entry.user_id !== user.id && user.role !== 'admin')}
+        />
+      </div>
+
       {(user?.role === 'validator' || user?.role === 'admin') && (
         <div className="mt-8">
           <TranslationPanel
@@ -96,7 +112,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
           />
         </div>
       )}
-      
+
     </article>
   );
 }

@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { validateImageFile } from '../utils/mediaValidation';
+import CoverImagePicker from '../components/CoverImagePicker';
+import heritageService from '../services/heritageService';
 
 const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Other'];
 
@@ -13,18 +16,60 @@ function validate({ title, rawContent }) {
   return errors;
 }
 
-export default function SubmitEntryPage({ onSubmit = async (data) => console.log('submit', data) }) {
-  const [form, setForm] = useState({
-    title: '', rawContent: '', sourceType: SOURCE_TYPES[0], sourceDescription: '', historicalPeriod: '',
-  });
+const EMPTY_FORM = {
+  title: '', rawContent: '', sourceType: SOURCE_TYPES[0],
+  sourceDescription: '', historicalPeriod: '', category: '',
+};
+
+function describeAi(ai) {
+  if (!ai) return null;
+  if (!ai.aiConfigured) {
+    return 'The AI service is not configured on the server, so this entry was saved without a category or a plain-language version.';
+  }
+  const bits = [];
+  if (ai.category) bits.push(`categorized as “${ai.category}”`);
+  if (ai.euphemistic) bits.push('a plain-language version was generated');
+  if (bits.length) return `AI ${bits.join(', and ')}.`;
+  if (ai.errors?.length) {
+    return 'The AI could not finish for this entry — it was saved anyway. You can retry from My Submissions.';
+  }
+  return null;
+}
+
+export default function SubmitEntryPage({
+  onSubmit = async (data) => console.log('submit', data),
+  uploadCoverImage = async () => null,
+  fetchCategories = heritageService.getCategories,
+}) {
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null); // { entry, possibleDuplicates } from HTG-010's onSubmit
+  const [result, setResult] = useState(null);
+
+  const [categories, setCategories] = useState([]);
+
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverError, setCoverError] = useState(null);
+  const [coverWarning, setCoverWarning] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchCategories()
+      .then((list) => { if (active) setCategories(list || []); })
+      .catch(() => { if (active) setCategories([]); });
+    return () => { active = false; };
+  }, [fetchCategories]);
 
   const field = (key) => ({
     value: form[key],
     onChange: (e) => setForm((f) => ({ ...f, [key]: e.target.value })),
   });
+
+  function handleCoverSelect(file) {
+    const problem = validateImageFile(file);
+    setCoverError(problem);
+    if (!problem) setCoverImage(file);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -33,16 +78,35 @@ export default function SubmitEntryPage({ onSubmit = async (data) => console.log
     if (Object.keys(fieldErrors).length) return;
 
     setSubmitting(true);
+    setCoverWarning(null);
     try {
-      const res = await onSubmit(form);
+      const payload = { ...form, category: form.category || undefined };
+      const res = await onSubmit(payload);
       setResult(res || null);
-      setForm({ title: '', rawContent: '', sourceType: SOURCE_TYPES[0], sourceDescription: '', historicalPeriod: '' });
+
+      const createdEntry = res && res.entry;
+      if (coverImage && createdEntry && createdEntry.id) {
+        try {
+          await uploadCoverImage(createdEntry.id, coverImage);
+        } catch (err) {
+          setCoverWarning(
+            err.response?.data?.message ||
+              'Your entry was submitted, but the photo could not be uploaded. You can add it later from My Submissions.'
+          );
+        }
+      }
+
+      setForm(EMPTY_FORM);
+      setCoverImage(null);
+      setCoverError(null);
     } catch (err) {
       setErrors({ form: err.message || 'Something went wrong. Please try again.' });
     } finally {
       setSubmitting(false);
     }
   }
+
+  const aiSummary = result ? describeAi(result.ai) : null;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
@@ -60,6 +124,30 @@ export default function SubmitEntryPage({ onSubmit = async (data) => console.log
       {result && !result.possibleDuplicates?.length && (
         <div className="mb-6 p-4 rounded-md bg-green-50 border border-green-200 text-sm text-green-800">
           Submitted — thank you. You can track its status from your dashboard.
+        </div>
+      )}
+
+      {aiSummary && (
+        <div
+          className={`mb-6 p-4 rounded-md border text-sm ${
+            result?.ai?.aiConfigured
+              ? 'bg-blue-50 border-blue-200 text-blue-900'
+              : 'bg-amber-50 border-amber-200 text-amber-800'
+          }`}
+        >
+          <p>{aiSummary}</p>
+          {result?.entry?.category_auto && (
+            <p className="mt-2 text-xs">
+              <span className="uppercase tracking-wide font-medium">Category:</span>{' '}
+              {result.entry.category_auto}
+            </p>
+          )}
+        </div>
+      )}
+
+      {coverWarning && (
+        <div className="mb-6 p-4 rounded-md bg-amber-50 border border-amber-200 text-sm text-amber-800">
+          {coverWarning}
         </div>
       )}
       {errors.form && (
@@ -91,7 +179,20 @@ export default function SubmitEntryPage({ onSubmit = async (data) => console.log
           {errors.rawContent && <p className="text-xs text-red-600 mt-1">{errors.rawContent}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select
+              {...field('category')}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+            >
+              <option value="">Let the AI decide</option>
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Leave this and we'll assign one automatically.
+            </p>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
             <select
@@ -107,7 +208,7 @@ export default function SubmitEntryPage({ onSubmit = async (data) => console.log
               type="text"
               {...field('historicalPeriod')}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-              placeholder="e.g. Pre-colonial, Spanish era, Contemporary"
+              placeholder="e.g. Spanish era"
             />
           </div>
         </div>
@@ -122,6 +223,20 @@ export default function SubmitEntryPage({ onSubmit = async (data) => console.log
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
             placeholder="Who told you this, or where you found it"
           />
+        </div>
+
+        <div className="pt-2 border-t border-gray-100">
+          <div className="pt-4">
+            <CoverImagePicker
+              file={coverImage}
+              error={coverError}
+              busy={submitting}
+              onSelect={handleCoverSelect}
+              onError={setCoverError}
+              label="Entry photo"
+              hint="Shown on the archive card and at the top of your entry."
+            />
+          </div>
         </div>
 
         <button

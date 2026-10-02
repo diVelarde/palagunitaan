@@ -13,18 +13,27 @@ const VERIFICATION_STYLES = {
 
 function EntryCard({ entry }) {
   return (
-    <Link to={`/entries/${entry.id}`} className="block p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-shadow">
-      <div className="flex items-center gap-2 mb-2">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
-          {entry.verification_status || 'unverified'}
-        </span>
-        {entry.category_auto && <span className="text-xs text-gray-500 uppercase tracking-wide">{entry.category_auto}</span>}
+    <Link to={`/entries/${entry.id}`} className="flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-shadow">
+      {entry.cover_image_url && (
+        <img
+          src={entry.cover_image_url}
+          alt=""
+          className="w-24 h-24 rounded-md object-cover border border-gray-100 shrink-0"
+        />
+      )}
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
+            {entry.verification_status || 'unverified'}
+          </span>
+          {entry.category_auto && <span className="text-xs text-gray-500 uppercase tracking-wide">{entry.category_auto}</span>}
+        </div>
+        <h3 className="font-medium text-gray-900 mb-1">{entry.title}</h3>
+        <p className="text-sm text-gray-500 line-clamp-2">
+          {(entry.euphemistic_content || entry.raw_content || '').slice(0, 160)}
+          {(entry.euphemistic_content || entry.raw_content || '').length > 160 ? '…' : ''}
+        </p>
       </div>
-      <h3 className="font-medium text-gray-900 mb-1">{entry.title}</h3>
-      <p className="text-sm text-gray-500 line-clamp-2">
-        {(entry.euphemistic_content || entry.raw_content || '').slice(0, 160)}
-        {(entry.euphemistic_content || entry.raw_content || '').length > 160 ? '…' : ''}
-      </p>
     </Link>
   );
 }
@@ -47,7 +56,6 @@ export default function BrowsePage({ searchEntries = async () => [] }) {
       });
     }, DEBOUNCE_MS);
     return () => clearTimeout(debounceRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword, verificationStatus, historicalPeriod, searchEntries]);
 
   return (

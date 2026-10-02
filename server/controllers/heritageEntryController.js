@@ -2,16 +2,18 @@ const heritageEntryService = require('../services/heritageEntryService');
 const heritageEntryModel = require('../models/heritageEntryModel');
 const timelineService = require('../services/timelineService');
 const geminiService = require('../services/geminiService');
+const cloudinaryService = require('../services/cloudinaryService');
 
 async function submitEntry(req, res, next) {
   try {
-    const { title, rawContent, sourceType, sourceDescription, historicalPeriod } = req.body;
-    const { entry, possibleDuplicates } = await heritageEntryService.submitEntry({
-      userId: req.user.id, title, rawContent, sourceType, sourceDescription, historicalPeriod,
+    const { title, rawContent, sourceType, sourceDescription, historicalPeriod, category } = req.body;
+    const { entry, possibleDuplicates, ai } = await heritageEntryService.submitEntry({
+      userId: req.user.id, title, rawContent, sourceType, sourceDescription, historicalPeriod, category,
     });
     res.status(201).json({
       entry,
       possibleDuplicates: possibleDuplicates.map((d) => ({ id: d.id, title: d.title, score: d.score })),
+      ai,
     });
   } catch (err) {
     next(err);
@@ -96,6 +98,62 @@ async function translateEntry(req, res, next) {
   }
 }
 
+async function updateCoverImage(req, res, next) {
+  try {
+    const entry = await heritageEntryModel.findById(req.params.id);
+    if (!entry) return res.status(404).json({ message: 'Entry not found.' });
+
+    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only change the photo on your own entries.' });
+    }
+
+    if (!req.file) return res.status(400).json({ message: 'No image uploaded.' });
+
+    const result = await cloudinaryService.uploadBuffer(req.file.buffer, {
+      mimetype: req.file.mimetype,
+      folder: 'palagunitaan/covers',
+    });
+    const updated = await heritageEntryModel.updateCoverImage(entry.id, result.secure_url);
+    res.json({ entry: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function enrichEntry(req, res, next) {
+  try {
+    const entry = await heritageEntryModel.findById(req.params.id);
+    if (!entry) return res.status(404).json({ message: 'Entry not found.' });
+
+    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only run AI enrichment on your own entries.' });
+    }
+
+    const ai = await heritageEntryService.enrichEntry(entry, { skipCategory: Boolean(entry.category_auto) });
+    const fresh = await heritageEntryModel.findById(entry.id);
+
+    res.json({ entry: fresh, ai });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function setCategory(req, res, next) {
+  try {
+    const entry = await heritageEntryModel.findById(req.params.id);
+    if (!entry) return res.status(404).json({ message: 'Entry not found.' });
+
+    if (entry.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only change the category on your own entries.' });
+    }
+
+    const updated = await heritageEntryModel.updateCategoryAuto(entry.id, req.body.category);
+    res.json({ entry: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = { 
   submitEntry, 
   listPublished, 
@@ -103,5 +161,8 @@ module.exports = {
   getEntryById, 
   searchEntries, 
   getTimeline, 
-  translateEntry 
+  translateEntry,
+  updateCoverImage,
+  enrichEntry,
+  setCategory 
 };

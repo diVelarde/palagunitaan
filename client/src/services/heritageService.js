@@ -2,7 +2,7 @@ import api from '../api/axios';
 
 async function submitEntry(formData) {
   const res = await api.post('/api/heritage-entries', formData);
-  return res.data;
+  return res.data; // { entry, possibleDuplicates, ai }
 }
 
 async function getEntryById(id) {
@@ -42,13 +42,45 @@ async function translateEntry(entryId, targetLanguage) {
   return res.data;
 }
 
-const heritageService = { 
-  submitEntry, 
-  getEntryById, 
-  getPublishedEntries, 
-  getMyEntries, 
-  searchEntries, 
-  getTimeline, 
-  translateEntry };
+async function updateCoverImage(entryId, file) {
+  const formData = new FormData();
+  formData.append('coverImage', file);
+
+  const res = await api.patch(`/api/heritage-entries/${entryId}/cover-image`, formData);
+  return res.data.entry;
+}
+
+async function getCategories() {
+  try {
+    const res = await api.get('/api/ai/categories');
+    return res.data.categories;
+  } catch (err) {
+    return ['Legend', 'Folk Tale', 'Folk Belief', 'Other'];
+  }
+}
+
+async function enrichEntry(entryId) {
+  const res = await api.post(`/api/heritage-entries/${entryId}/enrich`);
+  return res.data;
+}
+
+async function setCategory(entryId, category) {
+  const res = await api.patch(`/api/heritage-entries/${entryId}/category`, { category });
+  return res.data.entry;
+}
+
+const heritageService = {
+  submitEntry,
+  getEntryById,
+  getPublishedEntries,
+  getMyEntries,
+  searchEntries,
+  getTimeline,
+  translateEntry,
+  updateCoverImage,
+  getCategories,
+  enrichEntry,
+  setCategory,
+};
 
 export default heritageService;

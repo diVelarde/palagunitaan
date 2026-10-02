@@ -15,6 +15,8 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const highlightRoutes = require('./routes/highlightRoutes');
 const blogRoutes = require('./routes/blogRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const heritageSiteRoutes = require('./routes/heritageSiteRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -59,6 +61,8 @@ app.use('/api/map', mapRoutes);
 app.use('/api/review', reviewRoutes);
 app.use('/api/highlights', highlightRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/heritage-sites', heritageSiteRoutes);
 
 app.get('/api/protected', requireAuth, (req, res) => { 
   res.json({ 
@@ -72,6 +76,22 @@ app.get('/api/admin-only', requireAuth, requireRole('admin'), (req, res) => {
 });
 
 app.use('/api/admin', adminRoutes);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack || err);
+
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ message: 'Request payload is too large.' });
+  }
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ message: 'Request body is not valid JSON.' });
+  }
+
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    message: status === 500 ? 'Something went wrong on the server.' : err.message,
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
