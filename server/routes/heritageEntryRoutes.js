@@ -13,6 +13,8 @@ router.get('/mine', requireAuth, controller.listMine);
 router.get('/search', controller.searchEntries);
 router.get('/timeline', controller.getTimeline);
 router.get('/:id', controller.getEntryById);
+router.post('/:id/enrich', requireAuth, controller.enrichEntry);
+router.patch('/:id/category', requireAuth, controller.setCategory);
 router.post('/:id/translate', requireAuth, requireRole('validator', 'admin'), controller.translateEntry);
 router.patch('/:id/cover-image', requireAuth, uploadSingle('coverImage', { imagesOnly: true }), controller.updateCoverImage);
 router.post('/', requireAuth, requireRole('contributor', 'validator', 'admin'), validateSubmission, controller.submitEntry);

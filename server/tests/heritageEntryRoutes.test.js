@@ -19,7 +19,7 @@ jest.mock('../controllers/heritageEntryController', () => {
 
 const heritageEntryController = require('../controllers/heritageEntryController');
 
-function makeRequest(app, role) {
+function makeRequest(app, role, path = '/api/heritage-entries', method = 'POST') {
   return new Promise((resolve, reject) => {
     const server = app.listen(0, () => {
       const { port } = server.address();
@@ -30,8 +30,8 @@ function makeRequest(app, role) {
       const req = http.request({
         host: '127.0.0.1',
         port,
-        path: '/api/heritage-entries',
-        method: 'POST',
+        path,
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(payload),
@@ -83,5 +83,28 @@ describe('heritage entry submission route', () => {
     expect(response.statusCode).toBe(201);
     expect(response.body).toEqual({ submitted: true });
     expect(heritageEntryController.submitEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes authenticated contributors to AI enrichment', async () => {
+    const response = await makeRequest(
+      createApp('contributor'),
+      'contributor',
+      '/api/heritage-entries/60001/enrich'
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(heritageEntryController.enrichEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes authenticated contributors to category updates', async () => {
+    const response = await makeRequest(
+      createApp('contributor'),
+      'contributor',
+      '/api/heritage-entries/60001/category',
+      'PATCH'
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(heritageEntryController.setCategory).toHaveBeenCalledTimes(1);
   });
 });
