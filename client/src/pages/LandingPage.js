@@ -117,8 +117,7 @@ export default function LandingPage() {
           <p className="lp-eyebrow">Camarines Sur · Bicol Region</p>
           <h1>Preserving the Stories of <span>Bicol</span></h1>
           <p className="lp-hero-description">
-            A living archive of Philippine regional folklore and intangible cultural
-            heritage — documented, validated, and shared.
+            A living archive of Philippine regional folklore and intangible cultural heritage.
           </p>
           <form className="lp-search" onSubmit={handleSearch}>
             <input

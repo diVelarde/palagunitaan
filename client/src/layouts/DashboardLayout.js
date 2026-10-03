@@ -37,7 +37,12 @@ export default function DashboardLayout() {
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar-heading">
-          <span className="dashboard-sidebar-mark">P</span>
+          <img
+            src="/Palagunitaan (1).png"
+            alt=""
+            aria-hidden="true"
+            className="h-10 w-10 rounded-full object-cover"
+          />
           <div>
             <p>PALAGUNITAAN</p>
             <span>Heritage workspace</span>

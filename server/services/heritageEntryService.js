@@ -35,7 +35,10 @@ async function enrichEntry(entry, { skipCategory = false } = {}) {
   return ai;
 }
 
-async function submitEntry({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod, category, regionId }) {
+async function submitEntry({
+  userId, title, rawContent, sourceType, sourceDescription, historicalPeriod,
+  category, regionId, historyClaims,
+}) {
   const possibleDuplicates = await duplicateDetectionService.findPossibleDuplicates(title);
 
   const chosenCategory = resolveCategory(category);
@@ -49,6 +52,7 @@ async function submitEntry({ userId, title, rawContent, sourceType, sourceDescri
     historicalPeriod,
     categoryAuto: chosenCategory,
     regionId,
+    historyClaims,
   });
 
   const ai = await enrichEntry(entry, { skipCategory: Boolean(chosenCategory) });

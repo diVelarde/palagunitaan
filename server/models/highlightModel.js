@@ -1,15 +1,27 @@
 const db = require('../config/db');
 
-async function findActive(periodType) {
-  const [rows] = await db.query(
-    `SELECT h.*, he.title, he.euphemistic_content, he.category_auto
+const TRANSIENT_CONNECTION_ERRORS = new Set(['ECONNRESET', 'PROTOCOL_CONNECTION_LOST']);
+
+async function queryActiveHighlight(periodType) {
+  const sql = `SELECT h.*, he.title, he.euphemistic_content, he.category_auto
      FROM highlights h
      JOIN heritage_entries he ON he.id = h.heritage_entry_id
      WHERE h.period_type = ? AND CURDATE() BETWEEN h.starts_on AND h.ends_on
      ORDER BY h.created_at DESC
-     LIMIT 1`,
-    [periodType]
-  );
+     LIMIT 1`;
+
+  try {
+    return await db.query(sql, [periodType]);
+  } catch (err) {
+    if (!TRANSIENT_CONNECTION_ERRORS.has(err.code)) throw err;
+    console.warn(`Transient database connection error while loading ${periodType} highlight; retrying once (${err.code}).`);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return db.query(sql, [periodType]);
+  }
+}
+
+async function findActive(periodType) {
+  const [rows] = await queryActiveHighlight(periodType);
   return rows[0] || null;
 }
 

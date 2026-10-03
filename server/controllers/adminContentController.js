@@ -1,5 +1,26 @@
 const geographicTagModel = require('../models/geographicTagModel');
 const categoryModel = require('../models/categoryModel');
+const heritageEntryModel = require('../models/heritageEntryModel');
+
+async function listEntries(req, res, next) {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 100);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+    res.json({ entries: await heritageEntryModel.findAllForAdmin({ limit, offset }) });
+  } catch (err) { next(err); }
+}
+
+async function deleteEntry(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return res.status(400).json({ message: 'Entry ID must be a positive integer.' });
+    }
+    const deleted = await heritageEntryModel.deleteById(id);
+    if (!deleted) return res.status(404).json({ message: 'Heritage entry not found.' });
+    res.status(204).send();
+  } catch (err) { next(err); }
+}
 
 async function listRegions(req, res, next) {
   try { res.json({ regions: await geographicTagModel.findAllRegions() }); } catch (err) { next(err); }
@@ -71,6 +92,8 @@ async function deleteField(req, res, next) {
 }
 
 module.exports = { 
+    listEntries,
+    deleteEntry,
     listRegions, 
     createRegion, 
     updateRegion, 

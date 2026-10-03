@@ -5,6 +5,11 @@ async function createRequest(requestedRole, message) {
   return res.data.request;
 }
 
+async function getMyRequest() {
+  const res = await api.get('/api/auth/role-requests/mine');
+  return res.data.request;
+}
+
 async function getPendingRequests() {
   const res = await api.get('/api/admin/role-requests');
   return res.data.requests;
@@ -17,6 +22,7 @@ async function reviewRequest(id, decision) {
 
 const roleRequestService = { 
     createRequest, 
+    getMyRequest,
     getPendingRequests, 
     reviewRequest 
 };

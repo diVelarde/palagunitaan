@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HighlightSelector from '../components/HighlightSelector';
 import ProfilePanel from '../components/ProfilePanel';
+import RoleRequestsTab from '../components/RoleRequestsTab';
+import AdminEntriesTab from '../components/AdminEntriesTab';
 import AuditLogPage from './AuditLogPage';
 
-const TABS = ['Platform Overview', 'Manage Users', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
+const TABS = ['Platform Overview', 'Manage Entries', 'Manage Users', 'Role Requests', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
 
 function RoleSelect({ value, onChange, disabled }) {
   return (
@@ -475,6 +477,10 @@ export default function AdminDashboardPage({
   createSite = async (data) => ({ id: Date.now(), ...data }),
   deleteSite = async () => {},
   fetchAuditLog = async () => [],
+  fetchRoleRequests = async () => [],
+  reviewRoleRequest = async () => {},
+  fetchHeritageEntries = async () => [],
+  deleteHeritageEntry = async () => {},
 }) {
   const [tab, setTab] = useState(() => (
     new URLSearchParams(window.location.search).get('tab') === 'audit-log'
@@ -516,6 +522,14 @@ export default function AdminDashboardPage({
         />
       )}
       {tab === 'Manage Users' && <div className="dashboard-admin-panel"><h2>Manage Users</h2><UsersTab fetchUsers={fetchUsers} updateUserRole={updateUserRole} /></div>}
+      {tab === 'Manage Entries' && (
+        <AdminEntriesTab fetchEntries={fetchHeritageEntries} deleteEntry={deleteHeritageEntry} />
+      )}
+      {tab === 'Role Requests' && (
+        <div className="dashboard-admin-panel">
+          <RoleRequestsTab fetchPending={fetchRoleRequests} reviewRequest={reviewRoleRequest} />
+        </div>
+      )}
       {tab === 'Categories & Regions' && (
         <div className="dashboard-admin-panel">
           <div className="dashboard-admin-config-grid">

@@ -66,4 +66,20 @@ describe('submitEntry', () => {
     expect(possibleDuplicates).toHaveLength(1);
     expect(possibleDuplicates[0].id).toBe(99);
   });
+
+  it('stores multiple source-backed history claims with the entry', async () => {
+    const historyClaims = [
+      { claimedYear: 2003, sourceDescription: 'Interview with Juan', sourceType: 'Oral interview' },
+      { claimedYear: 1960, sourceDescription: 'Printed collection, volume 2', sourceYear: 1971 },
+    ];
+
+    await submitEntry({
+      userId: 7,
+      title: BASE_ENTRY.title,
+      rawContent: BASE_ENTRY.raw_content,
+      historyClaims,
+    });
+
+    expect(heritageEntryModel.create).toHaveBeenCalledWith(expect.objectContaining({ historyClaims }));
+  });
 });

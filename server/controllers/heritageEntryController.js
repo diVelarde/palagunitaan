@@ -9,10 +9,11 @@ async function submitEntry(req, res, next) {
   try {
     const {
       title, rawContent, sourceType, sourceDescription, historicalPeriod, category,
-      regionId, latitude, longitude, locationName,
+      regionId, latitude, longitude, locationName, historyClaims,
     } = req.body;
     const { entry, possibleDuplicates, ai } = await heritageEntryService.submitEntry({
-      userId: req.user.id, title, rawContent, sourceType, sourceDescription, historicalPeriod, category, regionId,
+      userId: req.user.id, title, rawContent, sourceType, sourceDescription,
+      historicalPeriod, category, regionId, historyClaims,
     });
     let locationWarning = null;
     if (latitude != null && longitude != null) {

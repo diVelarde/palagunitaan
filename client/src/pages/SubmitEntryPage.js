@@ -8,13 +8,18 @@ import './SubmitEntryPage.css';
 
 const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Other'];
 
-function validate({ title, rawContent }) {
+function validate({ title, rawContent, historyClaims }) {
   const errors = {};
   if (!title.trim()) errors.title = 'Title is required.';
   else if (title.length > 255) errors.title = 'Title must be 255 characters or fewer.';
 
   if (!rawContent.trim()) errors.rawContent = 'This field is required.';
   else if (rawContent.trim().length < 20) errors.rawContent = 'Please write at least 20 characters.';
+
+  if (historyClaims.length > 20) errors.historyClaims = 'You can add up to 20 source claims.';
+  else if (historyClaims.some((claim) => !claim.claimedYear || !claim.sourceDescription.trim())) {
+    errors.historyClaims = 'Each source claim needs a claimed origin year and source description.';
+  }
 
   return errors;
 }
@@ -23,6 +28,7 @@ const EMPTY_FORM = {
   title: '', rawContent: '', sourceType: SOURCE_TYPES[0],
   sourceDescription: '', historicalPeriod: '', category: '',
   regionId: '', locationName: '', latitude: '', longitude: '',
+  historyClaims: [],
 };
 
 function describeAi(ai) {
@@ -154,6 +160,13 @@ export default function SubmitEntryPage({
         regionId: form.regionId ? Number(form.regionId) : undefined,
         latitude: form.latitude === '' ? undefined : Number(form.latitude),
         longitude: form.longitude === '' ? undefined : Number(form.longitude),
+        historyClaims: form.historyClaims.map((claim) => ({
+          ...claim,
+          claimedYear: Number(claim.claimedYear),
+          sourceYear: claim.sourceYear ? Number(claim.sourceYear) : null,
+          sourceDescription: claim.sourceDescription.trim(),
+          sourceUrl: claim.sourceUrl.trim() || null,
+        })),
       };
       const res = await onSubmit(payload);
       setResult(res || null);
@@ -333,6 +346,129 @@ export default function SubmitEntryPage({
             placeholder="e.g., Interview with Lola Maria, 87, Naga City"
           />
         </div>
+
+        <section className="submit-entry-history">
+          <div className="submit-entry-location-heading">
+            <div>
+              <h2>History claims <span className="submit-entry-optional">Optional</span></h2>
+              <p>Add a source for each reported origin year. Keep the claimed year separate from when the source was recorded or published.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm((current) => ({
+                ...current,
+                historyClaims: [...current.historyClaims, {
+                  claimedYear: '', sourceType: '', sourceDescription: '', sourceYear: '', sourceUrl: '',
+                }],
+              }))}
+              disabled={form.historyClaims.length >= 20}
+              className="submit-entry-location-button"
+            >
+              Add a claim
+            </button>
+          </div>
+          {form.historyClaims.map((claim, index) => (
+            <fieldset className="submit-entry-history-claim" key={index}>
+              <legend>Source claim {index + 1}</legend>
+              <div className="submit-entry-grid">
+                <div>
+                  <label className="submit-entry-label" htmlFor={`claim-year-${index}`}>Claimed origin year <span>*</span></label>
+                  <input
+                    id={`claim-year-${index}`}
+                    type="number"
+                    min="1"
+                    max="9999"
+                    value={claim.claimedYear}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      historyClaims: current.historyClaims.map((item, itemIndex) => (
+                        itemIndex === index ? { ...item, claimedYear: event.target.value } : item
+                      )),
+                    }))}
+                    className="submit-entry-control"
+                    placeholder="e.g., 1960"
+                  />
+                </div>
+                <div>
+                  <label className="submit-entry-label" htmlFor={`claim-source-type-${index}`}>Source type</label>
+                  <select
+                    id={`claim-source-type-${index}`}
+                    value={claim.sourceType}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      historyClaims: current.historyClaims.map((item, itemIndex) => (
+                        itemIndex === index ? { ...item, sourceType: event.target.value } : item
+                      )),
+                    }))}
+                    className="submit-entry-control"
+                  >
+                    <option value="">Select source</option>
+                    {SOURCE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="submit-entry-label" htmlFor={`claim-source-year-${index}`}>Source recorded/published year</label>
+                  <input
+                    id={`claim-source-year-${index}`}
+                    type="number"
+                    min="1"
+                    max="9999"
+                    value={claim.sourceYear}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      historyClaims: current.historyClaims.map((item, itemIndex) => (
+                        itemIndex === index ? { ...item, sourceYear: event.target.value } : item
+                      )),
+                    }))}
+                    className="submit-entry-control"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div>
+                  <label className="submit-entry-label" htmlFor={`claim-source-url-${index}`}>Source link</label>
+                  <input
+                    id={`claim-source-url-${index}`}
+                    type="url"
+                    value={claim.sourceUrl}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      historyClaims: current.historyClaims.map((item, itemIndex) => (
+                        itemIndex === index ? { ...item, sourceUrl: event.target.value } : item
+                      )),
+                    }))}
+                    className="submit-entry-control"
+                    placeholder="https://…"
+                  />
+                </div>
+              </div>
+              <label className="submit-entry-label" htmlFor={`claim-source-description-${index}`}>Source description <span>*</span></label>
+              <textarea
+                id={`claim-source-description-${index}`}
+                rows={2}
+                value={claim.sourceDescription}
+                onChange={(event) => setForm((current) => ({
+                  ...current,
+                  historyClaims: current.historyClaims.map((item, itemIndex) => (
+                    itemIndex === index ? { ...item, sourceDescription: event.target.value } : item
+                  )),
+                }))}
+                className="submit-entry-control"
+                placeholder="Who said or recorded this, and where can it be checked?"
+              />
+              <button
+                type="button"
+                onClick={() => setForm((current) => ({
+                  ...current,
+                  historyClaims: current.historyClaims.filter((_, itemIndex) => itemIndex !== index),
+                }))}
+                className="submit-entry-history-remove"
+              >
+                Remove claim
+              </button>
+            </fieldset>
+          ))}
+          {errors.historyClaims && <p className="submit-entry-field-error" role="alert">{errors.historyClaims}</p>}
+        </section>
 
         <section className="submit-entry-location">
           <div className="submit-entry-location-heading">

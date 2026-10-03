@@ -4,6 +4,7 @@ const { validateRoleRequest, validateReview } = require('../validators/roleReque
 const controller = require('../controllers/roleRequestController');
 
 const selfServeRouter = express.Router();
+selfServeRouter.get('/mine', requireAuth, controller.getMyRequest);
 selfServeRouter.post('/', requireAuth, validateRoleRequest, controller.createRequest);
 
 const adminRouter = express.Router();

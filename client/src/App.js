@@ -19,6 +19,7 @@ import adminService from './services/adminService';
 import highlightService from './services/highlightService';
 import blogService from './services/blogService';
 import heritageSiteService from './services/heritageSiteService';
+import roleRequestService from './services/roleRequestService';
 
 const EntryDetailPage = lazy(() => import('./pages/EntryDetailPage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
@@ -110,6 +111,10 @@ function AppShell() {
                       createSite={heritageSiteService.createSite}
                       deleteSite={heritageSiteService.deleteSite}
                       fetchAuditLog={adminService.getAuditLog}
+                      fetchRoleRequests={roleRequestService.getPendingRequests}
+                      reviewRoleRequest={roleRequestService.reviewRequest}
+                      fetchHeritageEntries={adminService.getHeritageEntries}
+                      deleteHeritageEntry={adminService.deleteHeritageEntry}
                     />
                   }
                 />

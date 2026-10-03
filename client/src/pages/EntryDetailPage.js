@@ -115,6 +115,34 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
           {entry.source_description && (
             <p className="entry-source-note"><strong>Source notes:</strong> {entry.source_description}</p>
           )}
+          {entry.history_claims?.length > 0 && (
+            <section className="entry-history">
+              <h2>History &amp; sources</h2>
+              <p className="entry-history-intro">
+                These are source-backed claims about when the story originated. The source's own publication or recording year is shown separately.
+              </p>
+              {new Set(entry.history_claims.map((claim) => claim.claimed_year)).size > 1 && (
+                <p className="entry-history-difference" role="note">
+                  Sources give different claimed origin years. The archive preserves these differences rather than choosing one as definitive.
+                </p>
+              )}
+              <ol className="entry-history-list">
+                {entry.history_claims.map((claim) => (
+                  <li key={claim.id}>
+                    <strong>Claimed origin year: {claim.claimed_year}</strong>
+                    {claim.source_type && <span className="entry-history-source-type">{claim.source_type}</span>}
+                    <p>{claim.source_description}</p>
+                    {claim.source_year && <span>Source recorded/published: {claim.source_year}</span>}
+                    {claim.source_url && (
+                      <a href={claim.source_url} target="_blank" rel="noreferrer">
+                        View source →
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
         </article>
 
         <aside className="entry-detail-sidebar">

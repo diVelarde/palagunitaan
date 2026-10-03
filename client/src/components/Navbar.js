@@ -26,8 +26,19 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-[#e8e0d6] bg-[#f8f5ef]/95 backdrop-blur">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-5 px-6 py-3.5">
         <Link to="/" className="flex shrink-0 items-center gap-3 font-serif text-[21px] font-bold text-[#382920]">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-[#ad482d] font-serif text-xl text-white">P</span>
-          <span>Palagunitaan</span>
+          <img
+            src="/Palagunitaan (1).png"
+            alt=""
+            aria-hidden="true"
+            className="h-10 w-10 rounded-full object-cover"
+          />
+          <span className="relative block h-10 w-44 overflow-hidden">
+            <img
+              src="/Text1.png"
+              alt="Palagunitaan"
+              className="absolute left-0 top-1/2 w-full max-w-none -translate-y-1/2"
+            />
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center justify-center gap-7">

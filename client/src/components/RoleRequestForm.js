@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const REQUESTABLE_ROLES = {
@@ -6,16 +6,37 @@ const REQUESTABLE_ROLES = {
   validator: ['admin'],
 };
 
-export default function RoleRequestForm({ createRequest = async () => ({}), existingRequest = null }) {
+export default function RoleRequestForm({
+  createRequest = async () => ({}),
+  fetchMyRequest = async () => null,
+  existingRequest = null,
+}) {
   const { user } = useAuth();
   const [requestedRole, setRequestedRole] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(existingRequest);
   const [error, setError] = useState(null);
+  const [loadingRequest, setLoadingRequest] = useState(!existingRequest);
 
   const availableRoles = REQUESTABLE_ROLES[user?.role] || [];
+
+  useEffect(() => {
+    let active = true;
+    fetchMyRequest()
+      .then((request) => { if (active && request) setResult(request); })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || 'Could not check for a pending role request.');
+      })
+      .finally(() => { if (active) setLoadingRequest(false); });
+    return () => { active = false; };
+  }, [fetchMyRequest]);
+
   if (!user || availableRoles.length === 0) return null;
+
+  if (loadingRequest) {
+    return <p className="text-sm text-muted">Checking for a pending role request…</p>;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();

@@ -21,9 +21,9 @@ async function findById(id) {
 
 async function findAllPending() {
   const [rows] = await db.query(
-    `SELECT rr.*, u.name AS user_name, u.email AS user_email, u.role AS current_role
+    `SELECT rr.*, u.name AS user_name, u.email AS user_email, u.role AS applicant_role
      FROM role_requests rr JOIN users u ON u.id = rr.user_id
-     WHERE rr.status = 'pending' ORDER BY rr.created_at ASC`
+     WHERE rr.status = 'pending' ORDER BY rr.created_at ASC, rr.id ASC`
   );
   return rows;
 }

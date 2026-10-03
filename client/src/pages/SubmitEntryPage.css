@@ -28,7 +28,7 @@
 .submit-entry-heading h1 {
   margin: 0 0 7px;
   color: #35251f;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
@@ -123,6 +123,36 @@
   padding-top: 16px;
 }
 
+.submit-entry-history {
+  border-top: 1px solid #eee6dc;
+  padding-top: 16px;
+}
+
+.submit-entry-history-claim {
+  margin: 0 0 12px;
+  border: 1px solid #e9dfd2;
+  border-radius: 8px;
+  padding: 13px;
+}
+
+.submit-entry-history-claim legend {
+  padding: 0 5px;
+  color: #493126;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.submit-entry-history-remove {
+  margin-top: 8px;
+  border: 0;
+  padding: 0;
+  color: #ad482d;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .submit-entry-location-heading {
   display: flex;
   align-items: flex-start;
@@ -134,7 +164,7 @@
 .submit-entry-location-heading h2 {
   margin: 0 0 4px;
   color: #493126;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 16px;
 }
 
@@ -149,7 +179,7 @@
 .submit-entry-optional {
   margin-left: 5px;
   color: #968a7f;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--site-font-family);
   font-size: 10px;
   font-weight: 400;
   text-transform: uppercase;

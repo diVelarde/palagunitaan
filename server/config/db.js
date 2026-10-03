@@ -13,7 +13,9 @@ const pool = mysql.createPool({
     },
 
     waitForConnections: true,
-    connectionLimit: 10
+    connectionLimit: 10,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
 });
 
 module.exports = pool.promise();

@@ -12,7 +12,7 @@
 .browse-page-content > div:first-child h1 {
   margin-top: 0;
   color: var(--site-ink);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: clamp(28px, 3.5vw, 38px);
   font-weight: 700;
   line-height: 1.15;
@@ -132,7 +132,7 @@
 .browse-entry-card h2 {
   margin: 0 0 5px;
   color: var(--site-ink);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
@@ -168,7 +168,7 @@
 
 .timeline-page h1,
 .timeline-page h2 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
 }
 
 .blog-post-page {
@@ -177,7 +177,7 @@
 }
 
 .blog-feed-page h1 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
 }
 
 @media (max-width: 640px) {

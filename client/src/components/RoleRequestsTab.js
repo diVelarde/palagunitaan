@@ -7,7 +7,14 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchPending().then((data) => { setRequests(data || []); setLoading(false); });
+    let active = true;
+    fetchPending()
+      .then((data) => { if (active) setRequests(data || []); })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || 'Could not load role upgrade requests.');
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [fetchPending]);
 
   async function handleDecision(id, decision) {
@@ -28,9 +35,10 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
   return (
     <div>
       <h4 className="font-display text-lg text-ink mb-1">Role upgrade requests</h4>
-      <p className="text-sm text-muted mb-4">{requests.length === 0 ? 'Nothing waiting on you right now.' : `${requests.length} pending.`}</p>
-
       {error && <p className="text-sm text-primary-600 mb-3">{error}</p>}
+      <p className="text-sm text-muted mb-4">
+        {error ? 'The request queue could not be loaded.' : requests.length === 0 ? 'Nothing waiting on you right now.' : `${requests.length} pending.`}
+      </p>
 
       <div className="space-y-3">
         {requests.map((req) => (
@@ -39,7 +47,7 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
               <p className="text-sm text-ink">
                 <strong>{req.user_name}</strong> ({req.user_email}) wants to become a{' '}
                 <span className="capitalize font-medium">{req.requested_role}</span>
-                <span className="text-muted"> — currently {req.current_role}</span>
+                <span className="text-muted"> — currently {req.applicant_role}</span>
               </p>
               {req.message && <p className="text-xs text-muted mt-1 italic">"{req.message}"</p>}
             </div>

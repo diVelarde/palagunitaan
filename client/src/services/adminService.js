@@ -5,6 +5,15 @@ async function getUsers() {
   return res.data.users;
 }
 
+async function getHeritageEntries({ limit = 50, offset = 0 } = {}) {
+  const res = await api.get('/api/admin/entries', { params: { limit, offset } });
+  return res.data.entries;
+}
+
+async function deleteHeritageEntry(id) {
+  await api.delete(`/api/admin/entries/${id}`);
+}
+
 async function updateUserRole(userId, role) {
   const res = await api.patch(`/api/admin/users/${userId}/role`, { role });
   return res.data.user;
@@ -44,6 +53,8 @@ async function getAuditLog({ limit, offset } = {}) {
 }
 
 const adminService = {
+  getHeritageEntries,
+  deleteHeritageEntry,
   getUsers,
   updateUserRole,
   getRegions,

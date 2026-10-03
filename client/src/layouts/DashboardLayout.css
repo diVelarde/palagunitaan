@@ -11,7 +11,7 @@
   margin: 38px auto 72px;
   color: var(--dashboard-ink);
   background: var(--site-paper);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--site-font-family);
 }
 
 .dashboard-sidebar {
@@ -42,7 +42,7 @@
   border-radius: 50%;
   color: white;
   background: var(--dashboard-rust);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 20px;
   font-weight: 700;
 }
@@ -50,7 +50,7 @@
 .dashboard-sidebar-heading p {
   margin: 0 0 4px;
   color: #49352b;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .08em;
@@ -120,7 +120,7 @@
 }
 
 .dashboard-sidebar-note span {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 15px;
   font-weight: 700;
 }
@@ -139,7 +139,7 @@
 
 .dashboard-content h1 {
   color: var(--dashboard-ink);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
 }
 
 .dashboard-content h2,
@@ -267,7 +267,7 @@
 
 .dashboard-stat strong {
   color: #493126;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 30px;
 }
 
@@ -319,7 +319,7 @@
 .dashboard-section-card > h2,
 .dashboard-section-card > h3 {
   margin: 0 0 14px;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 20px;
 }
 
@@ -481,12 +481,12 @@
   border: 5px solid #f4ece1;
   background: #ad482d;
   color: white;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-font-family);
   font-size: 28px;
 }
 
 .dashboard-admin-profile > div:first-child h2 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 25px;
 }
 
@@ -538,7 +538,7 @@
 
 .dashboard-admin-panel > h2 {
   margin: 0 0 7px;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 20px;
 }
 
@@ -561,7 +561,7 @@
 
 .dashboard-admin-panel .dashboard-admin-audit-log > h1 {
   margin-top: 0;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 20px;
 }
 
@@ -588,7 +588,7 @@
 .dashboard-admin-config-grid > section > h3 {
   margin: 0 0 12px;
   color: #35251f;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 16px;
   font-weight: 700;
 }
@@ -761,7 +761,7 @@
 .dashboard-admin-site-form > h3 {
   margin: 0 0 1px;
   color: #35251f;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 16px;
 }
 

@@ -3,8 +3,10 @@ import ProfilePanel from '../components/ProfilePanel';
 import BecomeContributorPrompt from '../components/BecomeContributorPrompt';
 import CommunityTab from '../components/CommunityTab';
 import RoleSwitcher from '../components/RoleSwitcher';
+import RoleRequestForm from '../components/RoleRequestForm';
 import blogService from '../services/blogService';
 import heritageService from '../services/heritageService';
+import roleRequestService from '../services/roleRequestService';
 import { useAuth } from '../context/AuthContext';
 
 const CONTRIBUTOR_ROLES = ['contributor', 'validator', 'admin'];
@@ -80,6 +82,15 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
               <strong>{entriesLoading ? '—' : pendingCount}</strong>
             </div>
           </div>
+        </section>
+      )}
+
+      {(user?.role === 'contributor' || user?.role === 'validator') && (
+        <section className="dashboard-section-card">
+          <RoleRequestForm
+            createRequest={roleRequestService.createRequest}
+            fetchMyRequest={roleRequestService.getMyRequest}
+          />
         </section>
       )}
 

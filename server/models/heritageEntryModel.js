@@ -10,7 +10,15 @@ async function findById(id) {
      WHERE he.id = ?`,
     [id]
   );
-  return rows[0] || null;
+  if (!rows[0]) return null;
+  const [historyClaims] = await db.query(
+    `SELECT id, claimed_year, source_type, source_description, source_year, source_url
+     FROM heritage_entry_history_claims
+     WHERE heritage_entry_id = ?
+     ORDER BY claimed_year ASC, id ASC`,
+    [id]
+  );
+  return { ...rows[0], history_claims: historyClaims };
 }
 
 async function findByUser(userId) {
@@ -19,6 +27,57 @@ async function findByUser(userId) {
     [userId]
   );
   return rows;
+}
+
+async function findAllForAdmin({ limit = 50, offset = 0 } = {}) {
+  const [rows] = await db.query(
+    `SELECT id, title, status, verification_status, submitted_at, published_at
+     FROM heritage_entries
+     ORDER BY submitted_at DESC, id DESC
+     LIMIT ? OFFSET ?`,
+    [limit, offset]
+  );
+  return rows;
+}
+
+async function deleteById(id) {
+  const connection = await db.getConnection();
+  let transactionStarted = false;
+  try {
+    await connection.beginTransaction();
+    transactionStarted = true;
+
+    const [entries] = await connection.query(
+      'SELECT id FROM heritage_entries WHERE id = ? FOR UPDATE',
+      [id]
+    );
+    if (!entries.length) {
+      await connection.rollback();
+      transactionStarted = false;
+      return false;
+    }
+
+    await connection.query(
+      'UPDATE notifications SET heritage_entry_id = NULL WHERE heritage_entry_id = ?',
+      [id]
+    );
+    await connection.query('DELETE FROM multimedia_assets WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM metadata_values WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM geographic_tags WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM editorial_actions WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM highlights WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM heritage_entry_history_claims WHERE heritage_entry_id = ?', [id]);
+    await connection.query('DELETE FROM heritage_entries WHERE id = ?', [id]);
+
+    await connection.commit();
+    transactionStarted = false;
+    return true;
+  } catch (err) {
+    if (transactionStarted) await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
 }
 
 async function findPublished({ limit = 20, offset = 0 } = {}) {
@@ -62,14 +121,49 @@ async function search({ keyword, category, region, verificationStatus, historica
   return rows;
 }
 
-async function create({ userId, title, rawContent, sourceType, sourceDescription, historicalPeriod, categoryAuto, regionId }) {
-  const [result] = await db.query(
-    `INSERT INTO heritage_entries
-      (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, region_id, status, submitted_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-    [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null]
-  );
-  return findById(result.insertId);
+async function create({
+  userId, title, rawContent, sourceType, sourceDescription, historicalPeriod,
+  categoryAuto, regionId, historyClaims = [],
+}) {
+  const connection = await db.getConnection();
+  let entryId;
+  let transactionStarted = false;
+  try {
+    await connection.beginTransaction();
+    transactionStarted = true;
+    const [result] = await connection.query(
+      `INSERT INTO heritage_entries
+        (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, region_id, status, submitted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+      [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null]
+    );
+    entryId = result.insertId;
+    if (historyClaims.length) {
+      const values = historyClaims.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
+      const params = historyClaims.flatMap((claim) => [
+        entryId,
+        claim.claimedYear,
+        claim.sourceType || null,
+        claim.sourceDescription.trim(),
+        claim.sourceYear || null,
+        claim.sourceUrl || null,
+      ]);
+      await connection.query(
+        `INSERT INTO heritage_entry_history_claims
+          (heritage_entry_id, claimed_year, source_type, source_description, source_year, source_url)
+         VALUES ${values}`,
+        params
+      );
+    }
+    await connection.commit();
+    transactionStarted = false;
+  } catch (err) {
+    if (transactionStarted) await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+  return findById(entryId);
 }
 
 async function findNeedingAiEnrichment({ limit = 25 } = {}) {
@@ -139,6 +233,8 @@ async function updateCoverImage(id, coverImageUrl) {
 module.exports = { 
   findById, 
   findByUser, 
+  findAllForAdmin,
+  deleteById,
   findPublished, 
   search, 
   create, 

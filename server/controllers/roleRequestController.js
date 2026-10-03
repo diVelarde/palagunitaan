@@ -11,6 +11,13 @@ async function createRequest(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function getMyRequest(req, res, next) {
+  try {
+    const request = await roleRequestModel.findPendingForUser(req.user.id);
+    res.json({ request });
+  } catch (err) { next(err); }
+}
+
 async function listPending(req, res, next) {
   try { res.json({ requests: await roleRequestModel.findAllPending() }); } catch (err) { next(err); }
 }
@@ -41,4 +48,4 @@ async function reviewRequest(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { createRequest, listPending, reviewRequest };
+module.exports = { createRequest, getMyRequest, listPending, reviewRequest };

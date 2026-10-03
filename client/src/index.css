@@ -9,6 +9,8 @@
   --site-muted: #82766c;
   --site-rust: #ad482d;
   --site-border: #e9dfd2;
+  --site-font-family: 'Inter', system-ui, sans-serif;
+  --site-display-font-family: 'Playfair Display', Georgia, serif;
 }
 
 html,
@@ -21,7 +23,7 @@ body {
   margin: 0;
   color: var(--site-ink);
   background: var(--site-paper);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--site-font-family);
 }
 
 .site-app-shell,
@@ -31,5 +33,5 @@ body {
 
 .site-page-surface {
   min-height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--site-font-family);
 }

@@ -5,7 +5,7 @@
   --lp-paper: var(--site-paper);
   color: var(--lp-ink);
   background: var(--lp-paper);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--site-font-family);
 }
 
 .lp-hero {
@@ -40,7 +40,7 @@
 .lp-highlight-copy h3,
 .lp-category-copy h3,
 .lp-blog-card h3 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
 }
 
 .lp-hero h1 {
@@ -388,7 +388,7 @@
   place-items: center;
   color: rgba(255, 255, 255, .75);
   background: linear-gradient(145deg, #bd7954, #5b3729);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 48px;
 }
 
@@ -434,7 +434,7 @@
 
 .lp-entry-content h3 {
   margin: 0 0 7px;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--site-display-font-family);
   font-size: 20px;
   line-height: 1.25;
 }

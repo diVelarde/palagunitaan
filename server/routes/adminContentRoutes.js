@@ -4,6 +4,9 @@ const controller = require('../controllers/adminContentController');
 
 const router = express.Router();
 
+router.get('/entries', controller.listEntries);
+router.delete('/entries/:id', controller.deleteEntry);
+
 router.get('/regions', controller.listRegions);
 router.post('/regions', validateRegion, controller.createRegion);
 router.put('/regions/:id', validateRegion, controller.updateRegion);
