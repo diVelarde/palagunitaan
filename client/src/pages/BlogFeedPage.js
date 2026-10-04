@@ -19,25 +19,25 @@ function PostCard({ post }) {
   return (
     <Link
       to={`/blog/${post.id}`}
-      className="block rounded-xl border border-[#e9dfd2] bg-[#fffefa] p-6 text-inherit no-underline transition hover:-translate-y-0.5 hover:border-[#c7a386] hover:shadow-sm"
+      className="blog-post-card"
     >
       {post.cover_image_url && (
         <img
           src={post.cover_image_url}
           alt=""
-          className="mb-5 aspect-[16/9] w-full rounded-lg object-cover"
+          className="blog-post-card-image"
         />
       )}
-      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#82766c]">
-        <span className="font-semibold text-[#493126]">By {post.author_name || 'Community contributor'}</span>
+      <div className="blog-post-card-meta">
+        <span className="blog-post-card-author">By {post.author_name || 'Community contributor'}</span>
         <span aria-hidden="true">·</span>
         <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
         <span aria-hidden="true">·</span>
         <span>{post.view_count || 0} views</span>
       </div>
-      <h2 className="mb-2 font-serif text-xl font-bold text-[#35251f]">{post.title}</h2>
-      <p className="line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-[#766b63]">{post.content}</p>
-      <span className="mt-4 inline-block text-sm font-semibold text-[#a9472e]">Read story →</span>
+      <h2>{post.title}</h2>
+      <p className="blog-post-card-excerpt">{post.content}</p>
+      <span className="blog-post-card-link">Read story →</span>
     </Link>
   );
 }
@@ -84,9 +84,9 @@ export default function BlogFeedPage({
       <div className="blog-feed-content">
         <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-[#a9472e]">Community voices</p>
-            <h1 className="mb-2 font-serif text-4xl font-bold text-[#35251f]">From the Blog</h1>
-            <p className="max-w-2xl text-sm leading-6 text-[#766b63]">
+            <p className="blog-feed-eyebrow">Community voices</p>
+            <h1>From the Blog</h1>
+            <p className="blog-feed-intro">
               Notes, reflections, and stories from the people documenting and preserving Bicol’s living heritage.
             </p>
           </div>
@@ -105,17 +105,17 @@ export default function BlogFeedPage({
         </div>
 
         {postSuccess && (
-          <p className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+          <p className="blog-feed-message blog-feed-success" role="status">
             Your post was published.
           </p>
         )}
-        {loading && <p className="text-sm text-[#82766c]">Loading posts…</p>}
-        {error && <p className="rounded-lg border border-[#eccdc2] bg-[#fff1eb] p-4 text-sm text-[#8b3b2b]" role="alert">{error}</p>}
+        {loading && <p className="blog-feed-state">Loading posts…</p>}
+        {error && <p className="blog-feed-message blog-feed-error" role="alert">{error}</p>}
         {!loading && !error && posts.length === 0 && (
-          <p className="rounded-lg bg-[#f1ece4] p-5 text-sm text-[#786d64]">No community posts have been published yet.</p>
+          <p className="blog-feed-message blog-feed-empty">No community posts have been published yet.</p>
         )}
         {!error && posts.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="blog-post-grid">
             {posts.map((post) => <PostCard key={post.id} post={post} />)}
           </div>
         )}

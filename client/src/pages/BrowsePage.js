@@ -18,9 +18,9 @@ const REGION_OPTIONS = ['Naga City', 'Camarines Sur', 'Pili', 'Iriga City'];
 const DEBOUNCE_MS = 350;
 
 const VERIFICATION_STYLES = {
-  verified: 'bg-green-100 text-green-800',
-  disputed: 'bg-amber-100 text-amber-800',
-  unverified: 'bg-gray-100 text-gray-700',
+  verified: 'browse-status-verified',
+  disputed: 'browse-status-disputed',
+  unverified: 'browse-status-unverified',
 };
 
 function EntryCard({ entry }) {
@@ -30,18 +30,18 @@ function EntryCard({ entry }) {
         <img
           src={entry.cover_image_url}
           alt=""
-          className="w-24 h-24 rounded-md object-cover border border-gray-100 shrink-0"
+          className="browse-entry-image"
         />
       )}
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
+      <div className="browse-entry-copy">
+        <div className="browse-entry-meta">
+          <span className={`browse-status ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
             {entry.verification_status || 'unverified'}
           </span>
-          {entry.category_auto && <span className="text-xs text-gray-500 uppercase tracking-wide">{entry.category_auto}</span>}
+          {entry.category_auto && <span className="browse-entry-category">{entry.category_auto}</span>}
         </div>
         <h2>{entry.title}</h2>
-        <p className="text-sm text-gray-500 line-clamp-2">
+        <p className="browse-entry-excerpt">
           {(entry.euphemistic_content || entry.raw_content || '').slice(0, 160)}
           {(entry.euphemistic_content || entry.raw_content || '').length > 160 ? '…' : ''}
         </p>
@@ -129,7 +129,7 @@ export default function BrowsePage({
         </div>
 
         {searchError && (
-          <p className="mb-5 rounded-lg border border-[#eccdc2] bg-[#fff1eb] p-4 text-sm text-[#8b3b2b]" role="alert">
+          <p className="browse-page-message browse-page-error" role="alert">
             {searchError}
           </p>
         )}

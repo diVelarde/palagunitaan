@@ -1,0 +1,115 @@
+.status-page {
+  display: flex;
+  min-height: 46vh;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  padding: 72px 24px;
+  color: var(--site-ink);
+  text-align: center;
+  background: var(--site-paper);
+}
+
+.status-page h1 {
+  max-width: 760px;
+  margin: 0 0 12px;
+  color: var(--site-ink);
+  font-family: var(--site-display-font-family);
+  font-size: clamp(38px, 7vw, 68px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: .98;
+}
+
+.status-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 16px;
+  color: var(--site-link-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.status-eyebrow::before {
+  width: 24px;
+  height: 3px;
+  background: var(--site-gold);
+  content: '';
+}
+
+.status-description {
+  max-width: 540px;
+  margin: 0 0 26px;
+  color: var(--site-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.status-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--site-gold);
+  padding: 11px 17px;
+  color: #181816;
+  background: var(--site-gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.status-primary:hover {
+  border-color: var(--site-deep-gold);
+  background: var(--site-deep-gold);
+}
+
+.status-link {
+  color: var(--site-link-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.status-loading {
+  display: grid;
+  min-height: 45vh;
+  place-items: center;
+  background: var(--site-paper);
+}
+
+.status-spinner {
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--site-border);
+  border-top-color: var(--site-gold);
+  border-radius: 50%;
+  animation: status-spin .75s linear infinite;
+}
+
+@keyframes status-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-spinner {
+    animation-duration: 2.5s;
+  }
+}

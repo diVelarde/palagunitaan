@@ -1,8 +1,11 @@
+import '../components/StatusPage.css';
+
 export default function StubPage({ title, phase }) {
   return (
-    <div className="text-center py-24">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h1>
-      <p className="text-gray-400">Coming in the {phase} phase.</p>
+    <main className="status-page">
+      <p className="status-eyebrow">Palagunitaan · {phase} phase</p>
+      <h1>{title}</h1>
+      <p className="status-description">This part of the archive is being prepared.</p>
     </div>
   );
 }

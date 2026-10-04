@@ -1,0 +1,278 @@
+.about-page {
+  color: var(--site-ink);
+  background: var(--site-paper);
+}
+
+.about-page-inner {
+  width: min(100% - 48px, 1280px);
+  margin-inline: auto;
+}
+
+.about-hero {
+  position: relative;
+  display: flex;
+  min-height: min(620px, calc(100svh - 72px));
+  align-items: flex-end;
+  overflow: hidden;
+  padding: 100px max(calc((100vw - 1280px) / 2), 24px) 76px;
+  color: #fffdf8;
+  background:
+    linear-gradient(90deg, rgb(13 13 12 / 86%), rgb(13 13 12 / 38%) 78%),
+    linear-gradient(0deg, rgb(13 13 12 / 52%), transparent 55%),
+    url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Mt.%20Isarog%20Landscape.jpg?width=1800') center 50% / cover,
+    #181816;
+}
+
+.about-hero::after {
+  position: absolute;
+  top: 80px;
+  right: max(calc((100vw - 1280px) / 2), 24px);
+  width: min(24vw, 330px);
+  height: min(38vh, 390px);
+  border: 7px solid var(--site-gold);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  content: '';
+  pointer-events: none;
+}
+
+.about-hero .about-page-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.about-hero h1,
+.about-story h2,
+.about-value-grid h2,
+.about-cta h2 {
+  font-family: var(--site-display-font-family);
+  font-weight: 500;
+  letter-spacing: -.035em;
+}
+
+.about-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 17px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.about-eyebrow::before {
+  width: 26px;
+  height: 3px;
+  background: var(--site-gold);
+  content: '';
+}
+
+.about-hero h1 {
+  max-width: 860px;
+  margin: 0 0 20px;
+  font-size: clamp(52px, 8vw, 100px);
+  line-height: .95;
+}
+
+.about-hero-deck {
+  max-width: 620px;
+  margin: 0;
+  color: rgb(255 253 248 / 82%);
+  font-family: var(--site-display-font-family);
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.5;
+}
+
+.about-hero-mark {
+  position: absolute;
+  top: 15%;
+  right: 17%;
+  color: var(--site-gold);
+  font-family: var(--site-display-font-family);
+  font-size: clamp(100px, 22vw, 280px);
+  line-height: 1;
+  opacity: .16;
+}
+
+.about-photo-credit {
+  position: absolute;
+  right: max(calc((100vw - 1280px) / 2), 24px);
+  bottom: 13px;
+  z-index: 1;
+  margin: 0;
+  color: rgb(255 253 248 / 66%);
+  font-size: 9px;
+}
+
+.about-photo-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.about-story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(35px, 9vw, 130px);
+  padding-block: 100px;
+}
+
+.about-story h2,
+.about-cta h2 {
+  max-width: 570px;
+  margin: 0;
+  font-size: clamp(42px, 5.5vw, 68px);
+  line-height: .98;
+}
+
+.about-story-copy {
+  color: var(--site-charcoal);
+  font-family: var(--site-display-font-family);
+  font-size: 19px;
+  line-height: 1.65;
+}
+
+.about-story-copy p:first-child {
+  margin-top: 0;
+}
+
+.about-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid var(--site-gold);
+  padding-bottom: 6px;
+  color: var(--site-ink);
+  font-family: var(--site-font-family);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.about-values {
+  border-block: 1px solid var(--site-border);
+  padding-block: 70px 80px;
+  background: var(--site-card);
+}
+
+.about-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 32px;
+  border-top: 1px solid var(--site-border);
+  border-left: 1px solid var(--site-border);
+}
+
+.about-value-grid article {
+  min-height: 230px;
+  border-right: 1px solid var(--site-border);
+  border-bottom: 1px solid var(--site-border);
+  padding: 26px;
+}
+
+.about-value-grid article > span {
+  color: var(--site-link-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+.about-value-grid h2 {
+  margin: 28px 0 10px;
+  font-size: 30px;
+}
+
+.about-value-grid p {
+  max-width: 300px;
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.about-cta {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  padding-block: 82px 96px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .about-values {
+    background: var(--site-card);
+  }
+}
+
+@media (max-width: 680px) {
+  .about-page-inner {
+    width: min(100% - 40px, 1280px);
+  }
+
+  .about-hero {
+    min-height: 590px;
+    padding: 100px 20px 53px;
+    background-position: 58% center;
+  }
+
+  .about-hero::after {
+    top: 35px;
+    right: 20px;
+    width: 31vw;
+    height: 24vh;
+    border-width: 5px;
+  }
+
+  .about-hero h1 {
+    font-size: clamp(50px, 14vw, 76px);
+  }
+
+  .about-hero-mark {
+    top: 12%;
+    right: 5%;
+    font-size: 125px;
+  }
+
+  .about-photo-credit {
+    right: 20px;
+    left: 20px;
+    font-size: 8px;
+  }
+
+  .about-story {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-block: 66px;
+  }
+
+  .about-story-copy {
+    font-size: 18px;
+  }
+
+  .about-values {
+    padding-block: 54px;
+  }
+
+  .about-value-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-value-grid article {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .about-value-grid h2 {
+    margin: 15px 0 8px;
+  }
+
+  .about-cta {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-block: 63px 70px;
+  }
+}

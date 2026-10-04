@@ -489,7 +489,7 @@ export default function AdminDashboardPage({
   ));
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard-page dashboard-admin-page">
       <section className="dashboard-admin-profile">
         <ProfilePanel />
       </section>

@@ -136,13 +136,14 @@ export default function MySubmissionsPage({
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading your submissions…</p>;
+    return <p className="dashboard-page-loading text-sm text-gray-500">Loading your submissions…</p>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard-page dashboard-submissions-page">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
+          <p className="dashboard-page-eyebrow">Your archive</p>
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">My Submissions</h1>
           <p className="text-sm text-gray-600">
             Entries you have submitted, and where each one is in review.

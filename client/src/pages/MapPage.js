@@ -23,7 +23,11 @@ function dotIcon(color) {
   });
 }
 
-const ICONS = { entry: dotIcon('#ad482d'), site: dotIcon('#b88b3c'), siteHighlighted: dotIcon('#493126') };
+const ICONS = {
+  entry: dotIcon('var(--site-gold)'),
+  site: dotIcon('var(--site-ink)'),
+  siteHighlighted: dotIcon('var(--site-gold)'),
+};
 function iconFor(marker) {
   if (marker.type === 'site') return marker.isHighlighted ? ICONS.siteHighlighted : ICONS.site;
   return ICONS.entry;

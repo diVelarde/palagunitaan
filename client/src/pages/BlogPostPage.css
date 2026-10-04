@@ -1,0 +1,106 @@
+.blog-post-page {
+  --blog-ink: var(--site-ink);
+  --blog-muted: var(--site-muted);
+  --blog-paper: var(--site-paper);
+  --blog-card: var(--site-card);
+  --blog-line: var(--site-border);
+  --blog-accent: var(--site-link-accent);
+  min-height: 100%;
+  color: var(--blog-ink);
+  background: var(--blog-paper);
+  font-family: var(--site-font-family);
+}
+
+.blog-post-content {
+  width: min(100% - 48px, 760px);
+  margin: 0 auto;
+  padding: 55px 0 80px;
+}
+
+.blog-post-back-link {
+  display: inline-block;
+  margin-bottom: 38px;
+  color: var(--blog-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-decoration: none;
+}
+
+.blog-post-back-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-post-page h1 {
+  margin: 0 0 24px;
+  color: var(--blog-ink);
+  font-family: var(--site-display-font-family);
+  font-size: clamp(40px, 7vw, 68px);
+  font-weight: 500;
+  letter-spacing: -.025em;
+  line-height: .98;
+}
+
+.blog-post-cover {
+  display: block;
+  width: 100%;
+  max-height: 480px;
+  margin: 0 0 27px;
+  object-fit: cover;
+}
+
+.blog-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 12px;
+  margin-bottom: 28px;
+  border-top: 1px solid var(--blog-line);
+  border-bottom: 1px solid var(--blog-line);
+  padding: 13px 0;
+  color: var(--blog-muted);
+  font-size: 12px;
+}
+
+.blog-post-author {
+  color: var(--blog-ink);
+  font-weight: 600;
+}
+
+.blog-post-body {
+  color: var(--blog-ink);
+  font-size: 17px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.blog-post-message,
+.blog-post-state {
+  border: 1px solid var(--blog-line);
+  padding: 16px 18px;
+  color: var(--blog-muted);
+  background: var(--blog-card);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.blog-post-error {
+  color: rgb(var(--site-error-text));
+  background: rgb(var(--site-error-bg));
+}
+
+@media (max-width: 640px) {
+  .blog-post-content {
+    width: min(100% - 32px, 760px);
+    padding: 37px 0 56px;
+  }
+
+  .blog-post-back-link {
+    margin-bottom: 30px;
+  }
+
+  .blog-post-body {
+    font-size: 16px;
+  }
+}

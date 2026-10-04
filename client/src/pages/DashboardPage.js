@@ -50,7 +50,7 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
   const publishedCount = entries.filter((entry) => entry.status === 'published').length;
 
   return (
-    <div className="space-y-5">
+    <div className="dashboard-page dashboard-overview-page">
       <section className="dashboard-section-card">
         <div className="dashboard-overview-section-heading">
           <div>

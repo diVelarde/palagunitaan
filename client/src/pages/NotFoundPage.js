@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
+import '../components/StatusPage.css';
 
 export default function NotFoundPage() {
   return (
-    <div className="text-center py-24">
-      <p className="text-sm font-medium text-amber-700 mb-2">404</p>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-3">Page not found</h1>
-      <p className="text-gray-500 mb-8">
+    <main className="status-page">
+      <p className="status-eyebrow">404 · Archive record not found</p>
+      <h1>Page not found</h1>
+      <p className="status-description">
         The page you're looking for doesn't exist or may have been moved.
       </p>
-      <Link to="/" className="text-blue-900 font-medium hover:underline">
-        Back to home
+      <Link to="/" className="status-primary">
+        Return to Explore
       </Link>
-    </div>
+    </main>
   );
 }

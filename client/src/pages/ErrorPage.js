@@ -1,26 +1,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../components/StatusPage.css';
 
 export function ErrorPage({ onRetry }) {
   return (
-    <div className="text-center py-24">
-      <p className="text-sm font-medium text-red-700 mb-2">Something went wrong</p>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-3">
+    <div className="status-page">
+      <p className="status-eyebrow">Something went wrong</p>
+      <h1>
         We hit a snag loading this page
       </h1>
-      <p className="text-gray-500 mb-8">
+      <p className="status-description">
         Try refreshing the page. If the problem continues, please let us know.
       </p>
-      <div className="flex items-center justify-center gap-4">
+      <div className="status-actions">
         {onRetry && (
           <button
             onClick={onRetry}
-            className="px-4 py-2 rounded-md bg-[#ad482d] text-white text-sm font-medium hover:bg-[#873720]"
+            className="status-primary"
           >
             Try again
           </button>
         )}
-        <Link to="/" className="text-[#8f3e29] font-medium hover:underline">
+        <Link to="/" className="status-link">
           Back to home
         </Link>
       </div>

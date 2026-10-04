@@ -25,7 +25,8 @@ export default function AuditLogPage({ fetchAuditLog = async () => [] }) {
   }, [fetchAuditLog]);
 
   return (
-    <div className="dashboard-admin-audit-log max-w-4xl mx-auto px-6 py-10">
+    <div className="dashboard-admin-audit-log">
+      <p className="dashboard-page-eyebrow">Editorial record</p>
       <h1 className="text-2xl font-semibold text-gray-900 mb-1">Audit log</h1>
       <p className="text-sm text-gray-600 mb-8">Every editorial decision, across every entry.</p>
 

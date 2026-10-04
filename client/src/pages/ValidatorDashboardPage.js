@@ -89,11 +89,14 @@ export default function ValidatorDashboardPage({ fetchPending = async () => [], 
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
-      <p className="mb-6 text-sm text-gray-600">
+    <div className="dashboard-page dashboard-validator-page">
+      <header className="dashboard-page-heading">
+        <p className="dashboard-page-eyebrow">Editorial desk</p>
+        <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
+        <p className="text-sm text-gray-600">
         {loading ? 'Loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} awaiting your review.`}
-      </p>
+        </p>
+      </header>
       {error && <div className="dashboard-error" role="alert">{error}</div>}
       {!loading && entries.length === 0 && <p className="text-sm text-gray-500">Nothing waiting on you right now.</p>}
       <div className="space-y-4">

@@ -200,7 +200,7 @@ export default function SubmitEntryPage({
   const aiSummary = result ? describeAi(result.ai) : null;
 
   return (
-    <div className={embedded ? 'submit-entry-embedded' : 'max-w-2xl mx-auto px-6 py-12'}>
+    <div className={embedded ? 'submit-entry-embedded' : 'submit-entry-page'}>
     <header className={`submit-entry-heading ${embedded ? 'submit-entry-heading-embedded' : ''}`}>
       <p className="submit-entry-eyebrow">Contribute to the archive</p>
       <h1>Submit Heritage Entry</h1>

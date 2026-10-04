@@ -38,10 +38,10 @@ export default function DashboardLayout() {
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar-heading">
           <img
-            src="/Palagunitaan (1).png"
+            src="/image__3.1_-removebg-preview.png"
             alt=""
             aria-hidden="true"
-            className="h-10 w-10 rounded-full object-cover"
+            className="dashboard-brand-mark"
           />
           <div>
             <p>PALAGUNITAAN</p>

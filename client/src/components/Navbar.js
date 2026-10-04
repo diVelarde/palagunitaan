@@ -1,58 +1,60 @@
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 import RoleBadge from './RoleBadge';
 import { useNotifications } from '../hooks/useNotifications';
+import './Navbar.css';
 
 const NAV_LINKS = [
-  { to: '/browse', label: 'Browse' },
-  { to: '/map', label: 'Map' },
-  { to: '/timeline', label: 'Timeline' },
-  { to: '/blog', label: 'Blog' },
+  { to: '/', label: 'Explore', end: true },
+  { to: '/map', label: 'Places' },
+  { to: '/browse', label: 'Collections' },
+  { to: '/about', label: 'About' },
 ];
 
 function linkClass({ isActive }) {
-  return `text-[15px] font-medium transition ${
-    isActive ? 'text-[#a9472e]' : 'text-[#625953] hover:text-[#a9472e]'
-  }`;
+  return `navbar-link ${isActive ? 'is-active' : ''}`;
 }
 
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { user, loading, login } = useAuth();
   const { notifications, unreadCount, onOpen, onMarkRead, notificationError } = useNotifications();
   const firstName = (user?.name || '').trim().split(/\s+/)[0] || 'Account';
+  const navLinks = user
+    ? [...NAV_LINKS, { to: '/dashboard', label: 'Contribute' }]
+    : NAV_LINKS;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e8e0d6] bg-[#f8f5ef]/95 backdrop-blur">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-5 px-6 py-3.5">
-        <Link to="/" className="flex shrink-0 items-center gap-3 font-serif text-[21px] font-bold text-[#382920]">
+    <header className="site-navbar sticky top-0 z-50 border-b backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3.5">
+        <Link to="/" aria-label="Palagunitaan home" className="navbar-brand flex min-w-0 shrink items-center gap-2 sm:gap-3">
           <img
-            src="/Palagunitaan (1).png"
+            src="/image__3.1_-removebg-preview.png"
             alt=""
             aria-hidden="true"
-            className="h-10 w-10 rounded-full object-cover"
+            className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
           />
-          <span className="relative block h-10 w-44 overflow-hidden">
-            <img
-              src="/Text1.png"
-              alt="Palagunitaan"
-              className="absolute left-0 top-1/2 w-full max-w-none -translate-y-1/2"
-            />
+          <span className="navbar-wordmark truncate text-[20px] font-semibold leading-none sm:text-[24px]">
+            Palagunitaan
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center justify-center gap-7">
-          {NAV_LINKS.map((link) => (
-            <NavLink key={link.to} to={link.to} className={linkClass}>
+        <nav className="navbar-desktop-nav hidden items-center justify-center gap-7 md:flex" aria-label="Main navigation">
+          {navLinks.map((link) => (
+            <NavLink key={link.to} to={link.to} end={link.end} className={linkClass}>
               {link.label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {loading ? null : user ? (
             <>
-              <RoleBadge role={user.role} />
+              <span className="hidden sm:inline-flex">
+                <RoleBadge role={user.role} />
+              </span>
               <NotificationDropdown
                 notifications={notifications}
                 unreadCount={unreadCount}
@@ -63,35 +65,79 @@ export default function Navbar() {
               <Link
                 to="/dashboard"
                 aria-label={`Dashboard for ${user.name || firstName}`}
-                className="flex items-center gap-2 rounded-full text-sm font-medium text-[#493126] hover:text-[#a9472e] focus:outline-none focus:ring-2 focus:ring-[#b97554] focus:ring-offset-2"
+                className="navbar-account flex items-center gap-2 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FBD116] focus:ring-offset-2"
               >
                 {user.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
                     alt=""
-                    className="h-9 w-9 rounded-full border border-[#e9dfd2] object-cover"
+                    className="navbar-avatar-image h-9 w-9 rounded-full border object-cover"
                   />
                 ) : (
                   <span
                     aria-hidden="true"
-                    className="grid h-9 w-9 place-items-center rounded-full bg-[#ad482d] font-semibold text-white"
+                    className="navbar-avatar grid h-9 w-9 place-items-center rounded-full font-semibold"
                   >
                     {firstName[0].toUpperCase()}
                   </span>
                 )}
-                <span>{firstName}</span>
+                <span className="hidden sm:inline">{firstName}</span>
               </Link>
             </>
           ) : (
-            <button
-              onClick={login}
-              className="rounded-xl border border-[#d9c7b7] px-5 py-2.5 text-sm font-semibold text-[#a9472e] transition hover:bg-[#f3e9df]"
-            >
+            <button onClick={login} className="navbar-sign-in hidden rounded-xl border px-3 py-2 text-sm font-semibold transition sm:px-5 sm:py-2.5 md:inline-flex">
               Sign In
             </button>
           )}
+          <Link
+            to="/browse"
+            aria-label="Search collections"
+            className="navbar-search-button inline-flex h-10 w-10 items-center justify-center rounded-full"
+          >
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 4.5 4.5" />
+            </svg>
+          </Link>
+          <button
+            type="button"
+            className="navbar-menu-button inline-flex h-10 w-10 items-center justify-center rounded-lg md:hidden"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {menuOpen ? <path d="m6 6 12 12M18 6 6 18" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+            </svg>
+          </button>
         </div>
       </div>
+      <nav
+        id="mobile-navigation"
+        className={`navbar-mobile-panel px-4 pb-3 md:hidden ${menuOpen ? '' : 'hidden'}`}
+        aria-label="Mobile navigation"
+      >
+        {!loading && !user && (
+          <button type="button" className="navbar-mobile-sign-in" onClick={() => {
+            setMenuOpen(false);
+            login();
+          }}>
+            Sign in
+          </button>
+        )}
+        {navLinks.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end={link.end}
+            className={linkClass}
+            onClick={() => setMenuOpen(false)}
+          >
+            {link.label}
+          </NavLink>
+        ))}
+      </nav>
     </header>
   );
 }

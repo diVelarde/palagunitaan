@@ -10,6 +10,7 @@ import RouteLoadingFallback from './components/RouteLoadingFallback';
 import LandingPage from './pages/LandingPage.js';
 import DashboardPage from './pages/DashboardPage.js';
 import NotFoundPage from './pages/NotFoundPage.js';
+import AboutPage from './pages/AboutPage.js';
 import MySubmissionsPage from './pages/MySubmissionsPage.js';
 import { ErrorBoundary } from './pages/ErrorPage.js';
 
@@ -38,6 +39,7 @@ function AppShell() {
         <Suspense fallback={<RouteLoadingFallback />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/about" element={<AboutPage />} />
 
             <Route
               path="/browse"
