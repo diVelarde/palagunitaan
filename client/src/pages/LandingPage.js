@@ -127,7 +127,7 @@ export default function LandingPage() {
             <button type="submit">Search</button>
           </form>
           <div className="lp-hero-links">
-            <Link to="/browse" className="lp-hero-primary-link">Browse the archive <span aria-hidden="true">→</span></Link>
+            <Link to="/browse" className="lp-hero-primary-link">Browse the archives <span aria-hidden="true">→</span></Link>
             <span className="lp-hero-index">Field notes from Camarines Sur</span>
           </div>
           <p className="lp-photo-credit">

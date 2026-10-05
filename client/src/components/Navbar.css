@@ -5,6 +5,44 @@
   color: var(--site-ink);
 }
 
+.site-navbar.site-navbar-landing {
+  position: absolute;
+  inset: 0 0 auto;
+  border-color: rgb(255 253 248 / 20%);
+  background: transparent;
+  color: #fffdf8;
+  backdrop-filter: none;
+}
+
+.site-navbar-landing .navbar-wordmark,
+.site-navbar-landing .navbar-link,
+.site-navbar-landing .navbar-link:hover,
+.site-navbar-landing .navbar-link.is-active,
+.site-navbar-landing .navbar-account,
+.site-navbar-landing .navbar-search-button,
+.site-navbar-landing .navbar-menu-button,
+.site-navbar-landing .navbar-sign-in {
+  color: #fffdf8;
+}
+
+.site-navbar-landing .navbar-search-button,
+.site-navbar-landing .navbar-menu-button,
+.site-navbar-landing .navbar-sign-in {
+  border-color: rgb(255 253 248 / 45%);
+}
+
+.site-navbar-landing .navbar-search-button:hover,
+.site-navbar-landing .navbar-menu-button:hover,
+.site-navbar-landing .navbar-sign-in:hover {
+  border-color: var(--site-gold);
+  color: #181816;
+}
+
+.site-navbar-landing .navbar-mobile-panel {
+  border-color: rgb(255 253 248 / 20%);
+  background: rgb(24 24 22 / 94%);
+}
+
 .site-footer {
   border-color: var(--site-border);
   background-color: var(--site-footer-bg);

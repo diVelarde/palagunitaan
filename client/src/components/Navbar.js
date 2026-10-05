@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 import RoleBadge from './RoleBadge';
@@ -19,6 +19,7 @@ function linkClass({ isActive }) {
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
   const { user, loading, login } = useAuth();
   const { notifications, unreadCount, onOpen, onMarkRead, notificationError } = useNotifications();
   const firstName = (user?.name || '').trim().split(/\s+/)[0] || 'Account';
@@ -27,7 +28,11 @@ export default function Navbar() {
     : NAV_LINKS;
 
   return (
-    <header className="site-navbar sticky top-0 z-50 border-b backdrop-blur">
+    <header
+      className={`site-navbar sticky top-0 z-50 border-b backdrop-blur ${
+        pathname === '/' ? 'site-navbar-landing' : ''
+      }`}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3.5">
         <Link to="/" aria-label="Palagunitaan home" className="navbar-brand flex min-w-0 shrink items-center gap-2 sm:gap-3">
           <img
