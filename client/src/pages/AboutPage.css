@@ -86,13 +86,12 @@
 
 .about-hero-mark {
   position: absolute;
-  top: 15%;
-  right: 17%;
-  color: var(--site-gold);
-  font-family: var(--site-display-font-family);
-  font-size: clamp(100px, 22vw, 280px);
-  line-height: 1;
-  opacity: .16;
+  top: 5%;
+  right: -4%;
+  width: clamp(560px, 48vw, 760px);
+  height: auto;
+  opacity: .2;
+  pointer-events: none;
 }
 
 .about-photo-credit {
@@ -232,9 +231,9 @@
   }
 
   .about-hero-mark {
-    top: 12%;
-    right: 5%;
-    font-size: 125px;
+    top: 8%;
+    right: -240px;
+    width: 430px;
   }
 
   .about-photo-credit {

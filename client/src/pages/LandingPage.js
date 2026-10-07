@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import blogService from '../services/blogService';
 import heritageService from '../services/heritageService';
 import highlightService from '../services/highlightService';
+import multimediaService from '../services/multimediaService';
 import './LandingPage.css';
 
 const CATEGORIES = [
@@ -59,10 +60,20 @@ function LatestStoryLink({ entry }) {
   );
 }
 
+function formatAudioLocation(entry) {
+  return [entry.region_name, entry.region, entry.region_province]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
+    .join(' · ');
+}
+
 export default function LandingPage() {
   const navigate = useNavigate();
+  const audioRef = useRef(null);
+  const playAfterTrackChange = useRef(false);
   const [keyword, setKeyword] = useState('');
   const [entries, setEntries] = useState([]);
+  const [audioTracks, setAudioTracks] = useState([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [highlight, setHighlight] = useState(null);
   const [posts, setPosts] = useState([]);
   const [errors, setErrors] = useState({});
@@ -71,14 +82,35 @@ export default function LandingPage() {
     let active = true;
 
     Promise.allSettled([
-      heritageService.getPublishedEntries({ limit: 5 }),
+      heritageService.getPublishedEntries({ limit: 20 }),
       highlightService.getCurrentHighlights(),
       blogService.getPosts({ limit: 2 }),
     ]).then(([entriesResult, highlightResult, postsResult]) => {
       if (!active) return;
 
       if (entriesResult.status === 'fulfilled') {
-        setEntries(entriesResult.value || []);
+        const publishedEntries = entriesResult.value || [];
+        setEntries(publishedEntries.slice(0, 5));
+        Promise.allSettled(
+          publishedEntries.map(async (entry) => {
+            const assets = await multimediaService.getEntryMedia(entry.id);
+            return assets
+              .filter((asset) => asset.file_type !== 'image' && asset.file_url)
+              .map((asset) => ({ ...asset, entry }));
+          })
+        ).then((mediaResults) => {
+          if (!active) return;
+          const tracks = mediaResults.flatMap((result) => (
+            result.status === 'fulfilled' ? result.value : []
+          ));
+          setAudioTracks(tracks);
+          if (mediaResults.some((result) => result.status === 'rejected')) {
+            setErrors((current) => ({
+              ...current,
+              audio: 'Some archive recordings could not be loaded.',
+            }));
+          }
+        });
       } else {
         setErrors((current) => ({ ...current, entries: 'Latest entries are temporarily unavailable.' }));
       }
@@ -100,6 +132,27 @@ export default function LandingPage() {
       active = false;
     };
   }, []);
+
+  const currentTrack = audioTracks[currentTrackIndex];
+
+  useEffect(() => {
+    if (!playAfterTrackChange.current || !audioRef.current) return;
+    playAfterTrackChange.current = false;
+    audioRef.current.play().catch(() => {
+      setErrors((current) => ({
+        ...current,
+        audio: 'Playback did not start. Use the play control to try again.',
+      }));
+    });
+  }, [currentTrackIndex, currentTrack]);
+
+  function changeAudioTrack(direction) {
+    if (audioTracks.length < 2) return;
+    playAfterTrackChange.current = true;
+    setCurrentTrackIndex((index) => (
+      (index + direction + audioTracks.length) % audioTracks.length
+    ));
+  }
 
   function handleSearch(event) {
     event.preventDefault();
@@ -171,6 +224,79 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="lp-section lp-media-section" aria-labelledby="lp-media-title">
+        <p className="lp-media-kicker">Voices of the archive</p>
+        <h2 id="lp-media-title">Folklore was heard before it was read.</h2>
+        {currentTrack ? (
+          <div className="lp-audio-player">
+            <Link
+              to={`/entries/${currentTrack.entry.id}`}
+              className="lp-audio-artwork"
+              style={{
+                backgroundImage: `linear-gradient(0deg, rgb(13 13 12 / 62%), transparent 52%), url("${currentTrack.entry.cover_image_url || HERO_IMAGE}")`,
+              }}
+              aria-label={`Open ${currentTrack.entry.title}`}
+            >
+              <span>Field recording · Bicol</span>
+            </Link>
+            <div className="lp-audio-content">
+              <p className="lp-audio-label">Archive recording</p>
+              <Link to={`/entries/${currentTrack.entry.id}`} className="lp-audio-title-link">
+                <h3>{currentTrack.entry.title}</h3>
+              </Link>
+              <p className="lp-audio-meta">
+                {[formatAudioLocation(currentTrack.entry), currentTrack.entry.category_auto]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              <div className="lp-audio-controls">
+                <button
+                  type="button"
+                  onClick={() => changeAudioTrack(-1)}
+                  disabled={audioTracks.length < 2}
+                  aria-label="Play previous recording"
+                >
+                  <span aria-hidden="true">|◀</span>
+                </button>
+                <audio
+                  ref={audioRef}
+                  key={currentTrack.id}
+                  controls
+                  src={currentTrack.file_url}
+                  onEnded={() => changeAudioTrack(1)}
+                  aria-label={`Play recording: ${currentTrack.entry.title}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => changeAudioTrack(1)}
+                  disabled={audioTracks.length < 2}
+                  aria-label="Play next recording"
+                >
+                  <span aria-hidden="true">▶|</span>
+                </button>
+              </div>
+              <p className="lp-audio-track-count">
+                Recording {currentTrackIndex + 1} of {audioTracks.length}
+              </p>
+              <Link to="/browse?category=Oral%20Traditions" className="lp-audio-browse-link">
+                Explore more voices <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="lp-audio-empty">
+            <p>
+              Published entries with recordings will be playable here. Explore songs,
+              language, and oral traditions in the archive.
+            </p>
+            <Link to="/browse?category=Folk%20Songs%20%26%20Chants">
+              Browse songs and chants <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        )}
+        {errors.audio && <p className="lp-audio-error" role="status">{errors.audio}</p>}
+      </section>
+
       {highlight && (
         <section className="lp-section lp-highlight-section">
           <SectionHeading>Highlight of the Week</SectionHeading>
@@ -202,7 +328,8 @@ export default function LandingPage() {
             >
               <div
                 className="lp-category-photo"
-                style={{ backgroundImage: `linear-gradient(0deg, rgba(36, 24, 18, .82), rgba(36, 24, 18, .05)), url("https://images.unsplash.com/${category.image}?auto=format&fit=crop&w=700&q=80")` }}
+                style={{ backgroundImage: `url("https://images.unsplash.com/${category.image}?auto=format&fit=crop&w=700&q=80")` }}
+                aria-hidden="true"
               />
               <div className="lp-category-copy">
                 <h3>{category.title}</h3>

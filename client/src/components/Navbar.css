@@ -6,12 +6,22 @@
 }
 
 .site-navbar.site-navbar-landing {
-  position: absolute;
+  position: fixed;
+  z-index: 50;
   inset: 0 0 auto;
-  border-color: rgb(255 253 248 / 20%);
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: #fffdf8;
   backdrop-filter: none;
+  box-shadow: none;
+  transition: background-color .22s ease, backdrop-filter .22s ease, box-shadow .22s ease;
+}
+
+.site-navbar.site-navbar-landing.site-navbar-scrolled {
+  background: rgb(24 24 22 / 94%);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
 }
 
 .site-navbar-landing .navbar-wordmark,
@@ -41,6 +51,14 @@
 .site-navbar-landing .navbar-mobile-panel {
   border-color: rgb(255 253 248 / 20%);
   background: rgb(24 24 22 / 94%);
+}
+
+@media (max-width: 767px) {
+  .site-navbar.site-navbar-landing {
+    right: 0;
+    left: 0;
+    border-radius: 0;
+  }
 }
 
 .site-footer {
@@ -79,6 +97,25 @@
 .navbar-wordmark {
   color: var(--site-ink);
   font-family: var(--site-display-font-family);
+}
+
+.navbar-brand {
+  position: relative;
+  display: block;
+  width: 180px;
+  height: 48px;
+  flex: none;
+}
+
+.navbar-logo-image {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: block;
+  width: 180px;
+  max-width: none;
+  height: auto;
+  transform: translateY(-50%);
 }
 
 .navbar-desktop-nav {
@@ -187,7 +224,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .navbar-link::after,
-  .navbar-search-button {
+  .navbar-search-button,
+  .site-navbar.site-navbar-landing {
     transition: none;
   }
 }

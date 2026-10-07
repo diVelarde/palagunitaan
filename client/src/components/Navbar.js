@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
@@ -20,6 +20,8 @@ function linkClass({ isActive }) {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const isLandingPage = pathname === '/';
+  const [isScrolled, setIsScrolled] = useState(() => window.scrollY > 24);
   const { user, loading, login } = useAuth();
   const { notifications, unreadCount, onOpen, onMarkRead, notificationError } = useNotifications();
   const firstName = (user?.name || '').trim().split(/\s+/)[0] || 'Account';
@@ -27,23 +29,34 @@ export default function Navbar() {
     ? [...NAV_LINKS, { to: '/dashboard', label: 'Contribute' }]
     : NAV_LINKS;
 
+  useEffect(() => {
+    if (!isLandingPage) {
+      setIsScrolled(false);
+      return undefined;
+    }
+
+    function updateScrollState() {
+      setIsScrolled(window.scrollY > 24);
+    }
+
+    updateScrollState();
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+    return () => window.removeEventListener('scroll', updateScrollState);
+  }, [isLandingPage]);
+
   return (
     <header
       className={`site-navbar sticky top-0 z-50 border-b backdrop-blur ${
-        pathname === '/' ? 'site-navbar-landing' : ''
+        isLandingPage ? `site-navbar-landing ${isScrolled ? 'site-navbar-scrolled' : ''}` : ''
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3.5">
-        <Link to="/" aria-label="Palagunitaan home" className="navbar-brand flex min-w-0 shrink items-center gap-2 sm:gap-3">
+        <Link to="/" aria-label="Palagunitaan home" className="navbar-brand">
           <img
-            src="/image__3.1_-removebg-preview.png"
-            alt=""
-            aria-hidden="true"
-            className="h-9 w-9 shrink-0 object-contain sm:h-11 sm:w-11"
+            src="/Palagunitaan - Logo/7.png"
+            alt="Palagunitaan"
+            className="navbar-logo-image"
           />
-          <span className="navbar-wordmark truncate text-[20px] font-semibold leading-none sm:text-[24px]">
-            Palagunitaan
-          </span>
         </Link>
 
         <nav className="navbar-desktop-nav hidden items-center justify-center gap-7 md:flex" aria-label="Main navigation">

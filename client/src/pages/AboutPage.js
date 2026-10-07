@@ -12,7 +12,12 @@ export default function AboutPage() {
             Palagunitaan documents and preserves Philippine folklore and intangible cultural heritage, beginning with the stories of Camarines Sur.
           </p>
         </div>
-        <span className="about-hero-mark" aria-hidden="true">ᜉ</span>
+        <img
+          className="about-hero-mark"
+          src="/Palagunitaan - Logo/4.png"
+          alt=""
+          aria-hidden="true"
+        />
         <p className="about-photo-credit">
           Mount Isarog photo by <a href="https://commons.wikimedia.org/wiki/User:MarvinBikolano" target="_blank" rel="noreferrer">MarvinBikolano</a>
           {' '}via <a href="https://commons.wikimedia.org/wiki/File:Mt._Isarog_Landscape.jpg" target="_blank" rel="noreferrer">Wikimedia Commons</a>
