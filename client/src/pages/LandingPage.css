@@ -30,16 +30,18 @@
 
 .lp-hero::after {
   position: absolute;
-  top: 76px;
+  top: 50%;
   right: max(calc((100vw - 1280px) / 2), 24px);
   width: min(31vw, 430px);
   height: min(51vh, 520px);
+  box-sizing: border-box;
   border: 8px solid var(--lp-gold);
   border-left-color: transparent;
   border-bottom-color: transparent;
   content: '';
   opacity: .9;
   pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .lp-hero-content {
@@ -1421,11 +1423,12 @@
   }
 
   .lp-hero::after {
-    top: 38px;
+    top: 50%;
     right: 19px;
     width: 33vw;
     height: 25vh;
     border-width: 5px;
+    transform: translateY(-50%);
   }
 
   .lp-hero-content {
