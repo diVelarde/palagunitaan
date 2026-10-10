@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
+import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import blogService from '../services/blogService';
 import heritageService from '../services/heritageService';
 import highlightService from '../services/highlightService';
+import mapService from '../services/mapService';
 import multimediaService from '../services/multimediaService';
 import './LandingPage.css';
+
+const MAP_CENTER = [13.58, 123.29];
 
 const CATEGORIES = [
   { title: 'Legends & Myths', subtitle: 'Origin stories & lore', image: 'photo-1500530855697-b586d89ba3ee' },
@@ -20,10 +24,10 @@ const CATEGORIES = [
 ];
 
 const REGIONS = [
-  { name: 'Naga City', area: 'Camarines Sur', position: [13.6218, 123.1948] },
-  { name: 'Camarines Sur', area: 'Bicol Region', position: [13.667, 123.25] },
-  { name: 'Pili', area: 'Camarines Sur', position: [13.558, 123.28] },
-  { name: 'Iriga City', area: 'Camarines Sur', position: [13.432, 123.412] },
+  { name: 'Naga City', area: 'Camarines Sur' },
+  { name: 'Camarines Sur', area: 'Bicol Region' },
+  { name: 'Pili', area: 'Camarines Sur' },
+  { name: 'Iriga City', area: 'Camarines Sur' },
 ];
 
 const HERO_IMAGE = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Mt.%20Isarog%20Landscape.jpg?width=2200';
@@ -66,6 +70,18 @@ function formatAudioLocation(entry) {
     .join(' · ');
 }
 
+function FitLandingMarkers({ markers }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!markers.length) return;
+    const bounds = L.latLngBounds(markers.map((marker) => [marker.latitude, marker.longitude]));
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 9 });
+  }, [map, markers]);
+
+  return null;
+}
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const audioRef = useRef(null);
@@ -77,6 +93,9 @@ export default function LandingPage() {
   const [highlight, setHighlight] = useState(null);
   const [posts, setPosts] = useState([]);
   const [errors, setErrors] = useState({});
+  const [mapMarkers, setMapMarkers] = useState([]);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [mapLoadError, setMapLoadError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -133,7 +152,46 @@ export default function LandingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    mapService.getMapData()
+      .then((markers) => {
+        if (active) setMapMarkers(markers || []);
+      })
+      .catch(() => {
+        if (active) setMapLoadError('Heritage locations could not be loaded.');
+      })
+      .finally(() => {
+        if (active) setMapLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const currentTrack = audioTracks[currentTrackIndex];
+  const validMapMarkers = useMemo(() => mapMarkers
+    .filter((marker) => marker.latitude !== null
+      && marker.latitude !== undefined
+      && marker.latitude !== ''
+      && marker.longitude !== null
+      && marker.longitude !== undefined
+      && marker.longitude !== '')
+    .map((marker) => ({
+      ...marker,
+      latitude: Number(marker.latitude),
+      longitude: Number(marker.longitude),
+    }))
+    .filter((marker) => (
+      Number.isFinite(marker.latitude)
+      && marker.latitude >= -90
+      && marker.latitude <= 90
+      && Number.isFinite(marker.longitude)
+      && marker.longitude >= -180
+      && marker.longitude <= 180
+    )), [mapMarkers]);
 
   useEffect(() => {
     if (!playAfterTrackChange.current || !audioRef.current) return;
@@ -362,30 +420,47 @@ export default function LandingPage() {
           </div>
           <div className="lp-region-map">
             <MapContainer
-              center={[13.58, 123.29]}
+              center={MAP_CENTER}
               zoom={9}
               scrollWheelZoom={false}
               aria-label="Map of heritage locations in Camarines Sur"
             >
+              <FitLandingMarkers markers={validMapMarkers} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {REGIONS.map((region) => (
-                <CircleMarker
-                  key={region.name}
-                  center={region.position}
-                  radius={7}
-                  pathOptions={{ color: '#181816', fillColor: '#FBD116', fillOpacity: 1, weight: 2 }}
-                >
-                  <Popup>
-                    <Link to={`/browse?region=${encodeURIComponent(region.name)}`}>
-                      Browse stories from {region.name}
-                    </Link>
-                  </Popup>
-                </CircleMarker>
-              ))}
+              {validMapMarkers.map((marker) => {
+                const markerColor = marker.type === 'entry'
+                  ? '#e6a800'
+                  : marker.isHighlighted
+                    ? '#6750a4'
+                    : '#176b5b';
+                return (
+                  <CircleMarker
+                    key={`${marker.type}-${marker.id}`}
+                    center={[marker.latitude, marker.longitude]}
+                    radius={6}
+                    pathOptions={{ color: '#181816', fillColor: markerColor, fillOpacity: 1, weight: 2 }}
+                  >
+                    <Popup>
+                      <div className="lp-map-popup">
+                        <strong>{marker.title}</strong>
+                        {marker.approximateLocation && <small>Approximate province location</small>}
+                        {marker.type === 'entry'
+                          ? <Link to={`/entries/${marker.id}`}>View entry →</Link>
+                          : marker.description && <p>{marker.description}</p>}
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                );
+              })}
             </MapContainer>
+            {(mapLoading || mapLoadError || (!validMapMarkers.length && !mapLoading)) && (
+              <div className="lp-map-status" role={mapLoadError ? 'alert' : 'status'}>
+                {mapLoadError || (mapLoading ? 'Loading heritage locations…' : 'No mapped heritage locations yet.')}
+              </div>
+            )}
             <Link to="/map" className="lp-map-link">Explore the interactive map <span aria-hidden="true">↗</span></Link>
           </div>
         </div>

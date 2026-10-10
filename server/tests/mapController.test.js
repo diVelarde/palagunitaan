@@ -88,6 +88,19 @@ describe('getMapData', () => {
     });
   });
 
+  it('omits heritage sites without valid coordinates', async () => {
+    geographicTagModel.findTagsForPublishedEntries.mockResolvedValue([]);
+    heritageSiteModel.findAll.mockResolvedValue([
+      { id: 6, name: 'Unpinned site', latitude: null, longitude: null },
+      { id: 7, name: 'Invalid site', latitude: 'not-a-number', longitude: '123.2' },
+    ]);
+
+    const res = mockRes();
+    await getMapData({}, res, jest.fn());
+
+    expect(res.json.mock.calls[0][0].markers).toEqual([]);
+  });
+
   it('does not invent a location for unpinned entries outside supported regions', async () => {
     geographicTagModel.findTagsForPublishedEntries.mockResolvedValue([
       {

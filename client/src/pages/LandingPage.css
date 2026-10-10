@@ -1172,6 +1172,35 @@
   font-family: var(--site-font-family);
 }
 
+.lp-map-status {
+  position: absolute;
+  z-index: 500;
+  top: 16px;
+  left: 50%;
+  max-width: calc(100% - 32px);
+  border: 1px solid var(--lp-line);
+  padding: 9px 12px;
+  color: var(--lp-ink);
+  background: var(--lp-surface);
+  font-size: 12px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.lp-map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lp-map-popup p {
+  margin: 0;
+}
+
+.lp-map-popup small {
+  color: var(--site-muted);
+}
+
 .lp-map-link {
   position: absolute;
   z-index: 500;
@@ -1387,10 +1416,6 @@
   .lp-home .lp-media-section {
     color: #181816;
     background: #fbd116;
-  }
-
-  .lp-region-map .leaflet-tile-pane {
-    filter: brightness(.72) saturate(.72);
   }
 
   .lp-region-map .leaflet-control-attribution,

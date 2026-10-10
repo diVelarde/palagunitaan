@@ -45,16 +45,21 @@ async function getMapData(req, res, next) {
       }];
     });
 
-    const siteMarkers = sites.map((site) => ({
-      type: 'site',
-      id: site.id,
-      title: site.name,
-      description: site.description,
-      imageUrl: site.image_url,
-      isHighlighted: Boolean(site.is_highlighted),
-      latitude: Number(site.latitude),
-      longitude: Number(site.longitude),
-    }));
+    const siteMarkers = sites.flatMap((site) => {
+      if (site.latitude == null || site.longitude == null) return [];
+      const coordinates = { latitude: Number(site.latitude), longitude: Number(site.longitude) };
+      if (!isValidCoordinates(coordinates)) return [];
+      return [{
+        type: 'site',
+        id: site.id,
+        title: site.name,
+        description: site.description,
+        imageUrl: site.image_url,
+        isHighlighted: Boolean(site.is_highlighted),
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+      }];
+    });
 
     res.json({ markers: [...entryMarkers, ...siteMarkers] });
   } catch (err) {
