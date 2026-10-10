@@ -184,7 +184,7 @@ export default function MapPage({
                           {marker.imageUrl && (
                             <img
                               src={marker.imageUrl}
-                              alt={`Photo of ${marker.title}`}
+                              alt={marker.title}
                               className="map-popup-photo"
                             />
                           )}
