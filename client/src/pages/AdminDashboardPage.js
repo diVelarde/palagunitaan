@@ -8,6 +8,7 @@ import { validateImageFile } from '../utils/mediaValidation';
 import AuditLogPage from './AuditLogPage';
 
 const TABS = ['Platform Overview', 'Manage Entries', 'Manage Users', 'Role Requests', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
+const EMPTY_ASYNC_LIST = async () => [];
 
 function RoleSelect({ value, onChange, disabled }) {
   return (
@@ -239,10 +240,16 @@ function CategoriesTab({ fetchCategories, createCategory, deleteCategory }) {
   );
 }
 
-function HighlightsTab({ searchEntries, createHighlight }) {
+function HighlightsTab({ fetchHeritageEntries, fetchSites, fetchHighlightHistory, createHighlight }) {
   return (
-    <div className="max-w-md">
-      <HighlightSelector searchEntries={searchEntries} createHighlight={createHighlight} />
+    <div>
+      <p>All heritage entries and heritage sites are listed below. Only published entries can be highlighted.</p>
+      <HighlightSelector
+        fetchHeritageEntries={fetchHeritageEntries}
+        fetchSites={fetchSites}
+        fetchHighlightHistory={fetchHighlightHistory}
+        createHighlight={createHighlight}
+      />
     </div>
   );
 }
@@ -495,8 +502,9 @@ export default function AdminDashboardPage({
   createCategory = async (data) => ({ id: Date.now(), ...data, fields: [] }),
   deleteCategory = async () => {},
   deleteRegion = async () => {},
-  searchEntries = async () => [],
+  searchEntries = EMPTY_ASYNC_LIST,
   createHighlight = async (data) => ({ id: Date.now(), ...data }),
+  fetchHighlightHistory = EMPTY_ASYNC_LIST,
   fetchPending = async () => [],
   fetchPosts = async () => [],
   fetchSites = async () => [],
@@ -505,8 +513,9 @@ export default function AdminDashboardPage({
   fetchAuditLog = async () => [],
   fetchRoleRequests = async () => [],
   reviewRoleRequest = async () => {},
-  fetchHeritageEntries = async () => [],
+  fetchHeritageEntries = EMPTY_ASYNC_LIST,
   deleteHeritageEntry = async () => {},
+  setEducationalAiExcluded = async (id, excluded) => ({ id, ai_educational_excluded: excluded }),
 }) {
   const [tab, setTab] = useState(() => (
     new URLSearchParams(window.location.search).get('tab') === 'audit-log'
@@ -549,7 +558,11 @@ export default function AdminDashboardPage({
       )}
       {tab === 'Manage Users' && <div className="dashboard-admin-panel"><h2>Manage Users</h2><UsersTab fetchUsers={fetchUsers} updateUserRole={updateUserRole} /></div>}
       {tab === 'Manage Entries' && (
-        <AdminEntriesTab fetchEntries={fetchHeritageEntries} deleteEntry={deleteHeritageEntry} />
+        <AdminEntriesTab
+          fetchEntries={fetchHeritageEntries}
+          deleteEntry={deleteHeritageEntry}
+          setEducationalAiExcluded={setEducationalAiExcluded}
+        />
       )}
       {tab === 'Role Requests' && (
         <div className="dashboard-admin-panel">
@@ -568,7 +581,18 @@ export default function AdminDashboardPage({
         <HeritageSitesTab fetchSites={fetchSites} createSite={createSite} deleteSite={deleteSite} />
       )}
       {tab === 'Audit Log' && <div className="dashboard-admin-panel"><AuditLogPage fetchAuditLog={fetchAuditLog} /></div>}
-      {tab === 'Highlights' && <div className="dashboard-admin-panel"><h2>Highlight of the Week</h2><p>Choose which entry appears in the featured spot on the homepage.</p><HighlightsTab searchEntries={searchEntries} createHighlight={createHighlight} /></div>}
+      {tab === 'Highlights' && (
+        <div className="dashboard-admin-panel">
+          <h2>Heritage Entry Highlights</h2>
+          <p>Choose an entry and set its period, dates, and duration for the homepage highlight.</p>
+          <HighlightsTab
+            fetchHeritageEntries={fetchHeritageEntries}
+            fetchSites={fetchSites}
+            fetchHighlightHistory={fetchHighlightHistory}
+            createHighlight={createHighlight}
+          />
+        </div>
+      )}
     </div>
   );
 }

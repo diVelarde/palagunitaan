@@ -70,6 +70,60 @@ function formatAudioLocation(entry) {
     .join(' · ');
 }
 
+function getEntryPreview(content) {
+  const normalizedContent = content?.trim().replace(/\s+/g, ' ');
+  if (!normalizedContent) return '';
+  const sentences = normalizedContent.match(/[^.!?]+(?:[.!?]+|$)/g);
+  return sentences ? sentences.slice(0, 2).join(' ').trim() : normalizedContent;
+}
+
+function HighlightCard({ entry }) {
+  const preview = getEntryPreview(entry.raw_content || entry.euphemistic_content);
+
+  return (
+    <Link
+      to={`/entries/${entry.id}`}
+      className="lp-featured-story lp-featured-story-lead"
+    >
+      <div className="lp-featured-photo">
+        {entry.cover_image_url ? (
+          <img src={entry.cover_image_url} alt="" />
+        ) : (
+          <span aria-hidden="true">{entry.title?.charAt(0) || 'P'}</span>
+        )}
+      </div>
+      <div className="lp-featured-copy">
+        <p className="lp-featured-meta">
+          Highlight of the week{entry.category_auto ? ` · ${entry.category_auto}` : ''}
+        </p>
+        <h3>{entry.title}</h3>
+        {preview && <p className="lp-featured-description">{preview}</p>}
+        <span className="lp-featured-link">Read full entry <span aria-hidden="true">→</span></span>
+      </div>
+    </Link>
+  );
+}
+
+function HighlightSiteCard({ site }) {
+  return (
+    <Link to="/map" className="lp-featured-story lp-featured-story-lead">
+      <div className="lp-featured-photo">
+        {site.site_image_url ? (
+          <img src={site.site_image_url} alt="" />
+        ) : (
+          <span aria-hidden="true">{site.site_name?.charAt(0) || 'P'}</span>
+        )}
+      </div>
+      <div className="lp-featured-copy">
+        <p className="lp-featured-meta">Heritage site · Highlight of the week</p>
+        <h3>{site.site_name}</h3>
+        {site.site_description && <p className="lp-featured-description">{site.site_description}</p>}
+        <span className="lp-featured-link">Explore heritage sites <span aria-hidden="true">→</span></span>
+      </div>
+    </Link>
+  );
+}
+
 function FitLandingMarkers({ markers }) {
   const map = useMap();
 
@@ -282,6 +336,23 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {highlight && (
+        <section className="lp-section lp-featured-section" aria-labelledby="lp-featured-title">
+          <div className="lp-featured-heading">
+            <div>
+              <p className="lp-featured-kicker">Administration selection</p>
+              <h2 id="lp-featured-title">Highlight of the week.</h2>
+            </div>
+          </div>
+          <div className="lp-featured-grid lp-featured-grid-solo">
+            {highlight.target_type === 'site'
+              ? <HighlightSiteCard site={highlight} />
+              : <HighlightCard entry={{ ...highlight, id: highlight.heritage_entry_id }} />}
+          </div>
+        </section>
+      )}
+      {errors.highlight && <p className="lp-feed-error">{errors.highlight}</p>}
+
       <section className="lp-section lp-media-section" aria-labelledby="lp-media-title">
         <p className="lp-media-kicker">Voices of the archive</p>
         <h2 id="lp-media-title">Folklore was heard before it was read.</h2>
@@ -291,11 +362,13 @@ export default function LandingPage() {
               to={`/entries/${currentTrack.entry.id}`}
               className="lp-audio-artwork"
               style={{
-                backgroundImage: `linear-gradient(0deg, rgb(13 13 12 / 62%), transparent 52%), url("${currentTrack.entry.cover_image_url || HERO_IMAGE}")`,
+                backgroundImage: currentTrack.entry.cover_image_url
+                  ? `linear-gradient(0deg, rgb(13 13 12 / 62%), transparent 52%), url("${currentTrack.entry.cover_image_url}")`
+                  : 'linear-gradient(140deg, #3d4736, #181816 78%)',
               }}
               aria-label={`Open ${currentTrack.entry.title}`}
             >
-              <span>Field recording · Bicol</span>
+              <span>Field recording · {formatAudioLocation(currentTrack.entry) || 'Bicol'}</span>
             </Link>
             <div className="lp-audio-content">
               <p className="lp-audio-label">Archive recording</p>
@@ -354,26 +427,6 @@ export default function LandingPage() {
         )}
         {errors.audio && <p className="lp-audio-error" role="status">{errors.audio}</p>}
       </section>
-
-      {highlight && (
-        <section className="lp-section lp-highlight-section">
-          <SectionHeading>Highlight of the Week</SectionHeading>
-          <Link to={`/entries/${highlight.heritage_entry_id}`} className="lp-highlight-card">
-            <div
-              className="lp-highlight-photo"
-              style={{ backgroundImage: `url("${highlight.cover_image_url || HERO_IMAGE}")` }}
-            />
-            <div className="lp-highlight-copy">
-              <p className="lp-highlight-label">★ &nbsp; Highlight of the Week</p>
-              <h3>{highlight.title}</h3>
-              <p className="lp-highlight-description">{highlight.euphemistic_content}</p>
-              {highlight.category_auto && <span className="lp-category-pill">{highlight.category_auto}</span>}
-              <span className="lp-read-link">Read full entry →</span>
-            </div>
-          </Link>
-        </section>
-      )}
-      {errors.highlight && <p className="lp-feed-error">{errors.highlight}</p>}
 
       <section className="lp-section">
         <SectionHeading linkTo="/browse">Browse by Category</SectionHeading>

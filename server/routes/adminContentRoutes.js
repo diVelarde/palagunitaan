@@ -5,6 +5,7 @@ const controller = require('../controllers/adminContentController');
 const router = express.Router();
 
 router.get('/entries', controller.listEntries);
+router.patch('/entries/:id/educational-ai-exclusion', controller.setEducationalAiExcluded);
 router.delete('/entries/:id', controller.deleteEntry);
 
 router.get('/regions', controller.listRegions);

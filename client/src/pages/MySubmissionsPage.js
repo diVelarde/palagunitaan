@@ -195,7 +195,7 @@ export default function MySubmissionsPage({
           {entries.map((entry) => {
             const busy = busyEntryId === entry.id;
             const needsCategory = !entry.category_auto;
-            const needsPlainVersion = !entry.euphemistic_content;
+            const needsPlainVersion = !entry.euphemistic_content && !entry.ai_educational_excluded;
 
             return (
               <li key={entry.id} className="dashboard-submission-card">
@@ -231,7 +231,9 @@ export default function MySubmissionsPage({
                             No category
                           </span>
                         )}
-                        {entry.euphemistic_content ? (
+                        {entry.ai_educational_excluded ? (
+                          <span className="text-[11px] text-amber-700">AI rewrite disabled for language/cultural protection</span>
+                        ) : entry.euphemistic_content ? (
                           <span className="text-[11px] text-gray-500">Plain version ready</span>
                         ) : (
                           <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">

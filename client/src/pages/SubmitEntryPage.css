@@ -79,6 +79,24 @@
   font-weight: 700;
 }
 
+.submit-entry-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--submit-entry-border, #d8d0c4);
+  border-radius: 6px;
+  padding: 14px;
+  color: var(--submit-entry-ink, #39342d);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.submit-entry-consent input {
+  flex: none;
+  margin-top: 3px;
+  accent-color: #ad482d;
+}
+
 .submit-entry-label > span {
   color: var(--site-link-accent);
 }

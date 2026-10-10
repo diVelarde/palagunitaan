@@ -31,7 +31,8 @@ async function findByUser(userId) {
 
 async function findAllForAdmin({ limit = 50, offset = 0 } = {}) {
   const [rows] = await db.query(
-    `SELECT id, title, status, verification_status, submitted_at, published_at
+    `SELECT id, title, status, verification_status, category_auto, cover_image_url,
+            ai_educational_excluded, submitted_at, published_at
      FROM heritage_entries
      ORDER BY submitted_at DESC, id DESC
      LIMIT ? OFFSET ?`,
@@ -126,7 +127,7 @@ async function search({ keyword, category, region, regionId, verificationStatus,
 
 async function create({
   userId, title, rawContent, sourceType, sourceDescription, historicalPeriod,
-  categoryAuto, regionId, historyClaims = [],
+  categoryAuto, regionId, historyClaims = [], aiEducationalExcluded = false,
 }) {
   const connection = await db.getConnection();
   let entryId;
@@ -136,9 +137,10 @@ async function create({
     transactionStarted = true;
     const [result] = await connection.query(
       `INSERT INTO heritage_entries
-        (user_id, title, raw_content, source_type, source_description, historical_period, category_auto, region_id, status, submitted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-      [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null]
+        (user_id, title, raw_content, source_type, source_description, historical_period, category_auto,
+         region_id, ai_educational_excluded, status, submitted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+      [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null, aiEducationalExcluded]
     );
     entryId = result.insertId;
     if (historyClaims.length) {
@@ -172,7 +174,7 @@ async function create({
 async function findNeedingAiEnrichment({ limit = 25 } = {}) {
   const [rows] = await db.query(
     `SELECT * FROM heritage_entries
-     WHERE category_auto IS NULL OR euphemistic_content IS NULL
+     WHERE category_auto IS NULL OR (euphemistic_content IS NULL AND ai_educational_excluded = 0)
      ORDER BY id ASC LIMIT ?`,
     [limit]
   );
@@ -192,6 +194,16 @@ async function updateCategoryAuto(id, categoryAuto) {
 
 async function updateEuphemisticContent(id, euphemisticContent) {
   await db.query('UPDATE heritage_entries SET euphemistic_content = ? WHERE id = ?', [euphemisticContent, id]);
+  return findById(id);
+}
+
+async function setEducationalAiExcluded(id, excluded) {
+  await db.query(
+    `UPDATE heritage_entries
+     SET ai_educational_excluded = ?, euphemistic_content = CASE WHEN ? = 1 THEN NULL ELSE euphemistic_content END
+     WHERE id = ?`,
+    [excluded, excluded, id]
+  );
   return findById(id);
 }
 
@@ -244,6 +256,7 @@ module.exports = {
   updateStatus, 
   updateCategoryAuto, 
   updateEuphemisticContent,
+  setEducationalAiExcluded,
   findAllPublishedForTimeline,
   findPending,
   updateVerification,

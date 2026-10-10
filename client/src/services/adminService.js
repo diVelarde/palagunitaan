@@ -14,6 +14,11 @@ async function deleteHeritageEntry(id) {
   await api.delete(`/api/admin/entries/${id}`);
 }
 
+async function setEducationalAiExcluded(id, aiEducationalExcluded) {
+  const res = await api.patch(`/api/admin/entries/${id}/educational-ai-exclusion`, { aiEducationalExcluded });
+  return res.data.entry;
+}
+
 async function updateUserRole(userId, role) {
   const res = await api.patch(`/api/admin/users/${userId}/role`, { role });
   return res.data.user;
@@ -55,6 +60,7 @@ async function getAuditLog({ limit, offset } = {}) {
 const adminService = {
   getHeritageEntries,
   deleteHeritageEntry,
+  setEducationalAiExcluded,
   getUsers,
   updateUserRole,
   getRegions,

@@ -27,6 +27,7 @@ function validate({ title, rawContent, historyClaims }) {
 const EMPTY_FORM = {
   title: '', rawContent: '', sourceType: SOURCE_TYPES[0],
   sourceDescription: '', historicalPeriod: '', category: '',
+  aiEducationalExcluded: false,
   regionId: '', locationName: '', latitude: '', longitude: '',
   historyClaims: [],
 };
@@ -39,7 +40,15 @@ function describeAi(ai) {
   const bits = [];
   if (ai.category) bits.push(`categorized as “${ai.category}”`);
   if (ai.euphemistic) bits.push('an educational version was generated');
-  if (bits.length) return `AI ${bits.join(', and ')}.`;
+  if (bits.length) {
+    const summary = `AI ${bits.join(', and ')}.`;
+    return ai.euphemisticSkipped
+      ? `${summary} AI educational rewriting was skipped to protect Indigenous or local-language content.`
+      : summary;
+  }
+  if (ai.euphemisticSkipped) {
+    return 'AI educational rewriting was skipped to protect Indigenous or local-language content.';
+  }
   if (ai.errors?.length) {
     return 'The AI could not finish for this entry — it was saved anyway. You can retry from My Submissions.';
   }
@@ -374,6 +383,21 @@ export default function SubmitEntryPage({
             placeholder="e.g., Interview with Lola Maria, 87, Naga City"
           />
         </div>
+
+        <label className="submit-entry-consent">
+          <input
+            type="checkbox"
+            checked={form.aiEducationalExcluded}
+            onChange={(event) => setForm((current) => ({
+              ...current,
+              aiEducationalExcluded: event.target.checked,
+            }))}
+          />
+          <span>
+            This entry includes Indigenous or local-language content, or culturally sensitive wording.
+            Do not generate an AI educational rewrite; show the original account in Educational view.
+          </span>
+        </label>
 
         <section className="submit-entry-history">
           <div className="submit-entry-location-heading">

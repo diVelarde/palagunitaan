@@ -9,7 +9,9 @@ function isValidYear(value) {
 }
 
 async function validateSubmission(req, res, next) {
-  const { title, rawContent, category, regionId, latitude, longitude, historyClaims } = req.body;
+  const {
+    title, rawContent, category, regionId, latitude, longitude, historyClaims, aiEducationalExcluded,
+  } = req.body;
   const errors = [];
 
   if (!title || !title.trim()) errors.push('title is required.');
@@ -17,6 +19,10 @@ async function validateSubmission(req, res, next) {
 
   if (!rawContent || !rawContent.trim()) errors.push('rawContent is required.');
   else if (rawContent.trim().length < 20) errors.push('rawContent must be at least 20 characters.');
+
+  if (aiEducationalExcluded != null && typeof aiEducationalExcluded !== 'boolean') {
+    errors.push('aiEducationalExcluded must be a boolean.');
+  }
 
   if (category != null && category !== '') {
     const configured = await categoryModel.findAllCategories();

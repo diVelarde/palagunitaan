@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 
 const PAGE_SIZE = 50;
 
-export default function AdminEntriesTab({ fetchEntries, deleteEntry }) {
+export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducationalAiExcluded }) {
   const [entries, setEntries] = useState([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [updatingAiExclusionId, setUpdatingAiExclusionId] = useState(null);
   const [confirmingId, setConfirmingId] = useState(null);
   const [error, setError] = useState('');
 
@@ -42,6 +43,21 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry }) {
     }
   }
 
+  async function handleAiExclusionChange(entry, excluded) {
+    setError('');
+    setUpdatingAiExclusionId(entry.id);
+    try {
+      const updated = await setEducationalAiExcluded(entry.id, excluded);
+      setEntries((current) => current.map((item) => (
+        item.id === entry.id ? { ...item, ...updated } : item
+      )));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not update the educational AI exclusion.');
+    } finally {
+      setUpdatingAiExclusionId(null);
+    }
+  }
+
   return (
     <section className="dashboard-admin-panel">
       <h2>Manage Heritage Entries</h2>
@@ -51,11 +67,12 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry }) {
         <p className="text-sm text-gray-500">No entries on this page.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[620px]">
+          <table className="w-full text-sm min-w-[850px]">
             <thead>
               <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
                 <th className="py-2">Title</th>
                 <th className="py-2">Status</th>
+                <th className="py-2">Educational AI</th>
                 <th className="py-2">Submitted</th>
                 <th className="py-2">Action</th>
               </tr>
@@ -63,8 +80,29 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry }) {
             <tbody>
               {entries.map((entry) => (
                 <tr key={entry.id} className="border-b border-gray-100">
-                  <td className="py-3 pr-3">{entry.title}</td>
+                  <td className="py-3 pr-3">
+                    <div className="flex items-center gap-3">
+                      {entry.cover_image_url && (
+                        <img src={entry.cover_image_url} alt="" className="h-12 w-12 rounded object-cover" />
+                      )}
+                      <span>
+                        <strong className="block">{entry.title}</strong>
+                        {entry.category_auto && <small className="text-gray-500">{entry.category_auto}</small>}
+                      </span>
+                    </div>
+                  </td>
                   <td className="py-3 capitalize">{entry.status}</td>
+                  <td className="py-3">
+                    <label className="inline-flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(entry.ai_educational_excluded)}
+                        disabled={updatingAiExclusionId === entry.id}
+                        onChange={(event) => handleAiExclusionChange(entry, event.target.checked)}
+                      />
+                      <span>Bypass AI rewrite</span>
+                    </label>
+                  </td>
                   <td className="py-3">{entry.submitted_at ? new Date(entry.submitted_at).toLocaleDateString() : '—'}</td>
                   <td className="py-3">
                     {confirmingId === entry.id ? (

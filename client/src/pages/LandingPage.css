@@ -82,7 +82,6 @@
 .lp-hero h1,
 .lp-archive-feature h2,
 .lp-section-heading h2,
-.lp-highlight-copy h3,
 .lp-category-copy h3,
 .lp-entry-content h3,
 .lp-blog-card h3 {
@@ -891,8 +890,159 @@
   padding: 62px 24px 10px;
 }
 
-.lp-highlight-section {
-  padding-top: 12px;
+.lp-featured-section {
+  padding-top: 68px;
+  padding-bottom: 68px;
+}
+
+.lp-featured-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 29px;
+}
+
+.lp-featured-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 15px;
+  color: var(--lp-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.lp-featured-kicker::before {
+  width: 24px;
+  height: 2px;
+  background: var(--lp-gold);
+  content: '';
+}
+
+.lp-featured-heading h2 {
+  margin: 0;
+  font-family: var(--site-display-font-family);
+  font-size: clamp(42px, 5.6vw, 72px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: .96;
+}
+
+.lp-featured-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(280px, .95fr);
+  align-items: stretch;
+  gap: 20px;
+}
+
+.lp-featured-grid-solo {
+  grid-template-columns: 1fr;
+}
+
+.lp-featured-story {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--lp-line);
+  color: var(--lp-ink);
+  background: var(--lp-surface);
+  text-decoration: none;
+  transition: border-color .2s ease, transform .2s ease;
+}
+
+.lp-featured-story:hover {
+  transform: translateY(-3px);
+  border-color: var(--lp-gold);
+}
+
+.lp-featured-photo {
+  position: relative;
+  display: grid;
+  min-height: 180px;
+  overflow: hidden;
+  place-items: center;
+  color: #fffdf8;
+  background:
+    radial-gradient(ellipse at 25% 30%, rgb(251 209 22 / 30%), transparent 42%),
+    linear-gradient(140deg, #3d4736, #181816 78%);
+  font-family: var(--site-display-font-family);
+  font-size: 54px;
+}
+
+.lp-featured-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+
+.lp-featured-story:hover .lp-featured-photo img {
+  transform: scale(1.035);
+}
+
+.lp-featured-story-lead .lp-featured-photo {
+  min-height: 480px;
+}
+
+.lp-featured-copy {
+  min-height: 118px;
+  padding: 20px 22px 23px;
+}
+
+.lp-featured-story-lead .lp-featured-copy {
+  min-height: 154px;
+  padding: 22px 24px 26px;
+}
+
+.lp-featured-meta {
+  margin: 0 0 9px;
+  color: var(--lp-rust);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.lp-featured-copy h3 {
+  margin: 0;
+  font-family: var(--site-display-font-family);
+  font-size: clamp(22px, 2.2vw, 31px);
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+}
+
+.lp-featured-story-lead .lp-featured-copy h3 {
+  font-size: clamp(34px, 4vw, 52px);
+}
+
+.lp-featured-description {
+  margin: 10px 0 0;
+  color: var(--site-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.lp-featured-link {
+  display: inline-block;
+  margin-top: 18px;
+  border-bottom: 1px solid var(--lp-gold);
+  padding-bottom: 5px;
+  color: var(--lp-rust);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.lp-featured-story:focus-visible {
+  outline: 3px solid var(--lp-gold);
+  outline-offset: 4px;
 }
 
 .lp-section-heading {
@@ -925,79 +1075,6 @@
 .lp-section-heading > a:hover,
 .lp-blog-card:hover strong {
   color: var(--lp-rust);
-}
-
-.lp-highlight-card {
-  display: grid;
-  min-height: 420px;
-  grid-template-columns: 1.1fr .9fr;
-  overflow: hidden;
-  border: 1px solid var(--lp-line);
-  color: inherit;
-  background: var(--lp-surface);
-  text-decoration: none;
-}
-
-.lp-highlight-photo {
-  min-height: 390px;
-  background-color: var(--site-charcoal);
-  background-size: cover;
-  background-position: center;
-}
-
-.lp-highlight-copy {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(26px, 5vw, 64px);
-}
-
-.lp-highlight-label {
-  margin: 0 0 17px;
-  color: var(--lp-rust);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-.lp-highlight-copy h3 {
-  margin: 0 0 15px;
-  font-size: clamp(34px, 4.3vw, 56px);
-  letter-spacing: -.025em;
-  line-height: .98;
-}
-
-.lp-highlight-description {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 0 0 18px;
-  color: var(--site-muted);
-  font-size: 15px;
-  line-height: 1.7;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-.lp-category-pill {
-  display: inline-block;
-  margin: 0 0 16px;
-  border-left: 3px solid var(--lp-gold);
-  padding: 3px 0 3px 10px;
-  color: var(--site-muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-}
-
-.lp-read-link {
-  color: var(--lp-rust);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
 }
 
 .lp-category-grid {
@@ -1482,10 +1559,6 @@
     font-size: 14px;
   }
 
-  .lp-highlight-card {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .lp-entry-image {
     width: 135px;
   }
@@ -1726,8 +1799,20 @@
     padding: 47px 20px 6px;
   }
 
-  .lp-highlight-section {
-    padding-top: 0;
+  .lp-featured-section {
+    padding-top: 47px;
+    padding-bottom: 47px;
+  }
+
+  .lp-featured-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 19px;
+  }
+
+  .lp-featured-heading h2 {
+    font-size: clamp(37px, 10vw, 52px);
   }
 
   .lp-section-heading {
@@ -1741,20 +1826,17 @@
     font-size: clamp(37px, 10vw, 52px);
   }
 
-  .lp-highlight-card {
-    grid-template-columns: 1fr;
+  .lp-featured-story-lead .lp-featured-photo {
+    min-height: 260px;
   }
 
-  .lp-highlight-photo {
-    min-height: 230px;
+  .lp-featured-story-lead .lp-featured-copy {
+    min-height: 0;
+    padding: 20px;
   }
 
-  .lp-highlight-copy {
-    padding: 25px 22px;
-  }
-
-  .lp-highlight-copy h3 {
-    font-size: 38px;
+  .lp-featured-story-lead .lp-featured-copy h3 {
+    font-size: 36px;
   }
 
   .lp-category-grid {

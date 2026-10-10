@@ -109,6 +109,7 @@ function AppShell() {
                       deleteCategory={adminService.deleteCategory}
                       searchEntries={heritageService.searchEntries}
                       createHighlight={highlightService.createHighlight}
+                      fetchHighlightHistory={highlightService.getHighlightHistory}
                       fetchPending={reviewService.getPendingEntries}
                       fetchPosts={blogService.getPosts}
                       fetchSites={heritageSiteService.getSites}
@@ -119,6 +120,7 @@ function AppShell() {
                       reviewRoleRequest={roleRequestService.reviewRequest}
                       fetchHeritageEntries={adminService.getHeritageEntries}
                       deleteHeritageEntry={adminService.deleteHeritageEntry}
+                      setEducationalAiExcluded={adminService.setEducationalAiExcluded}
                     />
                   }
                 />
@@ -141,13 +143,13 @@ function AppShell() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
         <AuthProvider>
           <AppShell />
         </AuthProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }
 

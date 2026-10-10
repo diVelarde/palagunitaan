@@ -151,8 +151,6 @@ textarea {
 
   .lp-search,
   .lp-search input,
-  .lp-highlight-card,
-  .lp-highlight-copy,
   .lp-region-card,
   .lp-entry-card,
   .lp-blog-card,
@@ -170,12 +168,7 @@ textarea {
     color: var(--site-ink) !important;
   }
 
-  .lp-highlight-card {
-    background: linear-gradient(var(--site-card), var(--site-card)) padding-box,
-      linear-gradient(110deg, var(--site-gold), var(--site-link-accent), var(--site-gold)) border-box !important;
-  }
-
-  .lp-home :is(.lp-entry-content > p, .lp-entry-meta, .lp-entry-details, .lp-region-card small, .lp-blog-card p, .lp-highlight-description),
+  .lp-home :is(.lp-entry-content > p, .lp-entry-meta, .lp-entry-details, .lp-region-card small, .lp-blog-card p, .lp-featured-description),
   .browse-page :is(p, .browse-filter-control, .browse-period-select select),
   .entry-detail-page :is(.entry-reading-copy, .entry-source-note, .entry-history-intro, .entry-history-list li, .entry-info-card dd, .entry-info-card h2, .entry-history h2, .entry-source-note strong, .entry-history-list li > strong, .entry-category-label, .entry-history-source-type),
   .heritage-map-page :is(.map-sidebar-label, .map-filter-field > span, .map-filter-counts, .map-sidebar-footer, .heritage-map-toolbar p),
@@ -207,7 +200,6 @@ textarea {
 
   .entry-story-card,
   .entry-info-card,
-  .lp-highlight-copy,
   .lp-region-card,
   .lp-entry-card,
   .lp-blog-card,

@@ -57,7 +57,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
   const location = formatLocation(entry);
   const hasEducationalVersion = Boolean(entry.euphemistic_content?.trim());
   const bodyText = view === 'educational'
-    ? entry.euphemistic_content
+    ? entry.euphemistic_content?.trim() || entry.raw_content
     : entry.raw_content;
   const mapUrl = entry.latitude != null && entry.longitude != null
     ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(entry.latitude)}&mlon=${encodeURIComponent(entry.longitude)}#map=14/${encodeURIComponent(entry.latitude)}/${encodeURIComponent(entry.longitude)}`
@@ -107,7 +107,9 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
             )}
             {view === 'educational' && !hasEducationalVersion && (
               <p className="entry-editorial-note">
-                An educational summary is not available yet, so the original account is shown.
+                {entry.ai_educational_excluded
+                  ? 'AI rewriting is disabled for this entry to protect Indigenous or local-language content. The original account is shown.'
+                  : 'An educational summary is not available yet, so the original account is shown.'}
               </p>
             )}
           </section>

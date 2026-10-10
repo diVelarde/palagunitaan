@@ -22,6 +22,21 @@ async function deleteEntry(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function setEducationalAiExcluded(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return res.status(400).json({ message: 'Entry ID must be a positive integer.' });
+    }
+    if (typeof req.body.aiEducationalExcluded !== 'boolean') {
+      return res.status(400).json({ message: 'aiEducationalExcluded must be a boolean.' });
+    }
+    const entry = await heritageEntryModel.setEducationalAiExcluded(id, req.body.aiEducationalExcluded);
+    if (!entry) return res.status(404).json({ message: 'Heritage entry not found.' });
+    res.json({ entry });
+  } catch (err) { next(err); }
+}
+
 async function listRegions(req, res, next) {
   try { res.json({ regions: await geographicTagModel.findAllRegions() }); } catch (err) { next(err); }
 }
@@ -94,6 +109,7 @@ async function deleteField(req, res, next) {
 module.exports = { 
     listEntries,
     deleteEntry,
+    setEducationalAiExcluded,
     listRegions, 
     createRegion, 
     updateRegion, 

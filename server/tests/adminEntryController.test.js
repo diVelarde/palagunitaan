@@ -3,7 +3,11 @@ jest.mock('../models/categoryModel');
 jest.mock('../models/heritageEntryModel');
 
 const heritageEntryModel = require('../models/heritageEntryModel');
-const { listEntries, deleteEntry } = require('../controllers/adminContentController');
+const {
+  listEntries,
+  deleteEntry,
+  setEducationalAiExcluded,
+} = require('../controllers/adminContentController');
 
 function response() {
   return {
@@ -48,5 +52,31 @@ describe('admin heritage entry management', () => {
     expect(heritageEntryModel.deleteById).toHaveBeenCalledWith(22);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.send).toHaveBeenCalled();
+  });
+
+  it('sets the educational AI exclusion for an entry', async () => {
+    const entry = { id: 22, ai_educational_excluded: 1 };
+    heritageEntryModel.setEducationalAiExcluded.mockResolvedValue(entry);
+    const res = response();
+
+    await setEducationalAiExcluded({
+      params: { id: '22' },
+      body: { aiEducationalExcluded: true },
+    }, res, jest.fn());
+
+    expect(heritageEntryModel.setEducationalAiExcluded).toHaveBeenCalledWith(22, true);
+    expect(res.json).toHaveBeenCalledWith({ entry });
+  });
+
+  it('rejects invalid educational AI exclusion values', async () => {
+    const res = response();
+
+    await setEducationalAiExcluded({
+      params: { id: '22' },
+      body: { aiEducationalExcluded: 'true' },
+    }, res, jest.fn());
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(heritageEntryModel.setEducationalAiExcluded).not.toHaveBeenCalled();
   });
 });

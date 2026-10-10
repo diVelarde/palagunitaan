@@ -9,7 +9,7 @@ function resolveCategory(requestedCategory, categories = geminiService.CATEGORY_
 }
 
 async function enrichEntry(entry, { skipCategory = false } = {}) {
-  const ai = { category: null, euphemistic: false, errors: [] };
+  const ai = { category: null, euphemistic: false, euphemisticSkipped: false, errors: [] };
 
   if (!skipCategory) {
     try {
@@ -22,13 +22,25 @@ async function enrichEntry(entry, { skipCategory = false } = {}) {
     }
   }
 
-  try {
-    const euphemisticContent = await geminiService.generateEuphemisticVersion(entry.raw_content);
-    await heritageEntryModel.updateEuphemisticContent(entry.id, euphemisticContent);
-    ai.euphemistic = true;
-  } catch (err) {
-    console.error('Euphemistic generation failed for entry', entry.id, '-', err.message);
-    ai.errors.push('euphemistic');
+  if (entry.ai_educational_excluded) {
+    if (entry.euphemistic_content) {
+      try {
+        await heritageEntryModel.updateEuphemisticContent(entry.id, null);
+      } catch (err) {
+        console.error('Could not clear excluded educational rewrite for entry', entry.id, '-', err.message);
+        ai.errors.push('euphemistic');
+      }
+    }
+    ai.euphemisticSkipped = true;
+  } else {
+    try {
+      const euphemisticContent = await geminiService.generateEuphemisticVersion(entry.raw_content);
+      await heritageEntryModel.updateEuphemisticContent(entry.id, euphemisticContent);
+      ai.euphemistic = true;
+    } catch (err) {
+      console.error('Euphemistic generation failed for entry', entry.id, '-', err.message);
+      ai.errors.push('euphemistic');
+    }
   }
 
   ai.aiConfigured = geminiService.isConfigured();
@@ -37,7 +49,7 @@ async function enrichEntry(entry, { skipCategory = false } = {}) {
 
 async function submitEntry({
   userId, title, rawContent, sourceType, sourceDescription, historicalPeriod,
-  category, regionId, historyClaims,
+  category, regionId, historyClaims, aiEducationalExcluded = false,
 }) {
   const possibleDuplicates = await duplicateDetectionService.findPossibleDuplicates(title);
 
@@ -54,6 +66,7 @@ async function submitEntry({
     categoryAuto: chosenCategory,
     regionId,
     historyClaims,
+    aiEducationalExcluded,
   });
 
   const ai = await enrichEntry(entry, { skipCategory: Boolean(chosenCategory) });

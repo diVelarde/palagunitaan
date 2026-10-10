@@ -64,4 +64,23 @@ describe('heritage entry history claim validation', () => {
     expect(next).toHaveBeenCalledTimes(1);
     expect(res.statusCode).toBe(200);
   });
+
+  it('accepts the language-protection AI exclusion flag', async () => {
+    const { next, res } = await validate({
+      ...validEntry,
+      aiEducationalExcluded: true,
+    });
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('rejects non-boolean AI exclusion values', async () => {
+    const { next, res } = await validate({
+      ...validEntry,
+      aiEducationalExcluded: 'true',
+    });
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(400);
+    expect(res.payload.errors).toContain('aiEducationalExcluded must be a boolean.');
+  });
 });

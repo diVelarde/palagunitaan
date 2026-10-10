@@ -5,7 +5,7 @@ jest.mock('../services/duplicateDetectionService');
 const heritageEntryModel = require('../models/heritageEntryModel');
 const geminiService = require('../services/geminiService');
 const duplicateDetectionService = require('../services/duplicateDetectionService');
-const { submitEntry } = require('../services/heritageEntryService');
+const { submitEntry, enrichEntry } = require('../services/heritageEntryService');
 
 const BASE_ENTRY = {
   id: 1, user_id: 7, title: 'The Aswang of San Isidro',
@@ -54,6 +54,19 @@ describe('submitEntry', () => {
     expect(entry.id).toBe(1);
     expect(entry.euphemistic_content).toBeUndefined();
     expect(heritageEntryModel.updateCategoryAuto).toHaveBeenCalled();
+  });
+
+  it('skips and clears AI educational text for protected language content', async () => {
+    const ai = await enrichEntry({
+      ...BASE_ENTRY,
+      ai_educational_excluded: 1,
+      euphemistic_content: 'Previously generated rewrite',
+    }, { skipCategory: true });
+
+    expect(geminiService.generateEuphemisticVersion).not.toHaveBeenCalled();
+    expect(heritageEntryModel.updateEuphemisticContent).toHaveBeenCalledWith(1, null);
+    expect(ai.euphemisticSkipped).toBe(true);
+    expect(ai.errors).toEqual([]);
   });
 
   it('surfaces possible duplicates without blocking submission', async () => {
