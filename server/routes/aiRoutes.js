@@ -11,7 +11,7 @@ router.get('/health', requireAuth, requireRole('admin'), async (req, res) => {
       configured: false,
       model: geminiService.MODEL_NAME,
       message:
-        'GEMINI_API_KEY is not set on this server. AI categorization and plain-language versions are disabled, and entries are saved without them.',
+        'GEMINI_API_KEY is not set on this server. AI categorization and educational versions are disabled, and entries are saved without them.',
     });
   }
 
@@ -28,8 +28,12 @@ router.get('/health', requireAuth, requireRole('admin'), async (req, res) => {
   }
 });
 
-router.get('/categories', (req, res) => {
-  res.json({ categories: geminiService.CATEGORY_LIST });
+router.get('/categories', async (req, res, next) => {
+  try {
+    res.json({ categories: await geminiService.getCategories() });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

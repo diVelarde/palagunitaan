@@ -2,10 +2,10 @@ const heritageEntryModel = require('../models/heritageEntryModel');
 const geminiService = require('./geminiService');
 const duplicateDetectionService = require('./duplicateDetectionService');
 
-function resolveCategory(requestedCategory) {
+function resolveCategory(requestedCategory, categories = geminiService.CATEGORY_LIST) {
   if (!requestedCategory) return null;
   const wanted = String(requestedCategory).trim().toLowerCase();
-  return geminiService.CATEGORY_LIST.find((c) => c.toLowerCase() === wanted) || null;
+  return categories.find((categoryName) => categoryName.toLowerCase() === wanted) || null;
 }
 
 async function enrichEntry(entry, { skipCategory = false } = {}) {
@@ -41,7 +41,8 @@ async function submitEntry({
 }) {
   const possibleDuplicates = await duplicateDetectionService.findPossibleDuplicates(title);
 
-  const chosenCategory = resolveCategory(category);
+  const categoryOptions = await geminiService.getCategories();
+  const chosenCategory = resolveCategory(category, categoryOptions.length ? categoryOptions : geminiService.CATEGORY_LIST);
 
   const entry = await heritageEntryModel.create({
     userId,

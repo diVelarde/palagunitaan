@@ -154,7 +154,31 @@
 .about-values {
   border-block: 1px solid var(--site-border);
   padding-block: 70px 80px;
-  background: var(--site-card);
+  border-color: rgb(24 24 22 / 16%);
+  background: #fbd116;
+  color: #181816;
+}
+
+.about-values .about-eyebrow,
+.about-values .about-value-grid h2 {
+  color: #181816;
+}
+
+.about-values .about-eyebrow::before {
+  background: #181816;
+}
+
+.about-values .about-value-grid {
+  border-color: rgb(24 24 22 / 20%);
+}
+
+.about-values .about-value-grid article {
+  border-color: rgb(24 24 22 / 20%);
+}
+
+.about-values .about-value-grid article > span,
+.about-values .about-value-grid p {
+  color: #433800;
 }
 
 .about-value-grid {
@@ -199,12 +223,6 @@
   justify-content: space-between;
   gap: 30px;
   padding-block: 82px 96px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .about-values {
-    background: var(--site-card);
-  }
 }
 
 @media (max-width: 680px) {

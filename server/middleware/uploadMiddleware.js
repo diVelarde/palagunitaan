@@ -7,7 +7,7 @@ function uploadSingle(fieldName, { imagesOnly = false } = {}) {
   const allowed = imagesOnly ? ['image/'] : ALLOWED_MIME_PREFIXES;
   const rejectionMessage = imagesOnly
     ? 'Only image files can be uploaded.'
-    : 'Only image or audio files can be uploaded.';
+    : 'Only image, audio, or video files can be uploaded.';
 
   const instance = multer({
     storage: multer.memoryStorage(),

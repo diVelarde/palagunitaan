@@ -10,11 +10,11 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-async function create({ createdBy, name, description, latitude, longitude, isHighlighted, highlightPeriod }) {
+async function create({ createdBy, name, description, latitude, longitude, isHighlighted, highlightPeriod, imageUrl }) {
   const [result] = await db.query(
-    `INSERT INTO heritage_sites (created_by, name, description, latitude, longitude, is_highlighted, highlight_period)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [createdBy, name, description || null, latitude, longitude, Boolean(isHighlighted), highlightPeriod || null]
+    `INSERT INTO heritage_sites (created_by, name, description, latitude, longitude, is_highlighted, highlight_period, image_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [createdBy, name, description || null, latitude, longitude, isHighlighted === true || isHighlighted === 'true' || isHighlighted === '1', highlightPeriod || null, imageUrl || null]
   );
   return findById(result.insertId);
 }

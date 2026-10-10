@@ -1,4 +1,5 @@
 const { CATEGORY_LIST } = require('../services/geminiService');
+const categoryModel = require('../models/categoryModel');
 
 function isValidYear(value) {
   return (typeof value === 'number' || (typeof value === 'string' && /^\d{1,4}$/.test(value)))
@@ -7,7 +8,7 @@ function isValidYear(value) {
     && Number(value) <= 9999;
 }
 
-function validateSubmission(req, res, next) {
+async function validateSubmission(req, res, next) {
   const { title, rawContent, category, regionId, latitude, longitude, historyClaims } = req.body;
   const errors = [];
 
@@ -18,8 +19,10 @@ function validateSubmission(req, res, next) {
   else if (rawContent.trim().length < 20) errors.push('rawContent must be at least 20 characters.');
 
   if (category != null && category !== '') {
-    const ok = CATEGORY_LIST.some((c) => c.toLowerCase() === String(category).trim().toLowerCase());
-    if (!ok) errors.push(`category must be one of: ${CATEGORY_LIST.join(', ')}.`);
+    const configured = await categoryModel.findAllCategories();
+    const allowed = [...CATEGORY_LIST, ...configured.map((item) => item.name)];
+    const ok = allowed.some((c) => c.toLowerCase() === String(category).trim().toLowerCase());
+    if (!ok) errors.push(`category must be one of: ${allowed.join(', ')}.`);
   }
 
   if (regionId != null && regionId !== '' && (!Number.isInteger(Number(regionId)) || Number(regionId) < 1)) {
@@ -80,10 +83,12 @@ function validateSubmission(req, res, next) {
   next();
 }
 
-function validateCategoryUpdate(req, res, next) {
+async function validateCategoryUpdate(req, res, next) {
   const { category } = req.body;
-  if (!category || !CATEGORY_LIST.includes(category)) {
-    return res.status(400).json({ message: `category must be one of: ${CATEGORY_LIST.join(', ')}.` });
+  const configured = await categoryModel.findAllCategories();
+  const allowed = [...CATEGORY_LIST, ...configured.map((item) => item.name)];
+  if (!category || !allowed.includes(category)) {
+    return res.status(400).json({ message: `category must be one of: ${allowed.join(', ')}.` });
   }
   next();
 }

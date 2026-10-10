@@ -6,7 +6,7 @@ async function uploadMedia(req, res, next) {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
     if (!cloudinaryService.isAllowedMimeType(req.file.mimetype)) {
-      return res.status(400).json({ message: 'Only image or audio files are allowed.' });
+      return res.status(400).json({ message: 'Only image, audio, or video files are allowed.' });
     }
 
     const entry = await heritageEntryModel.findById(req.params.id);
@@ -17,7 +17,11 @@ async function uploadMedia(req, res, next) {
     }
 
     const result = await cloudinaryService.uploadBuffer(req.file.buffer, { mimetype: req.file.mimetype });
-    const asset = await multimediaAssetModel.create({ heritageEntryId: entry.id, fileUrl: result.secure_url, fileType: result.resource_type });
+    const asset = await multimediaAssetModel.create({
+      heritageEntryId: entry.id,
+      fileUrl: result.secure_url,
+      fileType: result.resource_type,
+    });
     res.status(201).json({ asset });
   } catch (err) { next(err); }
 }

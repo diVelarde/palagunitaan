@@ -9,16 +9,19 @@ const ROLE_WORKSPACES = {
   contributor: [
     { to: '/dashboard', label: 'Overview', end: true },
     { to: '/dashboard/submissions', label: 'My Submissions' },
+    { to: '/dashboard/submit', label: 'Submit an Entry' },
   ],
   validator: [
     { to: '/dashboard', label: 'Overview', end: true },
     { to: '/validate', label: 'Validation Queue' },
     { to: '/dashboard/submissions', label: 'My Submissions' },
+    { to: '/dashboard/submit', label: 'Submit an Entry' },
   ],
   admin: [
     { to: '/dashboard', label: 'Overview', end: true },
     { to: '/admin', label: 'Admin' },
     { to: '/dashboard/submissions', label: 'My Submissions' },
+    { to: '/dashboard/submit', label: 'Submit an Entry' },
   ],
 };
 
@@ -38,7 +41,7 @@ export default function DashboardLayout() {
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar-heading">
           <img
-            src="/image__3.1_-removebg-preview.png"
+            src="/Palagunitaan - Logo/3.png"
             alt=""
             aria-hidden="true"
             className="dashboard-brand-mark"

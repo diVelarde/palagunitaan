@@ -1,20 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
+import heritageService from '../services/heritageService';
+import mapService from '../services/mapService';
 import './BrowsePage.css';
 
 const VERIFICATION_OPTIONS = ['verified', 'disputed', 'unverified'];
-const CATEGORY_OPTIONS = [
-  'Legends & Myths',
-  'Folk Songs & Chants',
-  'Rituals & Ceremonies',
-  'Folk Dance',
-  'Culinary Heritage',
-  'Oral Traditions',
-  'Beliefs & Superstitions',
-  'Crafts',
-];
-const REGION_OPTIONS = ['Naga City', 'Camarines Sur', 'Pili', 'Iriga City'];
 const DEBOUNCE_MS = 350;
 
 const VERIFICATION_STYLES = {
@@ -52,13 +43,18 @@ function EntryCard({ entry }) {
 
 export default function BrowsePage({
   searchEntries = async () => [],
+  fetchCategories = heritageService.getCategories,
+  fetchRegions = mapService.getRegions,
 }) {
   const [searchParams] = useSearchParams();
   const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '');
   const [category, setCategory] = useState(() => searchParams.get('category') || '');
-  const [region, setRegion] = useState(() => searchParams.get('region') || '');
+  const [regionId, setRegionId] = useState(() => searchParams.get('regionId') || '');
   const [verificationStatus, setVerificationStatus] = useState('');
   const [historicalPeriod, setHistoricalPeriod] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [taxonomyError, setTaxonomyError] = useState('');
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchError, setSearchError] = useState('');
@@ -66,11 +62,28 @@ export default function BrowsePage({
 
   useEffect(() => {
     let active = true;
+    Promise.all([fetchCategories(), fetchRegions()])
+      .then(([categoryList, regionList]) => {
+        if (!active) return;
+        setCategories(categoryList || []);
+        setRegions(regionList || []);
+        setTaxonomyError('');
+      })
+      .catch((err) => {
+        if (active) {
+          setTaxonomyError(err.response?.data?.message || 'Could not load archive categories and regions.');
+        }
+      });
+    return () => { active = false; };
+  }, [fetchCategories, fetchRegions]);
+
+  useEffect(() => {
+    let active = true;
     setLoading(true);
     setSearchError('');
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      searchEntries({ keyword, verificationStatus, historicalPeriod, category, region })
+      searchEntries({ keyword, verificationStatus, historicalPeriod, category, regionId })
         .then((results) => {
           if (active) setEntries(results || []);
         })
@@ -85,7 +98,7 @@ export default function BrowsePage({
       active = false;
       clearTimeout(debounceRef.current);
     };
-  }, [keyword, verificationStatus, historicalPeriod, category, region, searchEntries]);
+  }, [keyword, verificationStatus, historicalPeriod, category, regionId, searchEntries]);
 
   return (
     <main className="browse-page site-page-surface">
@@ -112,11 +125,18 @@ export default function BrowsePage({
           </select>
           <select aria-label="Filter by category" value={category} onChange={(e) => setCategory(e.target.value)} className="browse-filter-control">
             <option value="">Any category</option>
-            {CATEGORY_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            {categories.map((option) => {
+              const name = typeof option === 'string' ? option : option.name;
+              return <option key={name} value={name}>{name}</option>;
+            })}
           </select>
-          <select aria-label="Filter by region" value={region} onChange={(e) => setRegion(e.target.value)} className="browse-filter-control">
+          <select aria-label="Filter by region and province" value={regionId} onChange={(e) => setRegionId(e.target.value)} className="browse-filter-control">
             <option value="">Any region</option>
-            {REGION_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            {regions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}{option.province ? ` — ${option.province}` : ''}
+              </option>
+            ))}
           </select>
           <div className="browse-period-select">
             <HistoricalPeriodSelector
@@ -128,6 +148,11 @@ export default function BrowsePage({
           </div>
         </div>
 
+        {taxonomyError && (
+          <p className="browse-page-message browse-page-error" role="status">
+            {taxonomyError}
+          </p>
+        )}
         {searchError && (
           <p className="browse-page-message browse-page-error" role="alert">
             {searchError}

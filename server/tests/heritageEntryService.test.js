@@ -22,6 +22,7 @@ beforeEach(() => {
   duplicateDetectionService.findPossibleDuplicates.mockResolvedValue([]);
   geminiService.categorizeContent.mockResolvedValue({ category: 'Legend', flaggedWords: [] });
   geminiService.generateEuphemisticVersion.mockResolvedValue('A long time ago, there was a story about a shapeshifter...');
+  geminiService.getCategories.mockResolvedValue(geminiService.CATEGORY_LIST);
   heritageEntryModel.updateCategoryAuto.mockImplementation(async (id, categoryAuto) => {
     storedEntry = { ...storedEntry, category_auto: categoryAuto };
   });

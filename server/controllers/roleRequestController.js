@@ -6,7 +6,12 @@ async function createRequest(req, res, next) {
   try {
     const existing = await roleRequestModel.findPendingForUser(req.user.id);
     if (existing) return res.status(409).json({ message: 'You already have a pending role request.' });
-    const request = await roleRequestModel.create({ userId: req.user.id, requestedRole: req.body.requestedRole, message: req.body.message });
+    const request = await roleRequestModel.create({
+      userId: req.user.id,
+      requestedRole: req.body.requestedRole,
+      qualifications: req.body.qualifications,
+      message: req.body.message,
+    });
     res.status(201).json({ request });
   } catch (err) { next(err); }
 }

@@ -84,6 +84,7 @@ async function searchEntries(req, res, next) {
       keyword: req.query.keyword,
       category: req.query.category,
       region: req.query.region,
+      regionId: req.query.regionId,
       verificationStatus: req.query.verificationStatus,
       historicalPeriod: req.query.historicalPeriod,
       limit,

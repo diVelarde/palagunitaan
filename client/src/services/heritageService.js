@@ -25,9 +25,9 @@ async function getMyEntries() {
   return res.data.entries;
 }
 
-async function searchEntries({ keyword, verificationStatus, historicalPeriod, category, region, limit, offset } = {}) {
+async function searchEntries({ keyword, verificationStatus, historicalPeriod, category, region, regionId, limit, offset } = {}) {
   const res = await api.get('/api/heritage-entries/search', {
-    params: { keyword, verificationStatus, historicalPeriod, category, region, limit, offset },
+    params: { keyword, verificationStatus, historicalPeriod, category, region, regionId, limit, offset },
   });
   return res.data.entries;
 }

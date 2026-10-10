@@ -4,6 +4,7 @@ import HighlightSelector from '../components/HighlightSelector';
 import ProfilePanel from '../components/ProfilePanel';
 import RoleRequestsTab from '../components/RoleRequestsTab';
 import AdminEntriesTab from '../components/AdminEntriesTab';
+import { validateImageFile } from '../utils/mediaValidation';
 import AuditLogPage from './AuditLogPage';
 
 const TABS = ['Platform Overview', 'Manage Entries', 'Manage Users', 'Role Requests', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
@@ -318,6 +319,8 @@ function HeritageSitesTab({ fetchSites, createSite, deleteSite }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', description: '', latitude: '', longitude: '' });
+  const [photo, setPhoto] = useState(null);
+  const [photoError, setPhotoError] = useState('');
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
@@ -355,9 +358,12 @@ function HeritageSitesTab({ fetchSites, createSite, deleteSite }) {
         description: form.description.trim() || null,
         latitude,
         longitude,
+        photo,
       });
       setSites((current) => [site, ...current]);
       setForm({ name: '', description: '', latitude: '', longitude: '' });
+      setPhoto(null);
+      setPhotoError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Could not add this heritage site.');
     } finally {
@@ -390,11 +396,15 @@ function HeritageSitesTab({ fetchSites, createSite, deleteSite }) {
           {sites.map((site) => (
             <div key={site.id} className="dashboard-site-row">
               <div className="dashboard-site-summary">
-                <div className="dashboard-site-thumbnail" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" focusable="false">
-                    <path d="M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Z" />
-                    <circle cx="12" cy="9" r="2.3" />
-                  </svg>
+                <div className="dashboard-site-thumbnail">
+                  {site.image_url ? (
+                    <img src={site.image_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Z" />
+                      <circle cx="12" cy="9" r="2.3" />
+                    </svg>
+                  )}
                 </div>
                 <div className="dashboard-site-copy">
                   <h3>{site.name}</h3>
@@ -424,6 +434,22 @@ function HeritageSitesTab({ fetchSites, createSite, deleteSite }) {
           onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
           className="dashboard-admin-input"
         />
+        <label className="text-sm text-gray-600">
+          Site photo (optional)
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const selected = event.target.files?.[0] || null;
+              const issue = selected ? validateImageFile(selected) : null;
+              setPhotoError(issue || '');
+              if (!issue && selected) setPhoto(selected);
+              if (issue) setPhoto(null);
+            }}
+            className="mt-1 block w-full text-xs"
+          />
+        </label>
+        {photoError && <p className="text-xs text-red-600" role="alert">{photoError}</p>}
         <input
           type="text"
           placeholder="Short description"

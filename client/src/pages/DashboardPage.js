@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import ProfilePanel from '../components/ProfilePanel';
-import BecomeContributorPrompt from '../components/BecomeContributorPrompt';
 import CommunityTab from '../components/CommunityTab';
 import RoleSwitcher from '../components/RoleSwitcher';
 import RoleRequestForm from '../components/RoleRequestForm';
@@ -85,7 +84,7 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
         </section>
       )}
 
-      {(user?.role === 'contributor' || user?.role === 'validator') && (
+      {user && ['public', 'contributor', 'validator'].includes(user.role) && (
         <section className="dashboard-section-card">
           <RoleRequestForm
             createRequest={roleRequestService.createRequest}
@@ -103,9 +102,8 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
         <div className="dashboard-section-card">
           <h2>Start contributing</h2>
           <p className="mb-4 text-sm leading-6 text-[#82766c]">
-            Know a story, song, or tradition that should be preserved? Become a contributor and share it with the community.
+            Know a story, song, or tradition that should be preserved? Request contributor access and share it with the community.
           </p>
-          <BecomeContributorPrompt />
         </div>
       )}
     </div>

@@ -38,7 +38,7 @@ function describeAi(ai) {
   }
   const bits = [];
   if (ai.category) bits.push(`categorized as “${ai.category}”`);
-  if (ai.euphemistic) bits.push('a plain-language version was generated');
+  if (ai.euphemistic) bits.push('an educational version was generated');
   if (bits.length) return `AI ${bits.join(', and ')}.`;
   if (ai.errors?.length) {
     return 'The AI could not finish for this entry — it was saved anyway. You can retry from My Submissions.';
@@ -63,6 +63,7 @@ export default function SubmitEntryPage({
   const [categoriesError, setCategoriesError] = useState('');
   const [regions, setRegions] = useState([]);
   const [regionsError, setRegionsError] = useState('');
+  const [selectedRegionName, setSelectedRegionName] = useState('');
   const [gettingLocation, setGettingLocation] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
 
@@ -185,6 +186,7 @@ export default function SubmitEntryPage({
       }
 
       setForm(EMPTY_FORM);
+      setSelectedRegionName('');
       setCoverImage(null);
       setCoverError(null);
       onSubmitted();
@@ -307,13 +309,39 @@ export default function SubmitEntryPage({
           </div>
           <div>
             <label className="submit-entry-label" htmlFor="entry-region">Region</label>
-            <select id="entry-region" {...field('regionId')} className="submit-entry-control">
+            <select
+              id="entry-region"
+              value={selectedRegionName}
+              onChange={(event) => {
+                setSelectedRegionName(event.target.value);
+                setForm((current) => ({ ...current, regionId: '' }));
+              }}
+              className="submit-entry-control"
+            >
               <option value="">Select region</option>
-              {regions.map((region) => (
-                <option key={region.id} value={region.id}>{region.name}{region.province ? `, ${region.province}` : ''}</option>
+              {[...new Set(regions.map((region) => region.name))].map((name) => (
+                <option key={name} value={name}>{name}</option>
               ))}
             </select>
           </div>
+          {selectedRegionName && (
+            <div>
+              <label className="submit-entry-label" htmlFor="entry-province">Province</label>
+              <select
+                id="entry-province"
+                value={form.regionId}
+                onChange={(event) => setForm((current) => ({ ...current, regionId: event.target.value }))}
+                className="submit-entry-control"
+              >
+                <option value="">Select province</option>
+                {regions
+                  .filter((region) => region.name === selectedRegionName && region.province)
+                  .map((region) => (
+                    <option key={region.id} value={region.id}>{region.province}</option>
+                  ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="submit-entry-label" htmlFor="entry-period">Historical Period</label>
             <HistoricalPeriodSelector

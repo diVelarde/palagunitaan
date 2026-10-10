@@ -91,7 +91,7 @@ async function findPublished({ limit = 20, offset = 0 } = {}) {
   return rows;
 }
 
-async function search({ keyword, category, region, verificationStatus, historicalPeriod, limit = 20, offset = 0 } = {}) {
+async function search({ keyword, category, region, regionId, verificationStatus, historicalPeriod, limit = 20, offset = 0 } = {}) {
   const conditions = [`status = 'published'`];
   const params = [];
 
@@ -101,7 +101,10 @@ async function search({ keyword, category, region, verificationStatus, historica
     params.push(like, like, like);
   }
   if (category) { conditions.push('category_auto = ?'); params.push(category); }
-  if (region) {
+  if (regionId && Number.isInteger(Number(regionId)) && Number(regionId) > 0) {
+    conditions.push('region_id = ?');
+    params.push(Number(regionId));
+  } else if (region) {
     conditions.push(`(
       region_id IN (SELECT id FROM regions WHERE name = ? OR province = ?)
       OR EXISTS (

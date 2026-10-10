@@ -49,6 +49,11 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
                 <span className="capitalize font-medium">{req.requested_role}</span>
                 <span className="text-muted"> — currently {req.applicant_role}</span>
               </p>
+              {req.qualifications && (
+                <p className="text-sm text-ink mt-2">
+                  <strong>Qualifications:</strong> {req.qualifications}
+                </p>
+              )}
               {req.message && <p className="text-xs text-muted mt-1 italic">"{req.message}"</p>}
             </div>
             <div className="flex items-center gap-2 shrink-0">

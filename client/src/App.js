@@ -12,6 +12,7 @@ import DashboardPage from './pages/DashboardPage.js';
 import NotFoundPage from './pages/NotFoundPage.js';
 import AboutPage from './pages/AboutPage.js';
 import MySubmissionsPage from './pages/MySubmissionsPage.js';
+import SubmitEntryWorkspacePage from './pages/SubmitEntryWorkspacePage.js';
 import { ErrorBoundary } from './pages/ErrorPage.js';
 
 import heritageService from './services/heritageService';
@@ -61,6 +62,7 @@ function AppShell() {
             <Route element={<ProtectedRoute minRole="public" />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/dashboard/submit" element={<SubmitEntryWorkspacePage />} />
                 <Route
                   path="/dashboard/submissions"
                   element={<MySubmissionsPage fetchMyEntries={heritageService.getMyEntries} />}
@@ -72,7 +74,7 @@ function AppShell() {
               <Route element={<DashboardLayout />}>
                 <Route
                   path="/submit"
-                  element={<Navigate to="/dashboard/submissions" replace />}
+                  element={<Navigate to="/dashboard/submit" replace />}
                 />
               </Route>
             </Route>

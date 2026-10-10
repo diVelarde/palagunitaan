@@ -1,12 +1,9 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
 import MediaUploader from '../components/MediaUploader';
 import CoverImagePicker from '../components/CoverImagePicker';
-import ActionDialog from '../components/ActionDialog';
-
-const SubmitEntryPage = lazy(() => import('./SubmitEntryPage'));
 
 const STATUS_STYLES = {
   pending: 'bg-amber-100 text-amber-800',
@@ -60,11 +57,11 @@ export default function MySubmissionsPage({
   const [entries, setEntries] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [reloadVersion, setReloadVersion] = useState(0);
   const [actionError, setActionError] = useState(null);
   const [busyEntryId, setBusyEntryId] = useState(null);
-  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -75,7 +72,12 @@ export default function MySubmissionsPage({
       .catch((err) => {
         if (active) setError(getLoadErrorMessage(err));
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+          setHasLoaded(true);
+        }
+      });
     return () => { active = false; };
   }, [fetchMyEntries, reloadVersion]);
 
@@ -135,7 +137,7 @@ export default function MySubmissionsPage({
     }
   }
 
-  if (loading) {
+  if (loading && !hasLoaded) {
     return <p className="dashboard-page-loading text-sm text-gray-500">Loading your submissions…</p>;
   }
 
@@ -149,15 +151,6 @@ export default function MySubmissionsPage({
             Entries you have submitted, and where each one is in review.
           </p>
         </div>
-        {isContributor && (
-          <button
-            type="button"
-            onClick={() => setIsSubmitDialogOpen(true)}
-            className="dashboard-action-link dashboard-action-primary"
-          >
-            Submit an entry
-          </button>
-        )}
       </div>
 
       {error && (
@@ -181,7 +174,9 @@ export default function MySubmissionsPage({
       {!error && entries.length === 0 && (
         <div className="border border-dashed border-gray-300 rounded-lg p-10 text-center">
           {isContributor ? (
-            <p className="text-sm text-gray-600">You haven't submitted any entries yet. Use “Submit an entry” above to get started.</p>
+            <p className="text-sm text-gray-600">
+              You haven&apos;t submitted any entries yet. Open the Submit an Entry tab to get started.
+            </p>
           ) : (
             <>
               <p className="text-sm text-gray-600 mb-3">
@@ -321,18 +316,6 @@ export default function MySubmissionsPage({
         </ul>
       )}
 
-      {isSubmitDialogOpen && (
-        <ActionDialog title="Submit a heritage entry" onClose={() => setIsSubmitDialogOpen(false)}>
-          <Suspense fallback={<p className="text-sm text-[#82766c]">Loading submission form…</p>}>
-            <SubmitEntryPage
-              embedded
-              onSubmit={heritageService.submitEntry}
-              uploadCoverImage={heritageService.updateCoverImage}
-              onSubmitted={() => setReloadVersion((version) => version + 1)}
-            />
-          </Suspense>
-        </ActionDialog>
-      )}
     </div>
   );
 }

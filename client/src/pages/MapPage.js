@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
@@ -15,18 +15,33 @@ import './MapPage.css';
 const DEFAULT_CENTER = [13.6218, 123.1948];
 const DEFAULT_ZOOM = 11;
 
-function dotIcon(color) {
+function FitMarkers({ markers }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!markers.length) return;
+    const bounds = L.latLngBounds(markers.map((marker) => [marker.latitude, marker.longitude]));
+    map.fitBounds(bounds, { padding: [32, 32], maxZoom: 11 });
+  }, [map, markers]);
+  return null;
+}
+
+function markerIcon(kind) {
+  const marker = kind === 'entry'
+    ? '<span class="map-marker-shape map-marker-entry"></span>'
+    : kind === 'featured'
+      ? '<span class="map-marker-shape map-marker-featured" aria-hidden="true"><span>★</span></span>'
+      : '<span class="map-marker-shape map-marker-site"></span>';
   return L.divIcon({
-    className: '',
-    html: `<span style="display:block; width:14px; height:14px; border-radius:50%; background:${color}; border:2px solid white; box-shadow:0 0 0 1px rgba(0,0,0,0.25);"></span>`,
-    iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -8],
+    className: 'map-marker-icon',
+    html: marker,
+    iconSize: [18, 20], iconAnchor: [9, 17], popupAnchor: [0, -17],
   });
 }
 
 const ICONS = {
-  entry: dotIcon('var(--site-gold)'),
-  site: dotIcon('var(--site-ink)'),
-  siteHighlighted: dotIcon('var(--site-gold)'),
+  entry: markerIcon('entry'),
+  site: markerIcon('site'),
+  siteHighlighted: markerIcon('featured'),
 };
 function iconFor(marker) {
   if (marker.type === 'site') return marker.isHighlighted ? ICONS.siteHighlighted : ICONS.site;
@@ -115,7 +130,7 @@ export default function MapPage({
         <div className="map-sidebar-footer">
           <span><i className="map-legend-dot map-legend-entry" />Heritage entry</span>
           <span><i className="map-legend-dot map-legend-site" />Heritage site</span>
-          <span><i className="map-legend-dot map-legend-highlighted" />Featured site</span>
+          <span><i className="map-legend-dot map-legend-highlighted">★</i>Featured site</span>
         </div>
       </aside>
 
@@ -147,6 +162,7 @@ export default function MapPage({
               pickedCoords && <div className="map-picked-coordinates">Pinned at {pickedCoords.latitude.toFixed(4)}, {pickedCoords.longitude.toFixed(4)}</div>
             )}
             <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} style={{ height: '100%', width: '100%' }}>
+              <FitMarkers markers={visibleMarkers} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -160,10 +176,20 @@ export default function MapPage({
                       {marker.type === 'entry' ? (
                         <>
                           {marker.category && <p className="text-gray-500 text-xs mb-2">{marker.category}</p>}
+                          {marker.approximateLocation && <p className="text-gray-500 text-xs mb-2">Approximate province location</p>}
                           <Link to={`/entries/${marker.id}`} className="map-popup-link">View entry →</Link>
                         </>
                       ) : (
-                        marker.description && <p className="text-gray-600 text-xs">{marker.description}</p>
+                        <>
+                          {marker.imageUrl && (
+                            <img
+                              src={marker.imageUrl}
+                              alt={`Photo of ${marker.title}`}
+                              className="map-popup-photo"
+                            />
+                          )}
+                          {marker.description && <p className="text-gray-600 text-xs">{marker.description}</p>}
+                        </>
                       )}
                     </div>
                   </Popup>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { validateImageFile } from '../utils/mediaValidation';
 
 const EMPTY_FORM = { name: '', description: '', latitude: '', longitude: '', isHighlighted: false, highlightPeriod: '' };
 
@@ -20,6 +21,8 @@ export default function AdminSiteMarkerForm({
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [photo, setPhoto] = useState(null);
+  const [photoError, setPhotoError] = useState('');
 
   useEffect(() => {
     if (initialCoords) {
@@ -47,8 +50,11 @@ export default function AdminSiteMarkerForm({
         longitude: Number(form.longitude),
         isHighlighted: form.isHighlighted,
         highlightPeriod: form.highlightPeriod.trim() || null,
+        photo,
       });
       setForm(EMPTY_FORM);
+      setPhoto(null);
+      setPhotoError('');
     } catch (err) {
       setErrors({ form: err.message || 'Could not save this site. Please try again.' });
     } finally {
@@ -71,6 +77,24 @@ export default function AdminSiteMarkerForm({
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
         <textarea {...field('description')} rows={3} className="w-full border border-gray-300 rounded-md px-2.5 py-1.5 text-sm" />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="site-photo">Photo (optional)</label>
+        <input
+          id="site-photo"
+          type="file"
+          accept="image/*"
+          onChange={(event) => {
+            const file = event.target.files?.[0] || null;
+            const issue = file ? validateImageFile(file) : null;
+            setPhotoError(issue || '');
+            if (!issue && file) setPhoto(file);
+            if (issue) setPhoto(null);
+          }}
+          className="w-full text-xs"
+        />
+        {photoError && <p className="text-xs text-red-600 mt-1">{photoError}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

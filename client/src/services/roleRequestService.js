@@ -1,7 +1,7 @@
 import api from '../api/axios';
 
-async function createRequest(requestedRole, message) {
-  const res = await api.post('/api/auth/role-requests', { requestedRole, message });
+async function createRequest(requestedRole, { qualifications, message }) {
+  const res = await api.post('/api/auth/role-requests', { requestedRole, qualifications, message });
   return res.data.request;
 }
 

@@ -1,4 +1,5 @@
 const heritageSiteModel = require('../models/heritageSiteModel');
+const cloudinaryService = require('../services/cloudinaryService');
 
 async function list(req, res, next) {
   try {
@@ -11,7 +12,15 @@ async function list(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const site = await heritageSiteModel.create({ createdBy: req.user.id, ...req.body });
+    let imageUrl = null;
+    if (req.file) {
+      const uploaded = await cloudinaryService.uploadBuffer(req.file.buffer, {
+        mimetype: req.file.mimetype,
+        folder: 'palagunitaan/sites',
+      });
+      imageUrl = uploaded.secure_url;
+    }
+    const site = await heritageSiteModel.create({ createdBy: req.user.id, ...req.body, imageUrl });
     res.status(201).json({ site });
   } catch (err) {
     next(err);

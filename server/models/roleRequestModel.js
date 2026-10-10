@@ -1,9 +1,9 @@
 const db = require('../config/db');
 
-async function create({ userId, requestedRole, message }) {
+async function create({ userId, requestedRole, qualifications, message }) {
   const [result] = await db.query(
-    'INSERT INTO role_requests (user_id, requested_role, message) VALUES (?, ?, ?)',
-    [userId, requestedRole, message || null]
+    'INSERT INTO role_requests (user_id, requested_role, qualifications, message) VALUES (?, ?, ?, ?)',
+    [userId, requestedRole, qualifications, message || null]
   );
   const [rows] = await db.query('SELECT * FROM role_requests WHERE id = ?', [result.insertId]);
   return rows[0];

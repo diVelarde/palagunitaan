@@ -3,7 +3,7 @@ import multimediaService from '../services/multimediaService';
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
 const MAX_MB = Math.round(MAX_FILE_SIZE_BYTES / (1024 * 1024));
-const ALLOWED_PREFIXES = ['image/', 'audio/'];
+const ALLOWED_PREFIXES = ['image/', 'audio/', 'video/'];
 
 function formatBytes(bytes) {
   if (!bytes) return '';
@@ -44,7 +44,7 @@ export default function MediaUploader({
     if (!file) return;
 
     if (!ALLOWED_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
-      setError('Only image or audio files can be uploaded.');
+      setError('Only image, audio, or video files can be uploaded.');
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
@@ -79,7 +79,7 @@ export default function MediaUploader({
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-gray-700">Media</span>
         <span className="text-[11px] text-gray-400">
-          Images or audio · up to {MAX_MB} MB
+          Images, audio, or video · up to {MAX_MB} MB
         </span>
       </div>
 
@@ -99,8 +99,10 @@ export default function MediaUploader({
                     className="w-16 h-16 object-cover rounded-md border border-gray-200"
                   />
                 </a>
-              ) : (
+              ) : asset.file_type === 'audio' || (asset.file_type === 'video' && !/\.(mp4|webm|mov|m4v)(?:$|\?)/i.test(asset.file_url)) ? (
                 <audio controls src={asset.file_url} className="h-9 max-w-[240px]" />
+              ) : (
+                <video controls src={asset.file_url} className="h-20 max-w-[240px] rounded-md" />
               )}
             </li>
           ))}
@@ -112,7 +114,7 @@ export default function MediaUploader({
           <input
             ref={inputRef}
             type="file"
-            accept="image/*,audio/*"
+            accept="image/*,audio/*,video/*"
             disabled={uploading}
             onChange={(e) => handleFile(e.target.files)}
             className="block text-xs text-[#71655c] file:mr-2 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#ad482d] file:text-white hover:file:bg-[#873720] disabled:opacity-50"

@@ -1,4 +1,7 @@
+jest.mock('../models/categoryModel');
+
 const { validateSubmission } = require('../validators/heritageEntryValidators');
+const categoryModel = require('../models/categoryModel');
 
 function validate(body) {
   const req = { body };
@@ -14,8 +17,7 @@ function validate(body) {
     },
   };
   const next = jest.fn();
-  validateSubmission(req, res, next);
-  return { res, next };
+  return validateSubmission(req, res, next).then(() => ({ res, next }));
 }
 
 const validEntry = {
@@ -24,8 +26,10 @@ const validEntry = {
 };
 
 describe('heritage entry history claim validation', () => {
-  it('accepts multiple claims with separate source years', () => {
-    const { next, res } = validate({
+  beforeEach(() => categoryModel.findAllCategories.mockResolvedValue([]));
+
+  it('accepts multiple claims with separate source years', async () => {
+    const { next, res } = await validate({
       ...validEntry,
       historyClaims: [
         { claimedYear: 2003, sourceDescription: 'Interview', sourceYear: 2005 },
@@ -37,8 +41,8 @@ describe('heritage entry history claim validation', () => {
     expect(res.statusCode).toBe(200);
   });
 
-  it('rejects claims without a valid year or source description', () => {
-    const { next, res } = validate({
+  it('rejects claims without a valid year or source description', async () => {
+    const { next, res } = await validate({
       ...validEntry,
       historyClaims: [{ claimedYear: 0, sourceDescription: ' ' }],
     });
@@ -49,5 +53,15 @@ describe('heritage entry history claim validation', () => {
       expect.stringContaining('claimedYear'),
       expect.stringContaining('sourceDescription'),
     ]));
+  });
+
+  it('accepts an admin-configured category', async () => {
+    categoryModel.findAllCategories.mockResolvedValue([{ name: 'Local Custom Category' }]);
+    const { next, res } = await validate({
+      ...validEntry,
+      category: 'Local Custom Category',
+    });
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
   });
 });

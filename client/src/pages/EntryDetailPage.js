@@ -56,7 +56,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
 
   const location = formatLocation(entry);
   const hasEducationalVersion = Boolean(entry.euphemistic_content?.trim());
-  const bodyText = view === 'educational' && hasEducationalVersion
+  const bodyText = view === 'educational'
     ? entry.euphemistic_content
     : entry.raw_content;
   const mapUrl = entry.latitude != null && entry.longitude != null
@@ -99,7 +99,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
             {view === 'community' && (
               <p className="entry-reading-label">RAW FIELD ACCOUNT · UNEDITED</p>
             )}
-            <p className="entry-story-text">{bodyText}</p>
+            {bodyText && <p className="entry-story-text">{bodyText}</p>}
             {view === 'educational' && hasEducationalVersion && entry.raw_content !== entry.euphemistic_content && (
               <p className="entry-editorial-note">
                 This educational summary was AI-generated from the original community account.

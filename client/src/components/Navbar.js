@@ -52,11 +52,19 @@ export default function Navbar() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3.5">
         <Link to="/" aria-label="Palagunitaan home" className="navbar-brand">
-          <img
-            src="/Palagunitaan - Logo/7.png"
-            alt="Palagunitaan"
-            className="navbar-logo-image"
-          />
+          <picture className="navbar-logo-picture">
+            {!isLandingPage && (
+              <source
+                media="(prefers-color-scheme: dark)"
+                srcSet="/Palagunitaan - Logo/7.png"
+              />
+            )}
+            <img
+              src={isLandingPage ? '/Palagunitaan - Logo/7.png' : '/Palagunitaan - Logo/6.png'}
+              alt="Palagunitaan"
+              className="navbar-logo-image"
+            />
+          </picture>
         </Link>
 
         <nav className="navbar-desktop-nav hidden items-center justify-center gap-7 md:flex" aria-label="Main navigation">

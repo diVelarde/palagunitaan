@@ -32,7 +32,7 @@ describe('getMapData', () => {
       { entry_id: 1, title: 'The Aswang of San Isidro', category_auto: 'Legend', verification_status: 'verified', latitude: '13.62', longitude: '123.19', location_name: 'San Isidro', region_name: 'Bicol Region', region_province: 'Camarines Sur' },
     ]);
     heritageSiteModel.findAll.mockResolvedValue([
-      { id: 5, name: 'Peñafrancia Basilica', description: 'Shrine', is_highlighted: 1, latitude: '13.63', longitude: '123.18' },
+      { id: 5, name: 'Peñafrancia Basilica', description: 'Shrine', image_url: 'https://example.test/basilica.jpg', is_highlighted: 1, latitude: '13.63', longitude: '123.18' },
     ]);
 
     const res = mockRes();
@@ -52,7 +52,58 @@ describe('getMapData', () => {
     expect(typeof entryMarker.latitude).toBe('number');
 
     const siteMarker = markers.find((m) => m.type === 'site');
-    expect(siteMarker).toMatchObject({ id: 5, title: 'Peñafrancia Basilica', isHighlighted: true });
+    expect(siteMarker).toMatchObject({
+      id: 5,
+      title: 'Peñafrancia Basilica',
+      isHighlighted: true,
+      imageUrl: 'https://example.test/basilica.jpg',
+    });
+  });
+
+  it('maps region-only Sorsogon entries to an approximate province location', async () => {
+    geographicTagModel.findTagsForPublishedEntries.mockResolvedValue([
+      {
+        entry_id: 2,
+        title: 'Sorsogon story',
+        category_auto: 'Oral history',
+        verification_status: 'verified',
+        latitude: null,
+        longitude: null,
+        location_name: null,
+        region_province: 'Sorsogon',
+        region_name: 'Bicol Region',
+      },
+    ]);
+    heritageSiteModel.findAll.mockResolvedValue([]);
+
+    const res = mockRes();
+    await getMapData({}, res, jest.fn());
+
+    expect(res.json.mock.calls[0][0].markers[0]).toMatchObject({
+      type: 'entry',
+      latitude: 12.9731,
+      longitude: 124.0053,
+      locationName: 'Sorsogon (approximate)',
+      approximateLocation: true,
+    });
+  });
+
+  it('does not invent a location for unpinned entries outside supported regions', async () => {
+    geographicTagModel.findTagsForPublishedEntries.mockResolvedValue([
+      {
+        entry_id: 3,
+        title: 'Region story',
+        latitude: null,
+        longitude: null,
+        region_province: 'Albay',
+      },
+    ]);
+    heritageSiteModel.findAll.mockResolvedValue([]);
+
+    const res = mockRes();
+    await getMapData({}, res, jest.fn());
+
+    expect(res.json.mock.calls[0][0].markers).toEqual([]);
   });
 
   it('calls next(err) instead of throwing when a model rejects', async () => {
