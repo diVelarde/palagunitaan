@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import multimediaService from '../services/multimediaService';
+import {
+  MAX_IMAGE_BYTES,
+  MAX_IMAGE_MB,
+  MAX_VIDEO_BYTES,
+  MAX_VIDEO_MB,
+} from '../utils/mediaValidation';
 
-const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
-const MAX_MB = Math.round(MAX_FILE_SIZE_BYTES / (1024 * 1024));
 const ALLOWED_PREFIXES = ['image/', 'audio/', 'video/'];
 
 function formatBytes(bytes) {
@@ -48,8 +52,10 @@ export default function MediaUploader({
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError(`That file is ${formatBytes(file.size)}. The limit is ${MAX_MB} MB.`);
+    const maxFileSizeBytes = file.type.startsWith('video/') ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+    const maxFileSizeMb = file.type.startsWith('video/') ? MAX_VIDEO_MB : MAX_IMAGE_MB;
+    if (file.size > maxFileSizeBytes) {
+      setError(`That file is ${formatBytes(file.size)}. The limit is ${maxFileSizeMb} MB.`);
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
@@ -65,7 +71,7 @@ export default function MediaUploader({
       setError(
         err.response?.data?.message ||
           (err.response?.status === 413
-            ? `That file is too large. The limit is ${MAX_MB} MB.`
+            ? `That file is too large. The limit is ${maxFileSizeMb} MB.`
             : 'Upload failed. Please try again.')
       );
     } finally {
@@ -79,7 +85,7 @@ export default function MediaUploader({
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-gray-700">Media</span>
         <span className="text-[11px] text-gray-400">
-          Images, audio, or video · up to {MAX_MB} MB
+          Images/audio up to {MAX_IMAGE_MB} MB · video up to {MAX_VIDEO_MB} MB
         </span>
       </div>
 

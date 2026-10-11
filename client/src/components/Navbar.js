@@ -13,6 +13,24 @@ const NAV_LINKS = [
   { to: '/about', label: 'About' },
 ];
 
+const LOGO_DARK_BG  = '/Palagunitaan - Logo/7.png';
+const LOGO_LIGHT_BG = '/Palagunitaan - Logo/6.png';
+
+function usePrefersDark() {
+  const [prefersDark, setPrefersDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e) => setPrefersDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  return prefersDark;
+}
+
 function linkClass({ isActive }) {
   return `navbar-link ${isActive ? 'is-active' : ''}`;
 }
@@ -21,6 +39,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const isLandingPage = pathname === '/';
+  const prefersDark = usePrefersDark();
   const [isScrolled, setIsScrolled] = useState(() => window.scrollY > 24);
   const { user, loading, login } = useAuth();
   const { notifications, unreadCount, onOpen, onMarkRead, notificationError } = useNotifications();
@@ -52,19 +71,11 @@ export default function Navbar() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3.5">
         <Link to="/" aria-label="Palagunitaan home" className="navbar-brand">
-          <picture className="navbar-logo-picture">
-            {!isLandingPage && (
-              <source
-                media="(prefers-color-scheme: dark)"
-                srcSet="/Palagunitaan - Logo/7.png"
-              />
-            )}
-            <img
-              src={isLandingPage ? '/Palagunitaan - Logo/7.png' : '/Palagunitaan - Logo/6.png'}
-              alt="Palagunitaan"
-              className="navbar-logo-image"
-            />
-          </picture>
+          <img
+            src={isLandingPage || prefersDark ? LOGO_DARK_BG : LOGO_LIGHT_BG}
+            alt="Palagunitaan"
+            className="navbar-logo-image"
+          />
         </Link>
 
         <nav className="navbar-desktop-nav hidden items-center justify-center gap-7 md:flex" aria-label="Main navigation">

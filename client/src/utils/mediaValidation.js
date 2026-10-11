@@ -1,5 +1,7 @@
 export const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 export const MAX_IMAGE_MB = Math.round(MAX_IMAGE_BYTES / (1024 * 1024));
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+export const MAX_VIDEO_MB = Math.round(MAX_VIDEO_BYTES / (1024 * 1024));
 
 export function validateImageFile(file) {
   if (!file) return 'No file selected.';

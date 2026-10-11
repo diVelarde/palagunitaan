@@ -2,6 +2,7 @@ const { getCloudinary } = require('../config/cloudinary');
 
 const ALLOWED_MIME_PREFIXES = ['image/', 'audio/', 'video/'];
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
+const MAX_VIDEO_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
 function isAllowedMimeType(mimetype) {
   return ALLOWED_MIME_PREFIXES.some((prefix) => mimetype.startsWith(prefix));
@@ -21,4 +22,11 @@ function uploadBuffer(buffer, { mimetype, folder = 'palagunitaan' }) {
   });
 }
 
-module.exports = { uploadBuffer, isAllowedMimeType, resourceTypeFor, ALLOWED_MIME_PREFIXES, MAX_FILE_SIZE_BYTES };
+module.exports = {
+  uploadBuffer,
+  isAllowedMimeType,
+  resourceTypeFor,
+  ALLOWED_MIME_PREFIXES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_VIDEO_FILE_SIZE_BYTES,
+};

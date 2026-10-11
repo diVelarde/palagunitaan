@@ -118,10 +118,6 @@
   transform: translateY(-50%);
 }
 
-.navbar-logo-picture {
-  display: contents;
-}
-
 .navbar-desktop-nav {
   gap: clamp(1rem, 2.5vw, 2.5rem);
 }
