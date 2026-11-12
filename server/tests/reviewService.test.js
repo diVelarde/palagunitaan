@@ -28,6 +28,31 @@ describe('reviewEntry', () => {
     expect(notificationService.notifyReviewDecision).toHaveBeenCalled();
   });
 
+  it('publishes as unverified when approved_unverified is selected', async () => {
+    editorialActionModel.create.mockResolvedValueOnce({ id: 100, action_type: 'approved_unverified' });
+
+    const { entry, action } = await reviewEntry({
+      entryId: 1,
+      validatorId: 2,
+      decision: 'approved_unverified',
+      comment: null,
+    });
+
+    expect(entry.status).toBe('published');
+    expect(entry.verification_status).toBe('unverified');
+    expect(action.action_type).toBe('approved_unverified');
+    expect(editorialActionModel.create).toHaveBeenCalledWith({
+      heritageEntryId: 1,
+      validatorId: 2,
+      actionType: 'approved_unverified',
+      comment: null,
+    });
+    expect(notificationService.notifyReviewDecision).toHaveBeenCalledWith({
+      entry,
+      decision: 'approved_unverified',
+    });
+  });
+
   it('disputes: entry stays published but flagged disputed', async () => {
     const { entry } = await reviewEntry({ entryId: 1, validatorId: 2, decision: 'disputed', comment: 'needs a second source' });
     expect(entry.status).toBe('published');

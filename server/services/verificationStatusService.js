@@ -1,5 +1,6 @@
 const DECISION_RULES = {
   approved: { verificationStatus: 'verified', entryStatus: 'published' },
+  approved_unverified: { verificationStatus: 'unverified', entryStatus: 'published' },
   disputed: { verificationStatus: 'disputed', entryStatus: 'published' }, 
   rejected: { verificationStatus: 'unverified', entryStatus: 'rejected' },
 };

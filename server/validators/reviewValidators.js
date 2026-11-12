@@ -5,7 +5,7 @@ function validateReview(req, res, next) {
   const errors = [];
 
   if (!decision || !isValidDecision(decision)) {
-    errors.push('decision must be one of: approved, disputed, rejected.');
+    errors.push('decision must be one of: approved, approved_unverified, disputed, rejected.');
   }
   if (decision === 'disputed' && (!comment || !comment.trim())) {
     errors.push('comment is required when disputing an entry.');

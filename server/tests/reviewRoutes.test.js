@@ -102,6 +102,34 @@ describe('review routes', () => {
     expect(response.body.action.actionType).toBe('disputed');
   });
 
+  it('accepts approved_unverified as a valid review decision', async () => {
+    const response = await makeRequest(createApp(), {
+      method: 'POST',
+      path: '/api/review/123',
+      body: { decision: 'approved_unverified' },
+    });
+
+    expect(reviewService.reviewEntry).toHaveBeenCalledWith({
+      entryId: '123',
+      validatorId: 2,
+      decision: 'approved_unverified',
+      comment: undefined,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('still rejects an unsupported review decision', async () => {
+    const response = await makeRequest(createApp(), {
+      method: 'POST',
+      path: '/api/review/123',
+      body: { decision: 'maybe' },
+    });
+
+    expect(reviewService.reviewEntry).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Invalid review.');
+  });
+
   it('returns 403 when an entry author tries to review their own entry', async () => {
     reviewService.reviewEntry.mockRejectedValue(
       new reviewService.ReviewError('You cannot review your own submission.', 403)

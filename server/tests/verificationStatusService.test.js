@@ -1,8 +1,9 @@
 const { isValidDecision, canReview, resolveOutcome, DECISION_RULES } = require('../services/verificationStatusService');
 
 describe('isValidDecision', () => {
-  it('accepts approved, disputed, rejected', () => {
+  it('accepts all supported review decisions', () => {
     expect(isValidDecision('approved')).toBe(true);
+    expect(isValidDecision('approved_unverified')).toBe(true);
     expect(isValidDecision('disputed')).toBe(true);
     expect(isValidDecision('rejected')).toBe(true);
   });
@@ -25,6 +26,9 @@ describe('canReview', () => {
 describe('resolveOutcome', () => {
   it('maps approved -> verified + published', () => {
     expect(resolveOutcome('approved')).toEqual({ verificationStatus: 'verified', entryStatus: 'published' });
+  });
+  it('maps approved_unverified -> unverified + published', () => {
+    expect(resolveOutcome('approved_unverified')).toEqual({ verificationStatus: 'unverified', entryStatus: 'published' });
   });
   it('maps disputed -> disputed + still published (visible but flagged)', () => {
     expect(resolveOutcome('disputed')).toEqual({ verificationStatus: 'disputed', entryStatus: 'published' });

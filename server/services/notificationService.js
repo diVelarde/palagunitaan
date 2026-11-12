@@ -1,7 +1,8 @@
 const notificationModel = require('../models/notificationModel');
 
 const DECISION_MESSAGES = {
-  approved: (title) => `Your entry "${title}" was reviewed and published.`,
+  approved: (title) => `Your entry "${title}" was reviewed and published as Verified.`,
+  approved_unverified: (title) => `Your entry "${title}" was reviewed and published as Unverified.`,
   disputed: (title) => `Your entry "${title}" was published, but a validator flagged it as disputed. Check the notes on the entry.`,
   rejected: (title) => `Your entry "${title}" was reviewed and was not published. See the validator's notes for why.`,
 };

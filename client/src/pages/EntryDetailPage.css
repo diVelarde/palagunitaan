@@ -119,6 +119,16 @@
   background: var(--site-paper);
 }
 
+.entry-unverified-disclaimer {
+  margin: 0 0 16px;
+  border-left: 3px solid #ad482d;
+  padding: 9px 12px;
+  color: var(--entry-ink);
+  background: #f4eee6;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .entry-category-label {
   color: var(--entry-muted);
   font-size: 11px;

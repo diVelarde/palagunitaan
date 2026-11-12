@@ -18,11 +18,23 @@ describe('notifyReviewDecision', () => {
   });
 
   it('mentions the entry title in the message for each decision type', async () => {
-    for (const decision of ['approved', 'disputed', 'rejected']) {
+    for (const decision of ['approved', 'approved_unverified', 'disputed', 'rejected']) {
       await notifyReviewDecision({ entry: ENTRY, decision });
       const [[call]] = notificationModel.create.mock.calls.slice(-1);
       expect(call.message).toContain(ENTRY.title);
     }
+  });
+
+  it('identifies whether an approved entry was published as Verified or Unverified', async () => {
+    await notifyReviewDecision({ entry: ENTRY, decision: 'approved' });
+    expect(notificationModel.create).toHaveBeenLastCalledWith(expect.objectContaining({
+      message: `Your entry "${ENTRY.title}" was reviewed and published as Verified.`,
+    }));
+
+    await notifyReviewDecision({ entry: ENTRY, decision: 'approved_unverified' });
+    expect(notificationModel.create).toHaveBeenLastCalledWith(expect.objectContaining({
+      message: `Your entry "${ENTRY.title}" was reviewed and published as Unverified.`,
+    }));
   });
 
   it('does not throw and returns null for an unrecognized decision', async () => {

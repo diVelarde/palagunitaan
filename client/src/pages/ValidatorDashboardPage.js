@@ -53,9 +53,14 @@ function PendingEntryRow({ entry, onReview }) {
 
       {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button onClick={() => handleDecision('approved')} disabled={submitting !== null} className="dashboard-review-approve disabled:opacity-50">
-          {submitting === 'approved' ? 'Approving…' : 'Approve'}
+          {submitting === 'approved' ? 'Approving as Verified…' : 'Approve as Verified'}
+          <span className="block text-[10px] font-normal">Source corroborated</span>
+        </button>
+        <button onClick={() => handleDecision('approved_unverified')} disabled={submitting !== null} className="dashboard-review-approve disabled:opacity-50">
+          {submitting === 'approved_unverified' ? 'Approving as Unverified…' : 'Approve as Unverified'}
+          <span className="block text-[10px] font-normal">Publish with disclaimer</span>
         </button>
         <button onClick={() => (expanded ? handleDecision('disputed') : setExpanded(true))} disabled={submitting !== null} className="dashboard-review-dispute disabled:opacity-50">
           {submitting === 'disputed' ? 'Flagging…' : 'Dispute'}

@@ -14,7 +14,17 @@ const VERIFICATION_STYLES = {
   unverified: 'browse-status-unverified',
 };
 
+const VERIFICATION_LABELS = {
+  verified: 'Verified',
+  disputed: 'Disputed',
+  unverified: 'Unverified',
+};
+
 function EntryCard({ entry }) {
+  const verificationStatus = VERIFICATION_STYLES[entry.verification_status]
+    ? entry.verification_status
+    : 'unverified';
+
   return (
     <Link to={`/entries/${entry.id}`} className="browse-entry-card">
       {entry.cover_image_url && (
@@ -26,8 +36,8 @@ function EntryCard({ entry }) {
       )}
       <div className="browse-entry-copy">
         <div className="browse-entry-meta">
-          <span className={`browse-status ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
-            {entry.verification_status || 'unverified'}
+          <span className={`browse-status ${VERIFICATION_STYLES[verificationStatus]}`}>
+            {VERIFICATION_LABELS[verificationStatus]}
           </span>
           {entry.category_auto && <span className="browse-entry-category">{entry.category_auto}</span>}
         </div>
