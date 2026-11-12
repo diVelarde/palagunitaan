@@ -94,6 +94,12 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
             )}
             {entry.category_auto && <span className="entry-category-label">{entry.category_auto}</span>}
           </div>
+          {entry.verification_status === 'disputed' && entry.dispute_comment && (
+            <section className="entry-dispute-note" role="note">
+              <h2>Other accounts of this story</h2>
+              <p>{entry.dispute_comment}</p>
+            </section>
+          )}
           {entry.verification_status === 'unverified' && entry.status === 'published' && (
             <p className="entry-unverified-disclaimer" role="note">
               This entry has been published but its source has not been corroborated.

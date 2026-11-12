@@ -135,6 +135,57 @@ describe('validateReview assessments', () => {
     expect(next).toHaveBeenCalled();
   });
 
+  it('requires a 20-character note when disputing', async () => {
+    const req = { params: { id: '4' }, body: { decision: 'disputed', comment: 'too short' } };
+    const res = mockResponse();
+    const next = jest.fn();
+
+    await validateReview(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      errors: expect.arrayContaining([
+        'A comment of at least 20 characters is required when disputing an entry.',
+      ]),
+    }));
+  });
+
+  it('requires a conflict-handling note for approval of conflicting claims', async () => {
+    heritageEntryModel.findById.mockResolvedValue({
+      claims_conflict: true,
+      history_claims: [],
+    });
+    const req = { params: { id: '4' }, body: { decision: 'approved', comment: 'not enough' } };
+    const res = mockResponse();
+    const next = jest.fn();
+
+    await validateReview(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      errors: expect.arrayContaining([
+        'A comment of at least 20 characters is required to explain how the conflicting claims were handled.',
+      ]),
+    }));
+  });
+
+  it('validates flag comments with the same minimum length as disputed decisions', () => {
+    const { validateFlag } = require('../validators/reviewValidators');
+    const req = { body: { comment: 'too short' } };
+    const res = mockResponse();
+    const next = jest.fn();
+
+    validateFlag(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'A comment of at least 20 characters is required when disputing an entry.',
+    });
+  });
+
   it('rejects assessments when the entry has no matching history claims', async () => {
     const req = {
       params: { id: '4' },

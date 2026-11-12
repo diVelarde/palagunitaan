@@ -3,6 +3,7 @@ const editorialActionModel = require('../models/editorialActionModel');
 const claimAssessmentModel = require('../models/claimAssessmentModel');
 const verificationStatusService = require('./verificationStatusService');
 const notificationService = require('./notificationService');
+const MIN_COMMENT_LENGTH = 20;
 
 class ReviewError extends Error {
   constructor(message, statusCode) {
@@ -42,6 +43,14 @@ async function reviewEntry({ entryId, validatorId, decision, comment, assessment
   }
   if (!verificationStatusService.canReview(entry)) {
     throw new ReviewError('This entry is not awaiting review.', 409);
+  }
+  const commentLength = typeof comment === 'string' ? comment.trim().length : 0;
+  if (decision === 'disputed' && commentLength < MIN_COMMENT_LENGTH) {
+    throw new ReviewError('A comment of at least 20 characters is required when disputing an entry.', 400);
+  }
+  const isApproval = decision === 'approved' || decision === 'approved_unverified';
+  if (entry.claims_conflict && isApproval && commentLength < MIN_COMMENT_LENGTH) {
+    throw new ReviewError('A comment of at least 20 characters is required to explain how the conflicting claims were handled.', 400);
   }
   const entryAssessments = validateAssessments(entry, decision, assessments);
 

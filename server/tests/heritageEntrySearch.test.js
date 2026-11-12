@@ -1,7 +1,7 @@
 jest.mock('../config/db', () => ({ query: jest.fn() }));
 
 const db = require('../config/db');
-const { findByUser, findPending, search } = require('../models/heritageEntryModel');
+const { findById, findByUser, findPending, search } = require('../models/heritageEntryModel');
 
 describe('heritageEntryModel.findByUser', () => {
   beforeEach(() => db.query.mockReset().mockResolvedValue([[]]));
@@ -32,6 +32,59 @@ describe('heritageEntryModel.findPending', () => {
       "SELECT * FROM heritage_entries WHERE status = 'pending' ORDER BY submitted_at ASC",
       []
     );
+  });
+
+  it('includes each pending entry’s claims and conflict flag', async () => {
+    const pendingEntries = [{ id: 1, title: 'Conflicting story' }, { id: 2, title: 'Single account' }];
+    db.query
+      .mockResolvedValueOnce([pendingEntries])
+      .mockResolvedValueOnce([[
+        { id: 11, heritage_entry_id: 1, claimed_year: 1800, source_type: 'record', source_description: 'First account' },
+        { id: 12, heritage_entry_id: 1, claimed_year: 1820, source_type: 'record', source_description: 'Second account' },
+        { id: 13, heritage_entry_id: 2, claimed_year: 1900, source_type: 'oral', source_description: 'One account' },
+      ]]);
+
+    const entries = await findPending();
+
+    expect(entries[0]).toMatchObject({
+      claims_conflict: true,
+      history_claims: [{ id: 11, claimed_year: 1800 }, { id: 12, claimed_year: 1820 }],
+    });
+    expect(entries[1]).toMatchObject({
+      claims_conflict: false,
+      history_claims: [{ id: 13, claimed_year: 1900 }],
+    });
+  });
+});
+
+describe('heritageEntryModel.findById', () => {
+  beforeEach(() => db.query.mockReset());
+
+  it('marks claims with different years as conflicting', async () => {
+    db.query
+      .mockResolvedValueOnce([[{ id: 1, status: 'pending' }]])
+      .mockResolvedValueOnce([[
+        { id: 11, claimed_year: 1800 },
+        { id: 12, claimed_year: 1820 },
+      ]]);
+
+    const entry = await findById(1);
+
+    expect(entry.claims_conflict).toBe(true);
+    expect(entry.history_claims).toHaveLength(2);
+  });
+
+  it('does not mark matching years as conflicting', async () => {
+    db.query
+      .mockResolvedValueOnce([[{ id: 1, status: 'pending' }]])
+      .mockResolvedValueOnce([[
+        { id: 11, claimed_year: 1800 },
+        { id: 12, claimed_year: 1800 },
+      ]]);
+
+    const entry = await findById(1);
+
+    expect(entry.claims_conflict).toBe(false);
   });
 });
 

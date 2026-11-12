@@ -119,6 +119,28 @@
   background: var(--site-paper);
 }
 
+.entry-dispute-note {
+  margin: 0 0 16px;
+  border-left: 3px solid #ad482d;
+  padding: 9px 12px;
+  color: var(--entry-ink);
+  background: #f4eee6;
+}
+
+.entry-dispute-note h2 {
+  margin: 0 0 4px;
+  color: var(--entry-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.entry-dispute-note p {
+  margin: 0;
+  color: var(--entry-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .entry-unverified-disclaimer {
   margin: 0 0 16px;
   border-left: 3px solid #ad482d;

@@ -10,13 +10,14 @@ const CLAIMS = [
   { id: 22, claimed_year: 1880, source_description: 'An oral history recording.' },
 ];
 
-function renderReview(submitReview) {
+function renderReview(submitReview, entryOverrides = {}) {
   const fetchPending = jest.fn().mockResolvedValue([{
     id: 7,
     title: 'A remembered story',
     submitted_at: '2026-01-01',
     raw_content: 'A community account.',
     history_claims: CLAIMS,
+    ...entryOverrides,
   }]);
 
   render(<ValidatorDashboardPage fetchPending={fetchPending} submitReview={submitReview} />);
@@ -89,6 +90,35 @@ describe('ValidatorDashboardPage claim assessments', () => {
             claimedYearSupported: 'met',
           }),
         ])
+      ));
+  });
+
+  it('shows the conflict banner and requires a conflict-handling note for approval', async () => {
+      const submitReview = jest.fn().mockResolvedValue({});
+      renderReview(submitReview, { claims_conflict: true });
+
+      expect(await screen.findByText('Claims disagree')).toBeInTheDocument();
+      expect(screen.getByText('Sources give different claimed years. Record what each source says.'))
+        .toBeInTheDocument();
+      selectAllAnswers(1820);
+      selectAllAnswers(1880, 'partly');
+
+      fireEvent.click(screen.getByRole('button', { name: /Approve as Unverified/ }));
+      expect(await screen.findByText(
+        'A comment of at least 20 characters is required to explain how the conflicting claims were handled.'
+      )).toBeInTheDocument();
+      expect(submitReview).not.toHaveBeenCalled();
+
+      fireEvent.change(screen.getByPlaceholderText(/at least 20 characters when disputing or explaining conflicting years/i), {
+        target: { value: 'These accounts describe different origins.' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /Approve as Unverified/ }));
+
+      await waitFor(() => expect(submitReview).toHaveBeenCalledWith(
+        7,
+        'approved_unverified',
+        'These accounts describe different origins.',
+        expect.any(Array)
       ));
   });
 });

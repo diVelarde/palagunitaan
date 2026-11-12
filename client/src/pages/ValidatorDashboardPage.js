@@ -35,6 +35,11 @@ function PendingEntryRow({ entry, onReview }) {
   const suggestVerified = historyClaims.length > 0
     && assessments.every((assessment) => assessment.corroboration === 'met');
 
+  function requiresComment(decision) {
+    return decision === 'disputed'
+      || (entry.claims_conflict && (decision === 'approved' || decision === 'approved_unverified'));
+  }
+
   function updateAssessment(historyClaimId, field, value) {
     setAssessments((current) => current.map((assessment) => (
       String(assessment.historyClaimId) === String(historyClaimId)
@@ -44,8 +49,10 @@ function PendingEntryRow({ entry, onReview }) {
   }
 
   async function handleDecision(decision) {
-    if (decision === 'disputed' && !comment.trim()) {
-      setError('A comment is required when disputing an entry.');
+    if (requiresComment(decision) && comment.trim().length < 20) {
+      setError(decision === 'disputed'
+        ? 'A comment of at least 20 characters is required when disputing an entry.'
+        : 'A comment of at least 20 characters is required to explain how the conflicting claims were handled.');
       setExpanded(true);
       return;
     }
@@ -69,13 +76,25 @@ function PendingEntryRow({ entry, onReview }) {
     <div className="dashboard-submission-card">
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
-          <Link to={`/entries/${entry.id}`} className="font-medium text-gray-900 hover:underline">{entry.title}</Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to={`/entries/${entry.id}`} className="font-medium text-gray-900 hover:underline">{entry.title}</Link>
+            {entry.claims_conflict && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                Claims disagree
+              </span>
+            )}
+          </div>
           {entry.category_auto && <p className="text-xs text-gray-500 uppercase tracking-wide mt-0.5">{entry.category_auto}</p>}
         </div>
         <span className="text-xs text-gray-400 shrink-0">Submitted {new Date(entry.submitted_at).toLocaleDateString()}</span>
       </div>
 
       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{entry.raw_content}</p>
+      {entry.claims_conflict && (
+        <p role="note" className="mb-4 border-l-2 border-[#ad482d] bg-[#f4eee6] px-3 py-2 text-sm text-gray-700">
+          Sources give different claimed years. Record what each source says.
+        </p>
+      )}
 
       {historyClaims.map((claim) => {
         const assessment = assessments.find(
@@ -131,11 +150,11 @@ function PendingEntryRow({ entry, onReview }) {
         );
       })}
 
-      {expanded && (
+      {(expanded || entry.claims_conflict) && (
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Notes for the contributor (required if disputing)"
+          placeholder="Notes for the contributor (at least 20 characters when disputing or explaining conflicting years)"
           rows={2}
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mb-3"
         />
@@ -153,13 +172,13 @@ function PendingEntryRow({ entry, onReview }) {
           {submitting === 'approved_unverified' ? 'Approving as Unverified…' : 'Approve as Unverified'}
           <span className="block text-[10px] font-normal">Publish with disclaimer</span>
         </button>
-        <button onClick={() => (expanded ? handleDecision('disputed') : setExpanded(true))} disabled={submitting !== null} className="dashboard-review-dispute disabled:opacity-50">
+        <button onClick={() => (expanded || entry.claims_conflict ? handleDecision('disputed') : setExpanded(true))} disabled={submitting !== null} className="dashboard-review-dispute disabled:opacity-50">
           {submitting === 'disputed' ? 'Flagging…' : 'Dispute'}
         </button>
         <button onClick={() => handleDecision('rejected')} disabled={submitting !== null} className="dashboard-review-reject disabled:opacity-50">
           {submitting === 'rejected' ? 'Rejecting…' : 'Reject'}
         </button>
-        {!expanded && <button onClick={() => setExpanded(true)} className="text-xs text-gray-500 hover:text-gray-700 ml-2">+ add note</button>}
+        {!expanded && !entry.claims_conflict && <button onClick={() => setExpanded(true)} className="text-xs text-gray-500 hover:text-gray-700 ml-2">+ add note</button>}
       </div>
     </div>
   );

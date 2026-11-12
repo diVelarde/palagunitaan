@@ -1,9 +1,20 @@
 const db = require('../config/db');
 
+function claimsHaveDifferentYears(historyClaims) {
+  return new Set(historyClaims.map((claim) => claim.claimed_year)).size > 1;
+}
+
 async function findById(id) {
   const [rows] = await db.query(
     `SELECT he.*, gt.latitude AS location_latitude, gt.longitude AS location_longitude,
-            gt.location_name, r.name AS region_name, r.province AS region_province
+            gt.location_name, r.name AS region_name, r.province AS region_province,
+            (SELECT ea.comment
+             FROM editorial_actions ea
+             WHERE ea.heritage_entry_id = he.id
+               AND ea.action_type = 'disputed'
+               AND ea.comment IS NOT NULL
+             ORDER BY ea.action_date DESC, ea.id DESC
+             LIMIT 1) AS dispute_comment
      FROM heritage_entries he
      LEFT JOIN geographic_tags gt ON gt.heritage_entry_id = he.id
      LEFT JOIN regions r ON r.id = he.region_id
@@ -18,7 +29,11 @@ async function findById(id) {
      ORDER BY claimed_year ASC, id ASC`,
     [id]
   );
-  return { ...rows[0], history_claims: historyClaims };
+  return {
+    ...rows[0],
+    history_claims: historyClaims,
+    claims_conflict: claimsHaveDifferentYears(historyClaims),
+  };
 }
 
 async function findByUser(userId) {
@@ -225,7 +240,33 @@ async function findPending({ excludeUserId } = {}) {
     `SELECT * FROM heritage_entries WHERE status = 'pending'${excludeUserClause} ORDER BY submitted_at ASC`,
     params
   );
-  return rows;
+  if (!rows.length) return rows;
+
+  const entryIds = rows.map((entry) => entry.id);
+  const placeholders = entryIds.map(() => '?').join(', ');
+  const [claims] = await db.query(
+    `SELECT id, heritage_entry_id, claimed_year, source_type, source_description, source_year, source_url
+     FROM heritage_entry_history_claims
+     WHERE heritage_entry_id IN (${placeholders})
+     ORDER BY heritage_entry_id ASC, claimed_year ASC, id ASC`,
+    entryIds
+  );
+  const claimsByEntryId = new Map();
+  claims.forEach((claimRow) => {
+    const { heritage_entry_id: entryId, ...claim } = claimRow;
+    const key = String(entryId);
+    if (!claimsByEntryId.has(key)) claimsByEntryId.set(key, []);
+    claimsByEntryId.get(key).push(claim);
+  });
+
+  return rows.map((entry) => {
+    const historyClaims = claimsByEntryId.get(String(entry.id)) || [];
+    return {
+      ...entry,
+      history_claims: historyClaims,
+      claims_conflict: claimsHaveDifferentYears(historyClaims),
+    };
+  });
 }
 
 async function updateVerification(id, { status, verificationStatus }) {

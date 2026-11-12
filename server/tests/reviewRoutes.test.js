@@ -114,6 +114,18 @@ describe('review routes', () => {
     expect(response.body.action.actionType).toBe('disputed');
   });
 
+  it('rejects a flag comment shorter than 20 characters', async () => {
+    const response = await makeRequest(createApp(), {
+      method: 'POST',
+      path: '/api/review/123/flag',
+      body: { comment: 'too short' },
+    });
+
+    expect(reviewService.reviewEntry).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('A comment of at least 20 characters is required when disputing an entry.');
+  });
+
   it('accepts approved_unverified as a valid review decision', async () => {
     const response = await makeRequest(createApp(), {
       method: 'POST',
@@ -154,6 +166,32 @@ describe('review routes', () => {
       decision: 'approved',
       assessments,
     }));
+  });
+
+  it('requires an explanation when approving conflicting claims', async () => {
+    heritageEntryModel.findById.mockResolvedValue({
+      claims_conflict: true,
+      history_claims: [{ id: 31 }, { id: 32 }],
+    });
+    const assessments = [31, 32].map((historyClaimId) => ({
+      historyClaimId,
+      sourceTypeFit: 'met',
+      sourceCredibility: 'met',
+      corroboration: 'partly',
+      claimedYearSupported: 'met',
+    }));
+
+    const response = await makeRequest(createApp(), {
+      method: 'POST',
+      path: '/api/review/123',
+      body: { decision: 'approved_unverified', comment: 'too short', assessments },
+    });
+
+    expect(reviewService.reviewEntry).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.body.errors).toContain(
+      'A comment of at least 20 characters is required to explain how the conflicting claims were handled.'
+    );
   });
 
   it('returns claim assessments with entry review history', async () => {

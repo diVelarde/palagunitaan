@@ -2,6 +2,7 @@ const { isValidDecision } = require('../services/verificationStatusService');
 const heritageEntryModel = require('../models/heritageEntryModel');
 
 const ASSESSMENT_VALUES = ['met', 'partly', 'not_met'];
+const MIN_COMMENT_LENGTH = 20;
 
 async function validateReview(req, res, next) {
   const { decision, comment, assessments } = req.body;
@@ -10,8 +11,9 @@ async function validateReview(req, res, next) {
   if (!decision || !isValidDecision(decision)) {
     errors.push('decision must be one of: approved, approved_unverified, disputed, rejected.');
   }
-  if (decision === 'disputed' && (!comment || !comment.trim())) {
-    errors.push('comment is required when disputing an entry.');
+  const commentLength = typeof comment === 'string' ? comment.trim().length : 0;
+  if (decision === 'disputed' && commentLength < MIN_COMMENT_LENGTH) {
+    errors.push('A comment of at least 20 characters is required when disputing an entry.');
   }
   if (assessments !== undefined) {
     if (!Array.isArray(assessments)) {
@@ -45,6 +47,9 @@ async function validateReview(req, res, next) {
       const entry = await heritageEntryModel.findById(req.params.id);
       const historyClaims = entry?.history_claims || [];
       const submittedAssessments = assessments || [];
+      if (entry?.claims_conflict && commentLength < MIN_COMMENT_LENGTH) {
+        errors.push('A comment of at least 20 characters is required to explain how the conflicting claims were handled.');
+      }
       if (isApproval && historyClaims.length && submittedAssessments.length !== historyClaims.length) {
         errors.push('An assessment is required for every historical claim when approving.');
       }
@@ -69,8 +74,10 @@ async function validateReview(req, res, next) {
 function validateFlag(req, res, next) {
   const { comment } = req.body;
 
-  if (!comment || !comment.trim()) {
-    return res.status(400).json({ message: 'Comment is required when flagging an entry.' });
+  if (typeof comment !== 'string' || comment.trim().length < MIN_COMMENT_LENGTH) {
+    return res.status(400).json({
+      message: 'A comment of at least 20 characters is required when disputing an entry.',
+    });
   }
 
   next();

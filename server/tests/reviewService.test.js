@@ -125,6 +125,44 @@ describe('reviewEntry', () => {
     expect(entry.verification_status).toBe('disputed');
   });
 
+  it('requires at least 20 characters when disputing', async () => {
+    await expect(reviewEntry({
+      entryId: 1,
+      validatorId: 2,
+      decision: 'disputed',
+      comment: 'too short',
+    })).rejects.toMatchObject({
+      message: 'A comment of at least 20 characters is required when disputing an entry.',
+      statusCode: 400,
+    });
+    expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+    expect(editorialActionModel.create).not.toHaveBeenCalled();
+  });
+
+  it('requires a conflict-handling comment for an approved conflicting entry', async () => {
+    heritageEntryModel.findById.mockResolvedValue({
+      ...PENDING_ENTRY,
+      claims_conflict: true,
+      history_claims: [{ id: 31 }, { id: 32 }],
+    });
+
+    await expect(reviewEntry({
+      entryId: 1,
+      validatorId: 2,
+      decision: 'approved',
+      comment: 'too short',
+      assessments: [
+        { historyClaimId: 31 },
+        { historyClaimId: 32 },
+      ],
+    })).rejects.toMatchObject({
+      message: 'A comment of at least 20 characters is required to explain how the conflicting claims were handled.',
+      statusCode: 400,
+    });
+    expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+    expect(editorialActionModel.create).not.toHaveBeenCalled();
+  });
+
   it('rejects: entry never becomes published', async () => {
     const { entry } = await reviewEntry({ entryId: 1, validatorId: 2, decision: 'rejected', comment: 'unverifiable claim' });
     expect(entry.status).toBe('rejected');
