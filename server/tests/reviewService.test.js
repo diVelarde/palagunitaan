@@ -57,6 +57,36 @@ describe('reviewEntry', () => {
     expect(notificationService.notifyReviewDecision).not.toHaveBeenCalled();
   });
 
+  it.each(['approved', 'disputed', 'rejected'])(
+    'blocks self-review with a ReviewError for the %s decision',
+    async (decision) => {
+      const error = await reviewEntry({
+        entryId: 1,
+        validatorId: 7,
+        decision,
+        comment: 'review comment',
+      }).catch((err) => err);
+      expect(error).toBeInstanceOf(ReviewError);
+      expect(error).toMatchObject({
+        message: 'You cannot review your own submission.',
+        statusCode: 403,
+      });
+
+      expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+      expect(editorialActionModel.create).not.toHaveBeenCalled();
+      expect(notificationService.notifyReviewDecision).not.toHaveBeenCalled();
+    }
+  );
+
+  it('blocks self-review for an administrator by the same user id', async () => {
+    const administratorId = PENDING_ENTRY.user_id;
+    await expect(reviewEntry({ entryId: 1, validatorId: administratorId, decision: 'approved' }))
+      .rejects.toMatchObject({ statusCode: 403 });
+    expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+    expect(editorialActionModel.create).not.toHaveBeenCalled();
+    expect(notificationService.notifyReviewDecision).not.toHaveBeenCalled();
+  });
+
   it('throws a 409 ReviewError when the entry is not pending', async () => {
     heritageEntryModel.findById.mockResolvedValue({ ...PENDING_ENTRY, status: 'published' });
     await expect(reviewEntry({ entryId: 1, validatorId: 2, decision: 'approved' })).rejects.toMatchObject({ statusCode: 409 });

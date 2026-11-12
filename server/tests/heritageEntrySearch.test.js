@@ -1,7 +1,7 @@
 jest.mock('../config/db', () => ({ query: jest.fn() }));
 
 const db = require('../config/db');
-const { findByUser, search } = require('../models/heritageEntryModel');
+const { findByUser, findPending, search } = require('../models/heritageEntryModel');
 
 describe('heritageEntryModel.findByUser', () => {
   beforeEach(() => db.query.mockReset().mockResolvedValue([[]]));
@@ -11,6 +11,26 @@ describe('heritageEntryModel.findByUser', () => {
     expect(db.query).toHaveBeenCalledWith(
       'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY submitted_at DESC',
       [7]
+    );
+  });
+});
+
+describe('heritageEntryModel.findPending', () => {
+  beforeEach(() => db.query.mockReset().mockResolvedValue([[]]));
+
+  it('excludes the selected user with a parameterized condition and keeps ordering', async () => {
+    await findPending({ excludeUserId: 7 });
+    const [sql, params] = db.query.mock.calls[0];
+    expect(sql).toMatch(/user_id <> \?/);
+    expect(sql).toMatch(/ORDER BY submitted_at ASC$/);
+    expect(params).toEqual([7]);
+  });
+
+  it('keeps the query unchanged when no exclusion is provided', async () => {
+    await findPending();
+    expect(db.query).toHaveBeenCalledWith(
+      "SELECT * FROM heritage_entries WHERE status = 'pending' ORDER BY submitted_at ASC",
+      []
     );
   });
 });
