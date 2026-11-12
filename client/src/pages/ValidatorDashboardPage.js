@@ -23,13 +23,15 @@ function PendingEntryRow({ entry, onReview }) {
     claimedYearSupported: '',
     notes: '',
   })));
-  const assessmentsComplete = !historyClaims.length || assessments.length === historyClaims.length
+  const assessmentsComplete = !historyClaims.length || (
+    assessments.length === historyClaims.length
     && assessments.every((assessment) => (
       assessment.sourceTypeFit
       && assessment.sourceCredibility
       && assessment.corroboration
       && assessment.claimedYearSupported
-    ));
+    ))
+  );
   const suggestVerified = historyClaims.length > 0
     && assessments.every((assessment) => assessment.corroboration === 'met');
 
