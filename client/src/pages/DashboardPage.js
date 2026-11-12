@@ -3,6 +3,7 @@ import ProfilePanel from '../components/ProfilePanel';
 import CommunityTab from '../components/CommunityTab';
 import RoleSwitcher from '../components/RoleSwitcher';
 import RoleRequestForm from '../components/RoleRequestForm';
+import BecomeContributorPrompt from '../components/BecomeContributorPrompt';
 import blogService from '../services/blogService';
 import heritageService from '../services/heritageService';
 import roleRequestService from '../services/roleRequestService';
@@ -86,10 +87,13 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
 
       {user && ['public', 'contributor', 'validator'].includes(user.role) && (
         <section className="dashboard-section-card">
-          <RoleRequestForm
-            createRequest={roleRequestService.createRequest}
-            fetchMyRequest={roleRequestService.getMyRequest}
-          />
+          <div id="role-request-form">
+            <RoleRequestForm
+              createRequest={roleRequestService.createRequest}
+              fetchMyRequest={roleRequestService.getMyRequest}
+              initialRequestedRole={user.role === 'public' ? 'contributor' : ''}
+            />
+          </div>
         </section>
       )}
 
@@ -101,9 +105,7 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
       {!isContributor && (
         <div className="dashboard-section-card">
           <h2>Start contributing</h2>
-          <p className="mb-4 text-sm leading-6 text-[#82766c]">
-            Know a story, song, or tradition that should be preserved? Request contributor access and share it with the community.
-          </p>
+          <BecomeContributorPrompt />
         </div>
       )}
     </div>

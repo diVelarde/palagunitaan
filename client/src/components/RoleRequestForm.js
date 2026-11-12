@@ -11,9 +11,10 @@ export default function RoleRequestForm({
   createRequest = async () => ({}),
   fetchMyRequest = async () => null,
   existingRequest = null,
+  initialRequestedRole = '',
 }) {
   const { user } = useAuth();
-  const [requestedRole, setRequestedRole] = useState('');
+  const [requestedRole, setRequestedRole] = useState(initialRequestedRole);
   const [qualifications, setQualifications] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
