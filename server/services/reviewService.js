@@ -13,6 +13,9 @@ class ReviewError extends Error {
 async function reviewEntry({ entryId, validatorId, decision, comment }) {
   const entry = await heritageEntryModel.findById(entryId);
   if (!entry) throw new ReviewError('Entry not found.', 404);
+  if (Number(entry.user_id) === Number(validatorId)) {
+    throw new ReviewError('You cannot review your own submission.', 403);
+  }
   if (!verificationStatusService.canReview(entry)) {
     throw new ReviewError('This entry is not awaiting review.', 409);
   }

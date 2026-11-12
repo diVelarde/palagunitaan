@@ -45,6 +45,18 @@ describe('reviewEntry', () => {
     await expect(reviewEntry({ entryId: 999, validatorId: 2, decision: 'approved' })).rejects.toBeInstanceOf(ReviewError);
   });
 
+  it('prevents contributors from reviewing their own entries', async () => {
+    await expect(reviewEntry({ entryId: 1, validatorId: '7', decision: 'disputed' }))
+      .rejects.toMatchObject({
+        message: 'You cannot review your own submission.',
+        statusCode: 403,
+      });
+
+    expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+    expect(editorialActionModel.create).not.toHaveBeenCalled();
+    expect(notificationService.notifyReviewDecision).not.toHaveBeenCalled();
+  });
+
   it('throws a 409 ReviewError when the entry is not pending', async () => {
     heritageEntryModel.findById.mockResolvedValue({ ...PENDING_ENTRY, status: 'published' });
     await expect(reviewEntry({ entryId: 1, validatorId: 2, decision: 'approved' })).rejects.toMatchObject({ statusCode: 409 });
