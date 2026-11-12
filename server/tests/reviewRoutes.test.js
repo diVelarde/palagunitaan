@@ -117,6 +117,27 @@ describe('review routes', () => {
     expect(response.body.message).toBe('You cannot review your own submission.');
   });
 
+  it('returns 403 when an administrator tries to review their own entry', async () => {
+    reviewService.reviewEntry.mockRejectedValue(
+      new reviewService.ReviewError('You cannot review your own submission.', 403)
+    );
+
+    const response = await makeRequest(createApp({ id: 7, role: 'admin' }), {
+      method: 'POST',
+      path: '/api/review/123',
+      body: { decision: 'approved' },
+    });
+
+    expect(reviewService.reviewEntry).toHaveBeenCalledWith({
+      entryId: '123',
+      validatorId: 7,
+      decision: 'approved',
+      comment: undefined,
+    });
+    expect(response.statusCode).toBe(403);
+    expect(response.body.message).toBe('You cannot review your own submission.');
+  });
+
   it('does not include the validator’s own pending entry in the queue', async () => {
     heritageEntryModel.findPending.mockImplementation(async ({ excludeUserId }) => [
       { id: 1, user_id: 7 },

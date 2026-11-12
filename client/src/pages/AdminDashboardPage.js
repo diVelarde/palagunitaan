@@ -4,6 +4,7 @@ import HighlightSelector from '../components/HighlightSelector';
 import ProfilePanel from '../components/ProfilePanel';
 import RoleRequestsTab from '../components/RoleRequestsTab';
 import AdminEntriesTab from '../components/AdminEntriesTab';
+import { useAuth } from '../context/AuthContext';
 import { validateImageFile } from '../utils/mediaValidation';
 import AuditLogPage from './AuditLogPage';
 
@@ -517,6 +518,7 @@ export default function AdminDashboardPage({
   deleteHeritageEntry = async () => {},
   setEducationalAiExcluded = async (id, excluded) => ({ id, ai_educational_excluded: excluded }),
 }) {
+  const { user } = useAuth();
   const [tab, setTab] = useState(() => (
     new URLSearchParams(window.location.search).get('tab') === 'audit-log'
       ? 'Audit Log'
@@ -562,6 +564,7 @@ export default function AdminDashboardPage({
           fetchEntries={fetchHeritageEntries}
           deleteEntry={deleteHeritageEntry}
           setEducationalAiExcluded={setEducationalAiExcluded}
+          currentUserId={user?.id}
         />
       )}
       {tab === 'Role Requests' && (

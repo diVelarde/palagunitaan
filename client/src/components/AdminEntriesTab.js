@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const PAGE_SIZE = 50;
 
-export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducationalAiExcluded }) {
+export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducationalAiExcluded, currentUserId }) {
   const [entries, setEntries] = useState([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -105,6 +105,11 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducatio
                   </td>
                   <td className="py-3">{entry.submitted_at ? new Date(entry.submitted_at).toLocaleDateString() : '—'}</td>
                   <td className="py-3">
+                    {Number(entry.user_id) === Number(currentUserId) && (
+                      <p className="mb-2 text-xs text-gray-500">
+                        You submitted this entry, so another reviewer must decide.
+                      </p>
+                    )}
                     {confirmingId === entry.id ? (
                       <span className="inline-flex items-center gap-2">
                         <button
