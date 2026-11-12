@@ -1,11 +1,45 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const CLAIM_ASSESSMENT_FIELDS = [
+  { field: 'sourceTypeFit', label: 'Source type', helper: 'Is this kind of source suitable for this claim?' },
+  { field: 'sourceCredibility', label: 'Source credibility', helper: 'Is the author or recorder reliable on the topic?' },
+  { field: 'corroboration', label: 'Corroboration', helper: 'Do other independent sources agree?' },
+  { field: 'claimedYearSupported', label: 'Claimed year', helper: 'Does the source actually support this year?' },
+];
+const ASSESSMENT_OPTIONS = ['met', 'partly', 'not_met'];
+
 function PendingEntryRow({ entry, onReview }) {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(null);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const historyClaims = entry.history_claims || [];
+  const [assessments, setAssessments] = useState(() => historyClaims.map((claim) => ({
+    historyClaimId: claim.id,
+    sourceTypeFit: '',
+    sourceCredibility: '',
+    corroboration: '',
+    claimedYearSupported: '',
+    notes: '',
+  })));
+  const assessmentsComplete = !historyClaims.length || assessments.length === historyClaims.length
+    && assessments.every((assessment) => (
+      assessment.sourceTypeFit
+      && assessment.sourceCredibility
+      && assessment.corroboration
+      && assessment.claimedYearSupported
+    ));
+  const suggestVerified = historyClaims.length > 0
+    && assessments.every((assessment) => assessment.corroboration === 'met');
+
+  function updateAssessment(historyClaimId, field, value) {
+    setAssessments((current) => current.map((assessment) => (
+      String(assessment.historyClaimId) === String(historyClaimId)
+        ? { ...assessment, [field]: value }
+        : assessment
+    )));
+  }
 
   async function handleDecision(decision) {
     if (decision === 'disputed' && !comment.trim()) {
@@ -16,7 +50,7 @@ function PendingEntryRow({ entry, onReview }) {
     setError(null);
     setSubmitting(decision);
     try {
-      await onReview(entry.id, decision, comment);
+      await onReview(entry.id, decision, comment, historyClaims.length ? assessments : undefined);
     } catch (err) {
       const selfReviewMessage = 'You cannot review your own submission.';
       const message = err.response?.status === 403
@@ -41,6 +75,60 @@ function PendingEntryRow({ entry, onReview }) {
 
       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{entry.raw_content}</p>
 
+      {historyClaims.map((claim) => {
+        const assessment = assessments.find(
+          (item) => String(item.historyClaimId) === String(claim.id)
+        );
+        if (!assessment) return null;
+
+        return (
+          <section key={claim.id} className="mb-4 rounded-md border border-gray-200 bg-[#f4eee6] p-4">
+            <h3 className="mb-1 text-sm font-semibold text-gray-900">
+              Claimed origin year: {claim.claimed_year}
+            </h3>
+            <p className="mb-4 text-xs text-gray-600">
+              {claim.source_description || 'No source description supplied.'}
+            </p>
+            {CLAIM_ASSESSMENT_FIELDS.map(({ field, label, helper }) => (
+              <fieldset
+                key={field}
+                aria-label={`${label} for claim ${claim.claimed_year}`}
+                className="mb-3"
+              >
+                <legend className="mb-1 text-xs font-semibold text-gray-800">
+                  {label}
+                  <span className="ml-1 font-normal text-gray-600">{helper}</span>
+                </legend>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {ASSESSMENT_OPTIONS.map((value) => (
+                    <label key={value} className="inline-flex items-center gap-1 text-xs text-gray-700">
+                      <input
+                        type="radio"
+                        name={`claim-${claim.id}-${field}`}
+                        value={value}
+                        checked={assessment[field] === value}
+                        onChange={() => updateAssessment(claim.id, field, value)}
+                        className="accent-[#ad482d]"
+                      />
+                      {value === 'not_met' ? 'Not met' : value.charAt(0).toUpperCase() + value.slice(1)}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+            <label className="block text-xs font-semibold text-gray-800">
+              Optional notes
+              <textarea
+                value={assessment.notes}
+                onChange={(event) => updateAssessment(claim.id, 'notes', event.target.value)}
+                rows={2}
+                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal"
+              />
+            </label>
+          </section>
+        );
+      })}
+
       {expanded && (
         <textarea
           value={comment}
@@ -54,11 +142,12 @@ function PendingEntryRow({ entry, onReview }) {
       {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
 
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => handleDecision('approved')} disabled={submitting !== null} className="dashboard-review-approve disabled:opacity-50">
+        <button onClick={() => handleDecision('approved')} disabled={submitting !== null || !assessmentsComplete} className="dashboard-review-approve disabled:opacity-50">
           {submitting === 'approved' ? 'Approving as Verified…' : 'Approve as Verified'}
           <span className="block text-[10px] font-normal">Source corroborated</span>
+          {suggestVerified && <span className="block text-[10px] font-semibold">Suggested</span>}
         </button>
-        <button onClick={() => handleDecision('approved_unverified')} disabled={submitting !== null} className="dashboard-review-approve disabled:opacity-50">
+        <button onClick={() => handleDecision('approved_unverified')} disabled={submitting !== null || !assessmentsComplete} className="dashboard-review-approve disabled:opacity-50">
           {submitting === 'approved_unverified' ? 'Approving as Unverified…' : 'Approve as Unverified'}
           <span className="block text-[10px] font-normal">Publish with disclaimer</span>
         </button>
@@ -93,8 +182,8 @@ export default function ValidatorDashboardPage({ fetchPending = async () => [], 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchPending]);
 
-  async function handleReview(entryId, decision, comment) {
-    await submitReview(entryId, decision, comment);
+  async function handleReview(entryId, decision, comment, assessments) {
+    await submitReview(entryId, decision, comment, assessments);
     setEntries((prev) => prev.filter((e) => e.id !== entryId)); // optimistic drop, no full re-fetch
   }
 

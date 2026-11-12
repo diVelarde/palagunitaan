@@ -1,9 +1,11 @@
 jest.mock('../models/heritageEntryModel');
 jest.mock('../models/editorialActionModel');
+jest.mock('../models/claimAssessmentModel');
 jest.mock('../services/notificationService');
 
 const heritageEntryModel = require('../models/heritageEntryModel');
 const editorialActionModel = require('../models/editorialActionModel');
+const claimAssessmentModel = require('../models/claimAssessmentModel');
 const notificationService = require('../services/notificationService');
 const { reviewEntry, ReviewError } = require('../services/reviewService');
 
@@ -16,6 +18,7 @@ beforeEach(() => {
     ...PENDING_ENTRY, status, verification_status: verificationStatus,
   }));
   editorialActionModel.create.mockResolvedValue({ id: 99, action_type: 'approved' });
+  claimAssessmentModel.createMany.mockResolvedValue({ affectedRows: 1 });
   notificationService.notifyReviewDecision.mockResolvedValue({ id: 5 });
 });
 
@@ -51,6 +54,69 @@ describe('reviewEntry', () => {
       entry,
       decision: 'approved_unverified',
     });
+  });
+
+  it('saves each claim assessment linked to the editorial action', async () => {
+    heritageEntryModel.findById.mockResolvedValue({
+      ...PENDING_ENTRY,
+      history_claims: [{ id: 31 }, { id: 32 }],
+    });
+    const assessments = [
+      {
+        historyClaimId: 31,
+        sourceTypeFit: 'met',
+        sourceCredibility: 'partly',
+        corroboration: 'met',
+        claimedYearSupported: 'not_met',
+        notes: 'Two independent accounts support the source type.',
+      },
+      {
+        historyClaimId: 32,
+        sourceTypeFit: 'partly',
+        sourceCredibility: 'met',
+        corroboration: 'partly',
+        claimedYearSupported: 'met',
+        notes: null,
+      },
+    ];
+
+    await reviewEntry({
+      entryId: 1,
+      validatorId: 2,
+      decision: 'approved',
+      assessments,
+    });
+
+    expect(editorialActionModel.create).toHaveBeenCalled();
+    expect(claimAssessmentModel.createMany).toHaveBeenCalledWith([
+      { ...assessments[0], heritageEntryId: 1, validatorId: 2, editorialActionId: 99 },
+      { ...assessments[1], heritageEntryId: 1, validatorId: 2, editorialActionId: 99 },
+    ]);
+    expect(editorialActionModel.create.mock.invocationCallOrder[0])
+      .toBeLessThan(claimAssessmentModel.createMany.mock.invocationCallOrder[0]);
+  });
+
+  it.each([
+    ['approved without assessments', 'approved', undefined],
+    ['approved with an empty assessment list', 'approved', []],
+    ['approved_unverified without assessments', 'approved_unverified', undefined],
+    ['a claim from another entry', 'approved', [{ historyClaimId: 99 }]],
+  ])('does not approve when assessments are invalid: %s', async (_label, decision, assessments) => {
+    heritageEntryModel.findById.mockResolvedValue({
+      ...PENDING_ENTRY,
+      history_claims: [{ id: 31 }],
+    });
+
+    await expect(reviewEntry({
+      entryId: 1,
+      validatorId: 2,
+      decision,
+      assessments,
+    })).rejects.toMatchObject({ statusCode: 400 });
+
+    expect(heritageEntryModel.updateVerification).not.toHaveBeenCalled();
+    expect(editorialActionModel.create).not.toHaveBeenCalled();
+    expect(claimAssessmentModel.createMany).not.toHaveBeenCalled();
   });
 
   it('disputes: entry stays published but flagged disputed', async () => {

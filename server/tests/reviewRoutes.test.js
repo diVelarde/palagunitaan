@@ -14,9 +14,18 @@ jest.mock('../services/reviewService', () => ({
 }));
 jest.mock('../models/heritageEntryModel', () => ({
   findPending: jest.fn(),
+  findById: jest.fn(),
+}));
+jest.mock('../models/editorialActionModel', () => ({
+  findByEntry: jest.fn(),
+}));
+jest.mock('../models/claimAssessmentModel', () => ({
+  findByEntryId: jest.fn(),
 }));
 
 const heritageEntryModel = require('../models/heritageEntryModel');
+const editorialActionModel = require('../models/editorialActionModel');
+const claimAssessmentModel = require('../models/claimAssessmentModel');
 
 function makeRequest(app, { method, path, body }) {
   return new Promise((resolve, reject) => {
@@ -65,6 +74,9 @@ describe('review routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     heritageEntryModel.findPending.mockResolvedValue([]);
+    heritageEntryModel.findById.mockResolvedValue({ history_claims: [] });
+    editorialActionModel.findByEntry.mockResolvedValue([]);
+    claimAssessmentModel.findByEntryId.mockResolvedValue([]);
     reviewService.reviewEntry.mockResolvedValue({
       entry: { id: '123', status: 'published' },
       action: { id: 99, actionType: 'disputed' },
@@ -116,6 +128,48 @@ describe('review routes', () => {
       comment: undefined,
     });
     expect(response.statusCode).toBe(200);
+  });
+
+  it('forwards well-formed claim assessments to the review service', async () => {
+    heritageEntryModel.findById.mockResolvedValue({ history_claims: [{ id: 31 }] });
+    const assessments = [{
+      historyClaimId: 31,
+      sourceTypeFit: 'met',
+      sourceCredibility: 'partly',
+      corroboration: 'met',
+      claimedYearSupported: 'not_met',
+      notes: 'A second account supports the source type.',
+    }];
+
+    const response = await makeRequest(createApp(), {
+      method: 'POST',
+      path: '/api/review/123',
+      body: { decision: 'approved', assessments },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(reviewService.reviewEntry).toHaveBeenCalledWith(expect.objectContaining({
+      entryId: '123',
+      validatorId: 2,
+      decision: 'approved',
+      assessments,
+    }));
+  });
+
+  it('returns claim assessments with entry review history', async () => {
+    const history = [{ id: 8, action_type: 'approved' }];
+    const assessments = [{ id: 9, history_claim_id: 31, source_type_fit: 'met' }];
+    editorialActionModel.findByEntry.mockResolvedValue(history);
+    claimAssessmentModel.findByEntryId.mockResolvedValue(assessments);
+
+    const response = await makeRequest(createApp(), {
+      method: 'GET',
+      path: '/api/review/123/history',
+    });
+
+    expect(editorialActionModel.findByEntry).toHaveBeenCalledWith('123');
+    expect(claimAssessmentModel.findByEntryId).toHaveBeenCalledWith('123');
+    expect(response.body).toEqual({ history, assessments });
   });
 
   it('still rejects an unsupported review decision', async () => {

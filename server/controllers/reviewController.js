@@ -1,5 +1,6 @@
 const heritageEntryModel = require('../models/heritageEntryModel');
 const editorialActionModel = require('../models/editorialActionModel');
+const claimAssessmentModel = require('../models/claimAssessmentModel');
 const reviewService = require('../services/reviewService');
 
 async function listPending(req, res, next) {
@@ -11,9 +12,13 @@ async function listPending(req, res, next) {
 
 async function reviewEntry(req, res, next) {
   try {
-    const { decision, comment } = req.body;
+    const { decision, comment, assessments } = req.body;
     const { entry, action } = await reviewService.reviewEntry({
-      entryId: req.params.id, validatorId: req.user.id, decision, comment,
+      entryId: req.params.id,
+      validatorId: req.user.id,
+      decision,
+      comment,
+      ...(assessments !== undefined ? { assessments } : {}),
     });
     res.json({ entry, action });
   } catch (err) {
@@ -44,8 +49,11 @@ async function flagEntry(req, res, next) {
 
 async function getEntryHistory(req, res, next) {
   try {
-    const history = await editorialActionModel.findByEntry(req.params.id);
-    res.json({ history });
+    const [history, assessments] = await Promise.all([
+      editorialActionModel.findByEntry(req.params.id),
+      claimAssessmentModel.findByEntryId(req.params.id),
+    ]);
+    res.json({ history, assessments });
   } catch (err) { next(err); }
 }
 
