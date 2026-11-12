@@ -18,7 +18,12 @@ function PendingEntryRow({ entry, onReview }) {
     try {
       await onReview(entry.id, decision, comment);
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not submit this review.');
+      const selfReviewMessage = 'You cannot review your own submission.';
+      const message = err.response?.status === 403
+        && err.response?.data?.message === selfReviewMessage
+        ? selfReviewMessage
+        : err.response?.data?.message || 'Could not submit this review.';
+      setError(message);
     } finally {
       setSubmitting(null);
     }
@@ -93,12 +98,17 @@ export default function ValidatorDashboardPage({ fetchPending = async () => [], 
       <header className="dashboard-page-heading">
         <p className="dashboard-page-eyebrow">Editorial desk</p>
         <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
+        <p className="text-sm text-gray-600">Validators cannot review their own entries.</p>
         <p className="text-sm text-gray-600">
         {loading ? 'Loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} awaiting your review.`}
         </p>
       </header>
       {error && <div className="dashboard-error" role="alert">{error}</div>}
-      {!loading && entries.length === 0 && <p className="text-sm text-gray-500">Nothing waiting on you right now.</p>}
+      {!loading && entries.length === 0 && (
+        <p className="text-sm text-gray-500">
+          No submissions are waiting for you. Your own submissions are not listed here because someone else must review them.
+        </p>
+      )}
       <div className="space-y-4">
         {entries.map((entry) => <PendingEntryRow key={entry.id} entry={entry} onReview={handleReview} />)}
       </div>
