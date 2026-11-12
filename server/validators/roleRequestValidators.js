@@ -23,9 +23,12 @@ function validateRoleRequest(req, res, next) {
 }
 
 function validateReview(req, res, next) {
-  const { decision } = req.body;
+  const { decision, reason } = req.body;
   if (!['approved', 'denied'].includes(decision)) {
     return res.status(400).json({ message: 'decision must be "approved" or "denied".' });
+  }
+  if (decision === 'denied' && (typeof reason !== 'string' || !reason.trim())) {
+    return res.status(400).json({ message: 'A reason is required when denying a role request.' });
   }
   next();
 }

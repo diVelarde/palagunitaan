@@ -28,15 +28,18 @@ async function findAllPending() {
   return rows;
 }
 
-async function markReviewed(id, { status, reviewedBy }) {
-  await db.query('UPDATE role_requests SET status = ?, reviewed_by = ?, reviewed_at = NOW() WHERE id = ?', [status, reviewedBy, id]);
+async function markReviewed(id, { status, reviewedBy, reason = null }) {
+  await db.query(
+    'UPDATE role_requests SET status = ?, reviewed_by = ?, reviewed_at = NOW(), decision_reason = ? WHERE id = ?',
+    [status, reviewedBy, reason, id]
+  );
   return findById(id);
 }
 
-module.exports = { 
-    create, 
-    findPendingForUser, 
-    findById, 
-    findAllPending, 
-    markReviewed 
+module.exports = {
+    create,
+    findPendingForUser,
+    findById,
+    findAllPending,
+    markReviewed
 };

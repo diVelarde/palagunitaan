@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { ROLE_CRITERIA } from '../utils/roleCriteria';
 
 const REQUESTABLE_ROLES = {
   public: ['contributor'],
@@ -23,6 +24,7 @@ export default function RoleRequestForm({
   const [loadingRequest, setLoadingRequest] = useState(!existingRequest);
 
   const availableRoles = REQUESTABLE_ROLES[user?.role] || [];
+  const selectedCriteria = ROLE_CRITERIA[requestedRole];
 
   useEffect(() => {
     let active = true;
@@ -80,6 +82,15 @@ export default function RoleRequestForm({
         </select>
       </div>
 
+      {selectedCriteria && (
+        <section className="rounded-md border border-parchment-300 bg-parchment-50 p-3" aria-label={`${selectedCriteria.label} approval criteria`}>
+          <h4 className="text-sm font-medium text-ink">{selectedCriteria.label} approval criteria</h4>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted">
+            {selectedCriteria.items.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </section>
+      )}
+
       <div>
         <label className="block text-sm font-medium text-ink mb-1" htmlFor="role-qualifications">
           Qualifications <span className="text-muted font-normal">(required)</span>
@@ -94,6 +105,9 @@ export default function RoleRequestForm({
           className="w-full border border-parchment-300 rounded-md px-3 py-2 text-sm"
           placeholder="Describe relevant experience, knowledge, or training for the role."
         />
+        <p className="mt-1 text-xs text-muted">
+          Local knowledge, community roles, and lived experience count, not only academic credentials. Examples include elders, cultural bearers, local historians, and teachers.
+        </p>
       </div>
 
       <div>

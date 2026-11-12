@@ -1,4 +1,4 @@
-const { validateRoleRequest } = require('../validators/roleRequestValidators');
+const { validateRoleRequest, validateReview } = require('../validators/roleRequestValidators');
 
 function validate(role, body) {
   const req = { user: { role }, body };
@@ -9,6 +9,18 @@ function validate(role, body) {
   };
   const next = jest.fn();
   validateRoleRequest(req, res, next);
+  return { next, res };
+}
+
+function validateDecision(body) {
+  const req = { body };
+  const res = {
+    statusCode: 200,
+    status(code) { this.statusCode = code; return this; },
+    json(payload) { this.payload = payload; return this; },
+  };
+  const next = jest.fn();
+  validateReview(req, res, next);
   return { next, res };
 }
 
@@ -39,5 +51,18 @@ describe('role request validation', () => {
     });
     expect(next).not.toHaveBeenCalled();
     expect(res.statusCode).toBe(400);
+  });
+
+  it('requires a non-empty reason when denying a request', () => {
+    const { next, res } = validateDecision({ decision: 'denied', reason: '   ' });
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(400);
+    expect(res.payload.message).toMatch(/reason/i);
+  });
+
+  it('allows approval without a denial reason', () => {
+    const { next, res } = validateDecision({ decision: 'approved' });
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
   });
 });

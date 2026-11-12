@@ -15,8 +15,8 @@ async function getPendingRequests() {
   return res.data.requests;
 }
 
-async function reviewRequest(id, decision) {
-  const res = await api.patch(`/api/admin/role-requests/${id}`, { decision });
+async function reviewRequest(id, decision, reason) {
+  const res = await api.patch(`/api/admin/role-requests/${id}`, { decision, reason });
   return res.data.request;
 }
 
