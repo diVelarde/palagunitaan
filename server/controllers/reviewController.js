@@ -4,7 +4,7 @@ const reviewService = require('../services/reviewService');
 
 async function listPending(req, res, next) {
   try {
-    const entries = await heritageEntryModel.findPending();
+    const entries = await heritageEntryModel.findPending({ excludeUserId: req.user.id });
     res.json({ entries });
   } catch (err) { next(err); }
 }

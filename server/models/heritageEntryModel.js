@@ -218,8 +218,13 @@ async function findAllPublishedForTimeline() {
   return rows;
 }
 
-async function findPending() {
-  const [rows] = await db.query(`SELECT * FROM heritage_entries WHERE status = 'pending' ORDER BY submitted_at ASC`);
+async function findPending({ excludeUserId } = {}) {
+  const excludeUserClause = excludeUserId === undefined ? '' : ' AND user_id <> ?';
+  const params = excludeUserId === undefined ? [] : [excludeUserId];
+  const [rows] = await db.query(
+    `SELECT * FROM heritage_entries WHERE status = 'pending'${excludeUserClause} ORDER BY submitted_at ASC`,
+    params
+  );
   return rows;
 }
 
