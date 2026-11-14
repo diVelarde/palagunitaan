@@ -51,6 +51,21 @@ describe('heritage entry history claim validation', () => {
     expect(res.statusCode).toBe(200);
   });
 
+  it('accepts Published reference as a source type', async () => {
+    const { next, res } = await validate({
+      ...validEntry,
+      sourceType: 'Published reference',
+      historyClaims: [{
+        claimedYear: 1920,
+        sourceType: 'Published reference',
+        sourceDescription: 'Author, title, year and page',
+      }],
+    });
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
+  });
+
   it.each([
     ['alternate_names', 'Aswong'],
     ['alternate_names', null],

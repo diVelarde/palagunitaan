@@ -6,7 +6,7 @@ import mapService from '../services/mapService';
 import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
 import './SubmitEntryPage.css';
 
-const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Other'];
+const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Published reference', 'Other'];
 
 function validate({ title, rawContent, historyClaims, alternateNames }) {
   const errors = {};
@@ -456,6 +456,9 @@ export default function SubmitEntryPage({
               <option value="">Select source</option>
               {SOURCE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
+            {form.sourceType === 'Published reference' && (
+              <p className="submit-entry-help">Include the author, title, year and page.</p>
+            )}
           </div>
         </div>
 
@@ -543,6 +546,9 @@ export default function SubmitEntryPage({
                     <option value="">Select source</option>
                     {SOURCE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
                   </select>
+                  {claim.sourceType === 'Published reference' && (
+                    <p className="submit-entry-help">Include the author, title, year and page.</p>
+                  )}
                 </div>
                 <div>
                   <label className="submit-entry-label" htmlFor={`claim-source-year-${index}`}>Source recorded/published year</label>
