@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ActionDialog from '../components/ActionDialog';
 import BlogComposer from '../components/BlogComposer';
@@ -7,6 +7,8 @@ import CommunityPostLabel from '../components/CommunityPostLabel';
 import './BrowsePage.css';
 
 const CONTRIBUTOR_ROLES = ['contributor', 'validator', 'admin'];
+const DEBOUNCE_MS = 300;
+const EMPTY_FETCH_POSTS = async () => [];
 
 function formatDate(value) {
   if (!value) return 'Date unavailable';
@@ -45,34 +47,89 @@ function PostCard({ post }) {
 }
 
 export default function BlogFeedPage({
-  fetchPosts = async () => [],
+  fetchPosts = EMPTY_FETCH_POSTS,
   createPost = async () => null,
 }) {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [keyword, setKeyword] = useState(() => searchParams.get('q') || '');
+  const [author, setAuthor] = useState(() => searchParams.get('author') || '');
+  const [from, setFrom] = useState(() => searchParams.get('from') || '');
+  const [to, setTo] = useState(() => searchParams.get('to') || '');
+  const [sort, setSort] = useState(() => searchParams.get('sort') === 'oldest' ? 'oldest' : 'newest');
   const [posts, setPosts] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [writePostOpen, setWritePostOpen] = useState(false);
+  const [submitCount, setSubmitCount] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
+  const debounceRef = useRef(null);
+  const searchImmediatelyRef = useRef(false);
   const canWritePost = Boolean(user && CONTRIBUTOR_ROLES.includes(user.role));
 
   useEffect(() => {
     let active = true;
-    fetchPosts()
-      .then((data) => {
-        if (active) setPosts(data || []);
+    setLoading(true);
+    setError('');
+    clearTimeout(debounceRef.current);
+    const delay = searchImmediatelyRef.current ? 0 : DEBOUNCE_MS;
+    searchImmediatelyRef.current = false;
+    debounceRef.current = setTimeout(() => {
+      fetchPosts({
+        q: keyword.trim() || undefined,
+        author: author || undefined,
+        from: from || undefined,
+        to: to || undefined,
+        sort,
       })
-      .catch((err) => {
-        if (active) {
-          setError(err.response?.data?.message || 'Could not load community posts. Please try again later.');
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+        .then((data) => {
+          if (!active) return;
+          const loadedPosts = data || [];
+          setPosts(loadedPosts);
+          setAuthors((currentAuthors) => {
+            const options = new Map(currentAuthors.map((option) => [option.value, option]));
+            loadedPosts.forEach((post) => {
+              if (!post.author_name) return;
+              const value = post.user_id == null ? post.author_name : String(post.user_id);
+              options.set(value, { value, label: post.author_name });
+            });
+            return Array.from(options.values()).sort((first, second) => first.label.localeCompare(second.label));
+          });
+        })
+        .catch((err) => {
+          if (active) {
+            setError(err.response?.data?.message || 'Could not load community posts. Please try again.');
+          }
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, delay);
     return () => {
       active = false;
+      clearTimeout(debounceRef.current);
     };
-  }, [fetchPosts]);
+  }, [author, fetchPosts, from, keyword, retryCount, sort, submitCount, to]);
+
+  function submitSearch(event) {
+    event.preventDefault();
+    searchImmediatelyRef.current = true;
+    setSubmitCount((count) => count + 1);
+  }
+
+  function clearFilters() {
+    setKeyword('');
+    setAuthor('');
+    setFrom('');
+    setTo('');
+    setSort('newest');
+  }
+
+  function retrySearch() {
+    searchImmediatelyRef.current = true;
+    setRetryCount((count) => count + 1);
+  }
 
   return (
     <main className="site-page-surface blog-feed-page">
@@ -96,12 +153,59 @@ export default function BlogFeedPage({
           )}
         </div>
 
-        {loading && <p className="blog-feed-state">Loading posts…</p>}
-        {error && <p className="blog-feed-message blog-feed-error" role="alert">{error}</p>}
-        {!loading && !error && posts.length === 0 && (
-          <p className="blog-feed-message blog-feed-empty">No community posts have been published yet.</p>
+        <form className="browse-filter-bar blog-filter-bar" onSubmit={submitSearch}>
+          <div className="blog-filter-field blog-search-field">
+            <label htmlFor="blog-search">Search posts</label>
+            <input
+              id="blog-search"
+              type="search"
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder="Search by title or content…"
+              className="browse-filter-control"
+            />
+          </div>
+          <div className="blog-filter-field">
+            <label htmlFor="blog-author">Author</label>
+            <select id="blog-author" value={author} onChange={(event) => setAuthor(event.target.value)} className="browse-filter-control">
+              <option value="">Any author</option>
+              {authors.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="blog-filter-field">
+            <label htmlFor="blog-from">From date</label>
+            <input id="blog-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="browse-filter-control" />
+          </div>
+          <div className="blog-filter-field">
+            <label htmlFor="blog-to">To date</label>
+            <input id="blog-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} className="browse-filter-control" />
+          </div>
+          <div className="blog-filter-field">
+            <label htmlFor="blog-sort">Sort</label>
+            <select id="blog-sort" value={sort} onChange={(event) => setSort(event.target.value)} className="browse-filter-control">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
+          <div className="blog-filter-actions">
+            <button type="submit" className="blog-filter-button">Search</button>
+            <button type="button" onClick={clearFilters} className="blog-filter-button">Clear filters</button>
+          </div>
+        </form>
+
+        {loading && <p className="blog-feed-state" role="status">Searching…</p>}
+        {error && (
+          <div className="blog-feed-message blog-feed-error" role="alert">
+            <span>{error}</span>
+            <button type="button" onClick={retrySearch} className="blog-feed-retry">Retry</button>
+          </div>
         )}
-        {!error && posts.length > 0 && (
+        {!loading && !error && posts.length === 0 && (
+          <p className="blog-feed-message blog-feed-empty">No posts match your search</p>
+        )}
+        {!loading && !error && posts.length > 0 && (
           <div className="blog-post-grid">
             {posts.map((post) => <PostCard key={post.id} post={post} />)}
           </div>

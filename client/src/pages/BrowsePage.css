@@ -84,6 +84,65 @@
   background: transparent;
 }
 
+.blog-filter-bar {
+  align-items: flex-end;
+}
+
+.blog-filter-field {
+  display: flex;
+  min-width: 150px;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blog-filter-field label {
+  color: var(--archive-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.blog-search-field {
+  min-width: 220px;
+  flex: 2;
+}
+
+.blog-filter-field .browse-filter-control {
+  width: 100%;
+  min-width: 0;
+}
+
+.blog-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.blog-filter-button,
+.blog-feed-retry {
+  min-height: 44px;
+  border: 1px solid var(--archive-line);
+  border-radius: 2px;
+  padding: 9px 13px;
+  color: var(--archive-ink);
+  background: var(--archive-card);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.blog-filter-button:hover,
+.blog-feed-retry:hover {
+  border-color: var(--site-gold);
+}
+
+.blog-feed-retry {
+  min-height: 34px;
+  margin-left: 12px;
+  padding: 5px 11px;
+}
+
 .browse-filter-control,
 .browse-period-select select {
   min-width: 155px;
