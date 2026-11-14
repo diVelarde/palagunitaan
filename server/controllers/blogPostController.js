@@ -5,15 +5,21 @@ async function listPosts(req, res, next) {
   try {
     const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
     const offset = parseInt(req.query.offset, 10) || 0;
-    res.json({ posts: await blogPostModel.findAll({ limit, offset }) });
+    const viewer = req.user ? { userId: req.user.id, role: req.user.role } : undefined;
+    const posts = viewer
+      ? await blogPostModel.findAll({ limit, offset }, viewer)
+      : await blogPostModel.findAll({ limit, offset });
+    res.json({ posts });
   } catch (err) { next(err); }
 }
 
 async function getPostById(req, res, next) {
   try {
-    const viewed = await blogPostModel.incrementViewCount(req.params.id);
-    if (!viewed) return res.status(404).json({ message: 'Post not found.' });
-    const post = await blogPostModel.findById(req.params.id);
+    await blogPostModel.incrementViewCount(req.params.id);
+    const viewer = req.user ? { userId: req.user.id, role: req.user.role } : undefined;
+    const post = viewer
+      ? await blogPostModel.findById(req.params.id, viewer)
+      : await blogPostModel.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found.' });
     res.json({ post });
   } catch (err) { next(err); }
@@ -40,7 +46,7 @@ async function createPost(req, res, next) {
       content: content.trim(),
       coverImageUrl,
     });
-    res.status(201).json({ post });
+    res.status(201).json({ post, message: 'Your post is waiting for review' });
   } catch (err) { next(err); }
 }
 
