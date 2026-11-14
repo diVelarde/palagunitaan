@@ -49,16 +49,16 @@ async function findAll({
     params.push(authorName);
   }
   if (from) {
-    conditions.push('bp.created_at >= ?');
+    conditions.push('bp.published_at >= ?');
     params.push(`${from} 00:00:00`);
   }
   if (to) {
-    conditions.push('bp.created_at < ?');
+    conditions.push('bp.published_at < ?');
     params.push(`${addDay(to)} 00:00:00`);
   }
   const orderBy = sort === 'oldest'
-    ? 'bp.created_at ASC, bp.id ASC'
-    : 'bp.created_at DESC, bp.id DESC';
+    ? 'bp.published_at ASC, bp.id ASC'
+    : 'bp.published_at DESC, bp.id DESC';
   const [rows] = await db.query(
     `SELECT bp.*, u.name AS author_name
      FROM blog_posts bp JOIN users u ON u.id = bp.user_id

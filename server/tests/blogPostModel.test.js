@@ -21,7 +21,7 @@ describe('blogPostModel.findAll', () => {
 
     const [sql, params] = db.query.mock.calls[0];
     expect(sql).toContain('WHERE bp.status = ?');
-    expect(sql).toContain('ORDER BY bp.created_at DESC, bp.id DESC');
+    expect(sql).toContain('ORDER BY bp.published_at DESC, bp.id DESC');
     expect(params).toEqual(['published', 5, 10]);
   });
 
@@ -72,9 +72,9 @@ describe('blogPostModel.findAll', () => {
     expect(sql).toContain('WHERE bp.status = ?');
     expect(sql).toContain('(bp.title LIKE ? ESCAPE \'!\' OR bp.content LIKE ? ESCAPE \'!\')');
     expect(sql).toContain('bp.user_id = ?');
-    expect(sql).toContain('bp.created_at >= ?');
-    expect(sql).toContain('bp.created_at < ?');
-    expect(sql).toContain('ORDER BY bp.created_at ASC, bp.id ASC');
+    expect(sql).toContain('bp.published_at >= ?');
+    expect(sql).toContain('bp.published_at < ?');
+    expect(sql).toContain('ORDER BY bp.published_at ASC, bp.id ASC');
     expect(params).toEqual([
       'published',
       '%aswang%',
