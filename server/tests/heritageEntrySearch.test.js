@@ -107,10 +107,20 @@ describe('heritageEntryModel.search', () => {
   it('combines multiple filters with AND', async () => {
     await search({ keyword: 'aswang', verificationStatus: 'verified', historicalPeriod: 'Spanish Era' });
     const [sql, params] = db.query.mock.calls[0];
-    expect(sql).toMatch(/title LIKE \? OR raw_content LIKE \? OR euphemistic_content LIKE \?/);
+    expect(sql).toMatch(/title LIKE \? OR raw_content LIKE \? OR euphemistic_content LIKE \? OR alternate_names LIKE \?/);
     expect(sql).toMatch(/verification_status = \?/);
     expect(sql).toMatch(/historical_period = \?/);
-    expect(params).toEqual(expect.arrayContaining(['%aswang%', '%aswang%', '%aswang%', 'verified', 'Spanish Era']));
+    expect(params).toEqual(expect.arrayContaining([
+      '%aswang%', '%aswang%', '%aswang%', '%aswang%', 'verified', 'Spanish Era',
+    ]));
+  });
+
+  it('finds published entries by an alternate name', async () => {
+    await search({ keyword: 'Aswong' });
+    const [sql, params] = db.query.mock.calls[0];
+    expect(sql).toContain('alternate_names LIKE ?');
+    expect(params).toContain('%Aswong%');
+    expect(sql).toContain("status = 'published'");
   });
 
   it('omits a condition entirely when its filter is not provided', async () => {

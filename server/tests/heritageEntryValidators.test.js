@@ -41,6 +41,33 @@ describe('heritage entry history claim validation', () => {
     expect(res.statusCode).toBe(200);
   });
 
+  it('accepts up to 10 alternate names', async () => {
+    const { next, res } = await validate({
+      ...validEntry,
+      alternate_names: ['Aswang', 'Aswong', 'Asuwang'],
+    });
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
+  });
+
+  it.each([
+    ['alternate_names', 'Aswong'],
+    ['alternate_names', null],
+    ['alternate_names', Array(11).fill('Aswong')],
+    ['alternate_names', ['']],
+    ['alternate_names', ['a'.repeat(101)]],
+  ])('rejects invalid %s values', async (field, value) => {
+    const { next, res } = await validate({
+      ...validEntry,
+      [field]: value,
+    });
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(400);
+    expect(res.payload.errors.some((error) => error.startsWith('alternate_names'))).toBe(true);
+  });
+
   it('rejects claims without a valid year or source description', async () => {
     const { next, res } = await validate({
       ...validEntry,

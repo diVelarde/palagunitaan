@@ -96,4 +96,16 @@ describe('submitEntry', () => {
 
     expect(heritageEntryModel.create).toHaveBeenCalledWith(expect.objectContaining({ historyClaims }));
   });
+
+  it('passes alternate names through to the entry model', async () => {
+    const alternateNames = ['Aswang', 'Aswong'];
+    await submitEntry({
+      userId: 7,
+      title: BASE_ENTRY.title,
+      rawContent: BASE_ENTRY.raw_content,
+      alternateNames,
+    });
+
+    expect(heritageEntryModel.create).toHaveBeenCalledWith(expect.objectContaining({ alternateNames }));
+  });
 });

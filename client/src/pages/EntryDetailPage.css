@@ -50,6 +50,13 @@
   line-height: 1.12;
 }
 
+.entry-alternate-names {
+  margin: -2px 0 11px;
+  color: rgba(255, 255, 255, .88);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .entry-hero-meta {
   display: flex;
   flex-wrap: wrap;

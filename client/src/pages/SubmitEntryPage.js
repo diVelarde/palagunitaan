@@ -8,7 +8,7 @@ import './SubmitEntryPage.css';
 
 const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Other'];
 
-function validate({ title, rawContent, historyClaims }) {
+function validate({ title, rawContent, historyClaims, alternateNames }) {
   const errors = {};
   if (!title.trim()) errors.title = 'Title is required.';
   else if (title.length > 255) errors.title = 'Title must be 255 characters or fewer.';
@@ -21,11 +21,16 @@ function validate({ title, rawContent, historyClaims }) {
     errors.historyClaims = 'Each source claim needs a claimed origin year and source description.';
   }
 
+  if (alternateNames.length > 10) errors.alternateNames = 'You can add up to 10 alternate names.';
+  else if (alternateNames.some((name) => !name.trim() || name.trim().length > 100)) {
+    errors.alternateNames = 'Each alternate name must be 100 characters or fewer.';
+  }
+
   return errors;
 }
 
 const EMPTY_FORM = {
-  title: '', rawContent: '', sourceType: SOURCE_TYPES[0],
+  title: '', alternateNames: [], rawContent: '', sourceType: SOURCE_TYPES[0],
   sourceDescription: '', historicalPeriod: '', category: '',
   aiEducationalExcluded: false,
   regionId: '', locationName: '', latitude: '', longitude: '',
@@ -79,6 +84,7 @@ export default function SubmitEntryPage({
   const [coverImage, setCoverImage] = useState(null);
   const [coverError, setCoverError] = useState(null);
   const [coverWarning, setCoverWarning] = useState(null);
+  const [alternateNameInput, setAlternateNameInput] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -124,6 +130,38 @@ export default function SubmitEntryPage({
     if (!problem) setCoverImage(file);
   }
 
+  function addAlternateName(value) {
+    const name = value.trim();
+    if (!name) return;
+    if (name.length > 100) {
+      setErrors((current) => ({ ...current, alternateNames: 'Each alternate name must be 100 characters or fewer.' }));
+      return;
+    }
+    if (form.alternateNames.length >= 10) {
+      setErrors((current) => ({ ...current, alternateNames: 'You can add up to 10 alternate names.' }));
+      return;
+    }
+    setForm((current) => ({ ...current, alternateNames: [...current.alternateNames, name] }));
+    setAlternateNameInput('');
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.alternateNames;
+      return next;
+    });
+  }
+
+  function removeAlternateName(indexToRemove) {
+    setForm((current) => ({
+      ...current,
+      alternateNames: current.alternateNames.filter((_, index) => index !== indexToRemove),
+    }));
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.alternateNames;
+      return next;
+    });
+  }
+
   function useCurrentLocation() {
     setLocationMessage('');
     if (!navigator.geolocation) {
@@ -157,15 +195,22 @@ export default function SubmitEntryPage({
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const fieldErrors = validate(form);
+    const pendingAlternateName = alternateNameInput.trim();
+    const alternateNames = pendingAlternateName
+      ? [...form.alternateNames, pendingAlternateName]
+      : form.alternateNames;
+    const fieldErrors = validate({ ...form, alternateNames });
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length) return;
 
     setSubmitting(true);
     setCoverWarning(null);
     try {
+      const formValues = { ...form };
+      delete formValues.alternateNames;
       const payload = {
-        ...form,
+        ...formValues,
+        alternate_names: alternateNames,
         category: form.category || undefined,
         regionId: form.regionId ? Number(form.regionId) : undefined,
         latitude: form.latitude === '' ? undefined : Number(form.latitude),
@@ -195,6 +240,7 @@ export default function SubmitEntryPage({
       }
 
       setForm(EMPTY_FORM);
+      setAlternateNameInput('');
       setSelectedRegionName('');
       setCoverImage(null);
       setCoverError(null);
@@ -277,6 +323,46 @@ export default function SubmitEntryPage({
             placeholder="e.g. The Aswang of Barangay San Isidro"
           />
           {errors.title && <p className="submit-entry-field-error">{errors.title}</p>}
+          <div className="submit-entry-alternate-names">
+            <label className="submit-entry-label" htmlFor="entry-alternate-name">Also known as</label>
+            {form.alternateNames.length > 0 && (
+              <ul className="submit-entry-alternate-list" aria-label="Alternate names">
+                {form.alternateNames.map((name, index) => (
+                  <li className="submit-entry-alternate-tag" key={`${name}-${index}`}>
+                    <span>{name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAlternateName(index)}
+                      aria-label={`Remove alternate name ${name}`}
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="submit-entry-alternate-input">
+              <input
+                id="entry-alternate-name"
+                type="text"
+                value={alternateNameInput}
+                onChange={(event) => setAlternateNameInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ',') {
+                    event.preventDefault();
+                    addAlternateName(alternateNameInput);
+                  }
+                }}
+                className="submit-entry-control"
+                placeholder="e.g. Aswong"
+              />
+              <button type="button" onClick={() => addAlternateName(alternateNameInput)} className="submit-entry-alternate-add">
+                Add name
+              </button>
+            </div>
+            <p className="submit-entry-help">Add up to 10 local or alternate spellings. Press Enter or comma after each name.</p>
+            {errors.alternateNames && <p className="submit-entry-field-error">{errors.alternateNames}</p>}
+          </div>
         </div>
 
         <div>

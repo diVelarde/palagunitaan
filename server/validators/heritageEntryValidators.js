@@ -10,7 +10,8 @@ function isValidYear(value) {
 
 async function validateSubmission(req, res, next) {
   const {
-    title, rawContent, category, regionId, latitude, longitude, historyClaims, aiEducationalExcluded,
+    title, rawContent, category, regionId, latitude, longitude, historyClaims, alternate_names: alternateNames,
+    aiEducationalExcluded,
   } = req.body;
   const errors = [];
 
@@ -22,6 +23,20 @@ async function validateSubmission(req, res, next) {
 
   if (aiEducationalExcluded != null && typeof aiEducationalExcluded !== 'boolean') {
     errors.push('aiEducationalExcluded must be a boolean.');
+  }
+
+  if (alternateNames !== undefined && !Array.isArray(alternateNames)) {
+    errors.push('alternate_names must be an array.');
+  } else if (alternateNames && alternateNames.length > 10) {
+    errors.push('alternate_names cannot contain more than 10 names.');
+  } else if (alternateNames) {
+    alternateNames.forEach((name, index) => {
+      if (typeof name !== 'string' || !name.trim()) {
+        errors.push(`alternate_names[${index}] must be a non-empty string.`);
+      } else if (name.trim().length > 100) {
+        errors.push(`alternate_names[${index}] must be 100 characters or fewer.`);
+      }
+    });
   }
 
   if (category != null && category !== '') {

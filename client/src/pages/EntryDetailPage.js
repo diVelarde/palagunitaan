@@ -73,6 +73,11 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
         <div className="entry-detail-hero-inner">
           <Link to="/browse" className="entry-back-link">← Back to Browse</Link>
           <h1>{entry.title}</h1>
+          {entry.alternate_names?.length > 0 && (
+            <p className="entry-alternate-names">
+              <strong>Also known as:</strong> {entry.alternate_names.join(', ')}
+            </p>
+          )}
           <div className="entry-hero-meta">
             {entry.category_auto && <span>{entry.category_auto}</span>}
             {location && <span>⌖ &nbsp;{location}</span>}

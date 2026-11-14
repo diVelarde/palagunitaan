@@ -4,6 +4,19 @@ function claimsHaveDifferentYears(historyClaims) {
   return new Set(historyClaims.map((claim) => claim.claimed_year)).size > 1;
 }
 
+function parseAlternateNames(value) {
+  if (value == null || value === '') return [];
+  const alternateNames = typeof value === 'string' ? JSON.parse(value) : value;
+  if (!Array.isArray(alternateNames)) {
+    throw new Error('Stored alternate_names must be a JSON array.');
+  }
+  return alternateNames;
+}
+
+function withAlternateNames(entry) {
+  return entry ? { ...entry, alternate_names: parseAlternateNames(entry.alternate_names) } : entry;
+}
+
 async function findById(id) {
   const [rows] = await db.query(
     `SELECT he.*, gt.latitude AS location_latitude, gt.longitude AS location_longitude,
@@ -22,6 +35,7 @@ async function findById(id) {
     [id]
   );
   if (!rows[0]) return null;
+  const entry = withAlternateNames(rows[0]);
   const [historyClaims] = await db.query(
     `SELECT id, claimed_year, source_type, source_description, source_year, source_url
      FROM heritage_entry_history_claims
@@ -30,7 +44,7 @@ async function findById(id) {
     [id]
   );
   return {
-    ...rows[0],
+    ...entry,
     history_claims: historyClaims,
     claims_conflict: claimsHaveDifferentYears(historyClaims),
   };
@@ -41,7 +55,7 @@ async function findByUser(userId) {
     'SELECT * FROM heritage_entries WHERE user_id = ? ORDER BY submitted_at DESC',
     [userId]
   );
-  return rows;
+  return rows.map(withAlternateNames);
 }
 
 async function findAllForAdmin({ limit = 50, offset = 0 } = {}) {
@@ -104,7 +118,7 @@ async function findPublished({ limit = 20, offset = 0 } = {}) {
      LIMIT ? OFFSET ?`,
     [limit, offset]
   );
-  return rows;
+  return rows.map(withAlternateNames);
 }
 
 async function search({ keyword, category, region, regionId, verificationStatus, historicalPeriod, limit = 20, offset = 0 } = {}) {
@@ -112,9 +126,9 @@ async function search({ keyword, category, region, regionId, verificationStatus,
   const params = [];
 
   if (keyword) {
-    conditions.push('(title LIKE ? OR raw_content LIKE ? OR euphemistic_content LIKE ?)');
+    conditions.push('(title LIKE ? OR raw_content LIKE ? OR euphemistic_content LIKE ? OR alternate_names LIKE ?)');
     const like = `%${keyword}%`;
-    params.push(like, like, like);
+    params.push(like, like, like, like);
   }
   if (category) { conditions.push('category_auto = ?'); params.push(category); }
   if (regionId && Number.isInteger(Number(regionId)) && Number(regionId) > 0) {
@@ -137,12 +151,12 @@ async function search({ keyword, category, region, regionId, verificationStatus,
     `SELECT * FROM heritage_entries WHERE ${conditions.join(' AND ')} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset]
   );
-  return rows;
+  return rows.map(withAlternateNames);
 }
 
 async function create({
   userId, title, rawContent, sourceType, sourceDescription, historicalPeriod,
-  categoryAuto, regionId, historyClaims = [], aiEducationalExcluded = false,
+  categoryAuto, regionId, historyClaims = [], alternateNames = [], aiEducationalExcluded = false,
 }) {
   const connection = await db.getConnection();
   let entryId;
@@ -153,9 +167,14 @@ async function create({
     const [result] = await connection.query(
       `INSERT INTO heritage_entries
         (user_id, title, raw_content, source_type, source_description, historical_period, category_auto,
-         region_id, ai_educational_excluded, status, submitted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-      [userId, title, rawContent, sourceType || null, sourceDescription || null, historicalPeriod || null, categoryAuto || null, regionId || null, aiEducationalExcluded]
+         region_id, alternate_names, ai_educational_excluded, status, submitted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+      [
+        userId, title, rawContent, sourceType || null, sourceDescription || null,
+        historicalPeriod || null, categoryAuto || null, regionId || null,
+        alternateNames.length ? JSON.stringify(alternateNames.map((name) => name.trim())) : null,
+        aiEducationalExcluded,
+      ]
     );
     entryId = result.insertId;
     if (historyClaims.length) {
@@ -212,6 +231,14 @@ async function updateEuphemisticContent(id, euphemisticContent) {
   return findById(id);
 }
 
+async function updateAlternateNames(id, alternateNames = []) {
+  const encodedNames = alternateNames.length
+    ? JSON.stringify(alternateNames.map((name) => name.trim()))
+    : null;
+  await db.query('UPDATE heritage_entries SET alternate_names = ? WHERE id = ?', [encodedNames, id]);
+  return findById(id);
+}
+
 async function setEducationalAiExcluded(id, excluded) {
   await db.query(
     `UPDATE heritage_entries
@@ -262,7 +289,7 @@ async function findPending({ excludeUserId } = {}) {
   return rows.map((entry) => {
     const historyClaims = claimsByEntryId.get(String(entry.id)) || [];
     return {
-      ...entry,
+      ...withAlternateNames(entry),
       history_claims: historyClaims,
       claims_conflict: claimsHaveDifferentYears(historyClaims),
     };
@@ -302,6 +329,7 @@ module.exports = {
   updateStatus, 
   updateCategoryAuto, 
   updateEuphemisticContent,
+  updateAlternateNames,
   setEducationalAiExcluded,
   findAllPublishedForTimeline,
   findPending,

@@ -123,6 +123,57 @@
   outline: 2px solid rgb(251 209 22 / 28%);
 }
 
+.submit-entry-alternate-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.submit-entry-alternate-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--submit-line);
+  border-radius: 999px;
+  padding: 4px 8px 4px 11px;
+  color: var(--submit-ink);
+  background: var(--site-paper);
+  font-size: 11px;
+}
+
+.submit-entry-alternate-tag button {
+  border: 0;
+  padding: 0;
+  color: var(--submit-muted);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.submit-entry-alternate-input {
+  display: flex;
+  gap: 8px;
+}
+
+.submit-entry-alternate-add {
+  flex: none;
+  border: 1px solid var(--submit-line);
+  border-radius: 2px;
+  padding: 8px 12px;
+  color: var(--submit-ink);
+  background: var(--site-paper);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.submit-entry-alternate-add:hover {
+  border-color: var(--site-gold);
+}
+
 .submit-entry-textarea {
   min-height: 125px;
   resize: vertical;
