@@ -7,6 +7,14 @@ import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
 import './SubmitEntryPage.css';
 
 const SOURCE_TYPES = ['Oral interview', 'Personal account', 'Archival text', 'Published reference', 'Other'];
+const GUIDE_QUESTIONS = [
+  'Who practices or carries this tradition? (Name the community or ethnolinguistic group and, if they agree to be named, the cultural bearers.)',
+  'Where is it practiced? (Barangay, municipality or city, province, and nearby places where it is also practiced.)',
+  'What kind of heritage is it? (Oral tradition, performing art, social practice or ritual, knowledge about nature, traditional craft, or other.)',
+  'What is it and what is its history? (Occasion or season, processes, beliefs connected to it, purpose.)',
+  'How is it passed on? (Who teaches it, to whom, and how.)',
+  'Why does it matter? (Its historical, social, spiritual or economic significance to the community.)',
+];
 
 function validate({ title, rawContent, historyClaims, alternateNames }) {
   const errors = {};
@@ -85,6 +93,9 @@ export default function SubmitEntryPage({
   const [coverError, setCoverError] = useState(null);
   const [coverWarning, setCoverWarning] = useState(null);
   const [alternateNameInput, setAlternateNameInput] = useState('');
+  const [guideQuestionsOpen, setGuideQuestionsOpen] = useState(
+    () => typeof window === 'undefined' || window.innerWidth > 640
+  );
 
   useEffect(() => {
     let active = true;
@@ -364,6 +375,31 @@ export default function SubmitEntryPage({
             {errors.alternateNames && <p className="submit-entry-field-error">{errors.alternateNames}</p>}
           </div>
         </div>
+
+        <section className="rounded border border-[var(--submit-line)] bg-[var(--submit-card)]">
+          <button
+            type="button"
+            aria-expanded={guideQuestionsOpen}
+            aria-controls="entry-guide-questions"
+            onClick={() => setGuideQuestionsOpen((open) => !open)}
+            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-semibold text-[var(--submit-ink)] hover:bg-[var(--site-paper)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ad482d]"
+          >
+            <span>Questions the NCCA asks when documenting heritage</span>
+            <span aria-hidden="true">{guideQuestionsOpen ? '−' : '+'}</span>
+          </button>
+          <div
+            id="entry-guide-questions"
+            hidden={!guideQuestionsOpen}
+            className="border-t border-[var(--submit-line)] px-4 py-4"
+          >
+            <ol className="list-decimal space-y-3 pl-5 text-xs leading-relaxed text-[var(--submit-muted)]">
+              {GUIDE_QUESTIONS.map((question) => <li key={question}>{question}</li>)}
+            </ol>
+            <p className="submit-entry-help mt-3">
+              Skip any question you cannot answer. A validator will review your entry.
+            </p>
+          </div>
+        </section>
 
         <div>
           <label className="submit-entry-label" htmlFor="entry-content">Content <span>*</span></label>
