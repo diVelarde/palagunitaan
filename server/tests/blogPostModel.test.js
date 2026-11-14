@@ -6,6 +6,8 @@ const {
   findById,
   incrementViewCount,
   findByUser,
+  findPending,
+  markReviewed,
   create,
 } = require('../models/blogPostModel');
 
@@ -34,10 +36,10 @@ describe('blogPostModel.findAll', () => {
     );
   });
 
-  it('allows validators and administrators to see all posts', async () => {
+  it.each(['validator', 'admin'])('allows %s to see all posts', async (role) => {
     db.query.mockResolvedValue([[]]);
 
-    await findAll({ limit: 20, offset: 0 }, { userId: 7, role: 'validator' });
+    await findAll({ limit: 20, offset: 0 }, { userId: 7, role });
 
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('WHERE 1 = 1'),
@@ -72,10 +74,15 @@ describe('blogPostModel.findById', () => {
     expect(db.query.mock.calls[0][1]).toEqual([12, 'published', 7]);
   });
 
-  it('allows a moderator to read an unpublished post', async () => {
-    db.query.mockResolvedValue([[{ id: 12, status: 'rejected' }]]);
+  it.each([
+    ['validator', 'pending'],
+    ['validator', 'rejected'],
+    ['admin', 'pending'],
+    ['admin', 'rejected'],
+  ])('allows a %s to read a %s post', async (role, status) => {
+    db.query.mockResolvedValue([[{ id: 12, status }]]);
 
-    await expect(findById(12, { userId: 3, role: 'admin' })).resolves.toMatchObject({ status: 'rejected' });
+    await expect(findById(12, { userId: 3, role })).resolves.toMatchObject({ status });
 
     expect(db.query.mock.calls[0][0]).toContain('AND 1 = 1');
   });
@@ -141,6 +148,67 @@ describe('blogPostModel.findByUser', () => {
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('SELECT * FROM blog_posts WHERE user_id = ?'),
       [4]
+    );
+  });
+});
+
+describe('blogPostModel.findPending', () => {
+  beforeEach(() => db.query.mockReset());
+
+  it('filters pending posts, excludes the reviewer’s posts, and orders oldest first', async () => {
+    const posts = [{ id: 2, status: 'pending', user_id: 8 }];
+    db.query.mockResolvedValue([posts]);
+
+    await expect(findPending({ excludeUserId: 8 })).resolves.toEqual(posts);
+
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE bp.status = 'pending' AND bp.user_id <> ?"),
+      [8]
+    );
+    expect(db.query.mock.calls[0][0]).toContain('ORDER BY bp.published_at ASC, bp.id ASC');
+  });
+
+  it('keeps the pending queue available without an excluded user', async () => {
+    db.query.mockResolvedValue([[]]);
+
+    await findPending();
+
+    expect(db.query.mock.calls[0][0]).toContain("WHERE bp.status = 'pending'");
+    expect(db.query.mock.calls[0][0]).not.toContain('bp.user_id <> ?');
+    expect(db.query.mock.calls[0][1]).toEqual([]);
+  });
+});
+
+describe('blogPostModel.markReviewed', () => {
+  beforeEach(() => db.query.mockReset());
+
+  it('saves the decision status, reviewer, timestamp, and rejection reason', async () => {
+    const updatedPost = {
+      id: 14,
+      status: 'published',
+      reviewed_by: 3,
+      reviewed_at: '2026-11-15 00:00:00',
+      rejection_reason: null,
+    };
+    db.query
+      .mockResolvedValueOnce([{ affectedRows: 1 }])
+      .mockResolvedValueOnce([[updatedPost]]);
+
+    await expect(markReviewed(14, {
+      status: 'published',
+      reviewedBy: 3,
+      reason: null,
+    })).resolves.toEqual(updatedPost);
+
+    expect(db.query).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('SET status = ?, reviewed_by = ?, reviewed_at = NOW(), rejection_reason = ?'),
+      ['published', 3, null, 14]
+    );
+    expect(db.query).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('WHERE bp.id = ? AND 1 = 1'),
+      [14]
     );
   });
 });

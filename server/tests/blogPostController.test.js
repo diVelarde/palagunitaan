@@ -3,6 +3,7 @@ jest.mock('../models/blogPostModel', () => ({
   findById: jest.fn(),
   incrementViewCount: jest.fn(),
   create: jest.fn(),
+  findPending: jest.fn(),
 }));
 jest.mock('../services/cloudinaryService', () => ({
   uploadBuffer: jest.fn(),
@@ -10,7 +11,7 @@ jest.mock('../services/cloudinaryService', () => ({
 
 const blogPostModel = require('../models/blogPostModel');
 const cloudinaryService = require('../services/cloudinaryService');
-const { listPosts, getPostById, createPost } = require('../controllers/blogPostController');
+const { listPosts, getPostById, listPending, createPost } = require('../controllers/blogPostController');
 
 function makeResponse() {
   const res = {
@@ -42,7 +43,7 @@ describe('blogPostController.getPostById', () => {
   });
 
   it('passes the viewer when listing the feed', async () => {
-    const posts = [{ id: 12, status: 'pending' }];
+    const posts = [{ id: 12, user_id: 6, status: 'pending' }];
     blogPostModel.findAll.mockResolvedValue(posts);
     const res = makeResponse();
 
@@ -55,6 +56,28 @@ describe('blogPostController.getPostById', () => {
       { limit: 10, offset: 2 },
       { userId: 6, role: 'contributor' }
     );
+    expect(res.json).toHaveBeenCalledWith({ posts });
+  });
+
+  it('uses the public-safe model query when listing the feed without a user', async () => {
+    const posts = [{ id: 12, status: 'published' }];
+    blogPostModel.findAll.mockResolvedValue(posts);
+    const res = makeResponse();
+
+    await listPosts({ query: {} }, res, jest.fn());
+
+    expect(blogPostModel.findAll).toHaveBeenCalledWith({ limit: 20, offset: 0 });
+    expect(res.json).toHaveBeenCalledWith({ posts });
+  });
+
+  it('excludes the reviewer’s own submissions from the pending list', async () => {
+    const posts = [{ id: 13, user_id: 8, status: 'pending' }];
+    blogPostModel.findPending.mockResolvedValue(posts);
+    const res = makeResponse();
+
+    await listPending({ user: { id: 8 } }, res, jest.fn());
+
+    expect(blogPostModel.findPending).toHaveBeenCalledWith({ excludeUserId: 8 });
     expect(res.json).toHaveBeenCalledWith({ posts });
   });
 
