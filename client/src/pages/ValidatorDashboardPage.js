@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import BlogModerationQueue from '../components/BlogModerationQueue';
 
 const CLAIM_ASSESSMENT_FIELDS = [
   { field: 'sourceTypeFit', label: 'Source type', helper: 'Is this kind of source suitable for this claim?' },
@@ -184,10 +185,16 @@ function PendingEntryRow({ entry, onReview }) {
   );
 }
 
-export default function ValidatorDashboardPage({ fetchPending = async () => [], submitReview = async () => {} }) {
+export default function ValidatorDashboardPage({
+  fetchPending = async () => [],
+  submitReview = async () => {},
+  fetchPendingBlogPosts = async () => [],
+  reviewBlogPost = async () => {},
+}) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('Entries');
 
   function reload() {
     setLoading(true);
@@ -214,19 +221,44 @@ export default function ValidatorDashboardPage({ fetchPending = async () => [], 
         <p className="dashboard-page-eyebrow">Editorial desk</p>
         <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
         <p className="text-sm text-gray-600">Validators cannot review their own entries.</p>
-        <p className="text-sm text-gray-600">
-        {loading ? 'Loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} awaiting your review.`}
-        </p>
+        {activeTab === 'Entries' && (
+          <p className="text-sm text-gray-600">
+            {loading ? 'Loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} awaiting your review.`}
+          </p>
+        )}
       </header>
-      {error && <div className="dashboard-error" role="alert">{error}</div>}
-      {!loading && entries.length === 0 && (
-        <p className="text-sm text-gray-500">
-          No submissions are waiting for you. Your own submissions are not listed here because someone else must review them.
-        </p>
-      )}
-      <div className="space-y-4">
-        {entries.map((entry) => <PendingEntryRow key={entry.id} entry={entry} onReview={handleReview} />)}
+      <div className="mb-5 flex gap-2 border-b border-gray-200" role="tablist" aria-label="Review queues">
+        {['Entries', 'Blog posts'].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            onClick={() => setActiveTab(tab)}
+            className={`border-b-2 px-3 py-2 text-sm font-medium ${
+              activeTab === tab ? 'border-[#ad482d] text-[#ad482d]' : 'border-transparent text-gray-600'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
+      {activeTab === 'Blog posts' && (
+        <BlogModerationQueue fetchPending={fetchPendingBlogPosts} reviewPost={reviewBlogPost} />
+      )}
+      {activeTab === 'Entries' && (
+        <>
+          {error && <div className="dashboard-error" role="alert">{error}</div>}
+          {!loading && entries.length === 0 && (
+            <p className="text-sm text-gray-500">
+              No submissions are waiting for you. Your own submissions are not listed here because someone else must review them.
+            </p>
+          )}
+          <div className="space-y-4">
+            {entries.map((entry) => <PendingEntryRow key={entry.id} entry={entry} onReview={handleReview} />)}
+          </div>
+        </>
+      )}
     </div>
   );
 }

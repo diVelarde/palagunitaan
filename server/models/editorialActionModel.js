@@ -1,9 +1,14 @@
 const db = require('../config/db');
 
-async function create({ heritageEntryId, validatorId, actionType, comment }) {
+async function create({ heritageEntryId, blogPostId, validatorId, actionType, comment }) {
+  const hasHeritageEntry = heritageEntryId != null;
+  const hasBlogPost = blogPostId != null;
+  if (hasHeritageEntry === hasBlogPost) {
+    throw new Error('An editorial action must reference exactly one heritage entry or blog post.');
+  }
   const [result] = await db.query(
-    'INSERT INTO editorial_actions (heritage_entry_id, validator_id, action_type, comment) VALUES (?, ?, ?, ?)',
-    [heritageEntryId, validatorId, actionType, comment || null]
+    'INSERT INTO editorial_actions (heritage_entry_id, blog_post_id, validator_id, action_type, comment) VALUES (?, ?, ?, ?, ?)',
+    [heritageEntryId || null, blogPostId || null, validatorId, actionType, comment || null]
   );
   const [rows] = await db.query('SELECT * FROM editorial_actions WHERE id = ?', [result.insertId]);
   return rows[0];
@@ -23,10 +28,11 @@ async function findByEntry(heritageEntryId) {
 
 async function findAll({ limit = 50, offset = 0 } = {}) {
   const [rows] = await db.query(
-    `SELECT ea.*, u.name AS validator_name, he.title AS entry_title
+    `SELECT ea.*, u.name AS validator_name, he.title AS entry_title, bp.title AS blog_post_title
      FROM editorial_actions ea
      JOIN users u ON u.id = ea.validator_id
-     JOIN heritage_entries he ON he.id = ea.heritage_entry_id
+     LEFT JOIN heritage_entries he ON he.id = ea.heritage_entry_id
+     LEFT JOIN blog_posts bp ON bp.id = ea.blog_post_id
      ORDER BY ea.action_date DESC
      LIMIT ? OFFSET ?`,
     [limit, offset]

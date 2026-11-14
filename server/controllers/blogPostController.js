@@ -1,5 +1,6 @@
 const blogPostModel = require('../models/blogPostModel');
 const cloudinaryService = require('../services/cloudinaryService');
+const blogReviewService = require('../services/blogReviewService');
 
 async function listPosts(req, res, next) {
   try {
@@ -23,6 +24,31 @@ async function getPostById(req, res, next) {
     if (!post) return res.status(404).json({ message: 'Post not found.' });
     res.json({ post });
   } catch (err) { next(err); }
+}
+
+async function listPending(req, res, next) {
+  try {
+    const posts = await blogPostModel.findPending({ excludeUserId: req.user.id });
+    res.json({ posts });
+  } catch (err) { next(err); }
+}
+
+async function reviewPost(req, res, next) {
+  try {
+    const { decision, reason } = req.body;
+    const result = await blogReviewService.reviewPost({
+      postId: req.params.id,
+      reviewerId: req.user.id,
+      decision,
+      reason,
+    });
+    res.json(result);
+  } catch (err) {
+    if (err instanceof blogReviewService.BlogReviewError) {
+      return res.status(err.statusCode).json({ message: err.message });
+    }
+    next(err);
+  }
 }
 
 async function listMine(req, res, next) {
@@ -50,4 +76,4 @@ async function createPost(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { listPosts, getPostById, listMine, createPost };
+module.exports = { listPosts, getPostById, listPending, reviewPost, listMine, createPost };

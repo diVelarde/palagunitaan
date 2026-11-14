@@ -15,6 +15,16 @@ async function getMyPosts() {
   return res.data.posts;
 }
 
+async function getPendingPosts() {
+  const res = await api.get('/api/blog/pending');
+  return res.data.posts;
+}
+
+async function reviewPost(id, decision, reason) {
+  const res = await api.patch(`/api/blog/${id}/review`, { decision, reason });
+  return res.data;
+}
+
 async function createPost({ title, content, coverImage }) {
   let payload = { title, content };
   if (coverImage) {
@@ -31,6 +41,8 @@ const blogService = {
   getPosts,
   getPostById,
   getMyPosts,
+  getPendingPosts,
+  reviewPost,
   createPost
 };
 

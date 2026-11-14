@@ -44,6 +44,31 @@ async function findByUser(userId) {
   return rows;
 }
 
+async function findPending({ excludeUserId } = {}) {
+  const params = [];
+  let excludeAuthor = '';
+  if (excludeUserId != null) {
+    excludeAuthor = ' AND bp.user_id <> ?';
+    params.push(excludeUserId);
+  }
+  const [rows] = await db.query(
+    `SELECT bp.*, u.name AS author_name
+     FROM blog_posts bp JOIN users u ON u.id = bp.user_id
+     WHERE bp.status = 'pending'${excludeAuthor}
+     ORDER BY bp.published_at ASC, bp.id ASC`,
+    params
+  );
+  return rows;
+}
+
+async function markReviewed(id, { status, reviewedBy, reason = null }) {
+  await db.query(
+    'UPDATE blog_posts SET status = ?, reviewed_by = ?, reviewed_at = NOW(), rejection_reason = ? WHERE id = ?',
+    [status, reviewedBy, reason, id]
+  );
+  return findById(id, { userId: reviewedBy, role: 'validator' });
+}
+
 async function create({ userId, title, content, coverImageUrl }) {
   const [result] = await db.query(
     "INSERT INTO blog_posts (user_id, title, content, cover_image_url, status) VALUES (?, ?, ?, ?, 'pending')",
@@ -52,4 +77,12 @@ async function create({ userId, title, content, coverImageUrl }) {
   return findById(result.insertId, { userId });
 }
 
-module.exports = { findAll, findById, incrementViewCount, findByUser, create };
+module.exports = {
+  findAll,
+  findById,
+  incrementViewCount,
+  findByUser,
+  findPending,
+  markReviewed,
+  create,
+};

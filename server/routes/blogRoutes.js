@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get('/', controller.listPosts);
 router.get('/mine', requireAuth, controller.listMine);
+router.get('/pending', requireAuth, requireRole('validator', 'admin'), controller.listPending);
+router.patch('/:id/review', requireAuth, requireRole('validator', 'admin'), controller.reviewPost);
 router.get('/:id', controller.getPostById);
 router.post('/', requireAuth, requireRole('contributor', 'validator', 'admin'), uploadSingle('coverImage', { imagesOnly: true }), validateBlogPost, controller.createPost);
 

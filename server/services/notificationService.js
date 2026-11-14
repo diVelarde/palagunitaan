@@ -23,4 +23,16 @@ async function notifyRoleRequestDecision({ userId, message }) {
   return notificationModel.create({ userId, heritageEntryId: null, type: 'role_request_reviewed', message });
 }
 
-module.exports = { notifyReviewDecision, notifyRoleRequestDecision };
+async function notifyBlogDecision({ userId, postTitle, decision, reason }) {
+  const message = decision === 'approved'
+    ? `Your blog post "${postTitle}" was approved and published.`
+    : `Your blog post "${postTitle}" was not approved. Reason: ${reason}`;
+  return notificationModel.create({
+    userId,
+    heritageEntryId: null,
+    type: 'blog_post_reviewed',
+    message,
+  });
+}
+
+module.exports = { notifyReviewDecision, notifyRoleRequestDecision, notifyBlogDecision };

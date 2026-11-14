@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
+import blogService from '../services/blogService';
 import MediaUploader from '../components/MediaUploader';
 import CoverImagePicker from '../components/CoverImagePicker';
 
@@ -48,6 +49,7 @@ function formatDate(value) {
 
 export default function MySubmissionsPage({
   fetchMyEntries = heritageService.getMyEntries,
+  fetchMyBlogPosts = blogService.getMyPosts,
   setEntryPhoto = heritageService.updateCoverImage,
   fetchCategories = heritageService.getCategories,
   regenerateAi = heritageService.enrichEntry,
@@ -55,6 +57,9 @@ export default function MySubmissionsPage({
 }) {
   const { user } = useAuth();
   const [entries, setEntries] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogPostsLoading, setBlogPostsLoading] = useState(true);
+  const [blogPostsError, setBlogPostsError] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -80,6 +85,17 @@ export default function MySubmissionsPage({
       });
     return () => { active = false; };
   }, [fetchMyEntries, reloadVersion]);
+
+  useEffect(() => {
+    let active = true;
+    fetchMyBlogPosts()
+      .then((data) => { if (active) setBlogPosts(data || []); })
+      .catch((err) => {
+        if (active) setBlogPostsError(err.response?.data?.message || 'Could not load your blog posts.');
+      })
+      .finally(() => { if (active) setBlogPostsLoading(false); });
+    return () => { active = false; };
+  }, [fetchMyBlogPosts]);
 
   useEffect(() => {
     let active = true;
@@ -317,6 +333,39 @@ export default function MySubmissionsPage({
           })}
         </ul>
       )}
+
+      <section className="mt-8">
+        <h2 className="mb-3 text-xl font-semibold text-gray-900">My Blog Posts</h2>
+        {blogPostsError && <p className="dashboard-error" role="alert">{blogPostsError}</p>}
+        {blogPostsLoading && <p className="text-sm text-gray-500">Loading your blog posts…</p>}
+        {!blogPostsLoading && !blogPostsError && blogPosts.length === 0 && (
+          <p className="text-sm text-gray-600">You haven&apos;t written any blog posts yet.</p>
+        )}
+        {!blogPostsLoading && blogPosts.length > 0 && (
+          <ul className="space-y-3">
+            {blogPosts.map((post) => (
+              <li key={post.id} className="dashboard-submission-card">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <Link to={`/blog/${post.id}`} className="font-semibold text-gray-900 hover:underline">
+                      {post.title}
+                    </Link>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Submitted {formatDate(post.published_at || post.created_at)}
+                    </p>
+                  </div>
+                  <StatusBadge status={post.status} />
+                </div>
+                {post.status === 'rejected' && post.rejection_reason && (
+                  <p className="mt-3 text-sm text-red-700">
+                    <strong>Reason:</strong> {post.rejection_reason}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
     </div>
   );

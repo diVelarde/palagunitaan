@@ -15,6 +15,7 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
   const [coverError, setCoverError] = useState('');
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -28,6 +29,7 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
       setForm({ title: '', content: '' });
       setCoverImage(null);
       setCoverError('');
+      setSubmitted(true);
       onPosted(post);
     } catch (err) {
       setErrors({ form: err.response?.data?.message || 'Could not publish this post. Please try again.' });
@@ -38,6 +40,11 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {submitted && (
+        <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800" role="status">
+          Your post was sent for review. It will appear once approved.
+        </p>
+      )}
       {errors.form && <p className="text-sm text-red-700" role="alert">{errors.form}</p>}
 
       <div>

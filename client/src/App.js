@@ -65,7 +65,10 @@ function AppShell() {
                 <Route path="/dashboard/submit" element={<SubmitEntryWorkspacePage />} />
                 <Route
                   path="/dashboard/submissions"
-                  element={<MySubmissionsPage fetchMyEntries={heritageService.getMyEntries} />}
+                  element={<MySubmissionsPage
+                    fetchMyEntries={heritageService.getMyEntries}
+                    fetchMyBlogPosts={blogService.getMyPosts}
+                  />}
                 />
               </Route>
             </Route>
@@ -87,6 +90,8 @@ function AppShell() {
                     <ValidatorDashboardPage
                       fetchPending={reviewService.getPendingEntries}
                       submitReview={reviewService.submitReview}
+                      fetchPendingBlogPosts={blogService.getPendingPosts}
+                      reviewBlogPost={blogService.reviewPost}
                     />
                   }
                 />
@@ -111,6 +116,8 @@ function AppShell() {
                       createHighlight={highlightService.createHighlight}
                       fetchHighlightHistory={highlightService.getHighlightHistory}
                       fetchPending={reviewService.getPendingEntries}
+                      fetchPendingBlogPosts={blogService.getPendingPosts}
+                      reviewBlogPost={blogService.reviewPost}
                       fetchPosts={blogService.getPosts}
                       fetchSites={heritageSiteService.getSites}
                       createSite={heritageSiteService.createSite}

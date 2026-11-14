@@ -136,7 +136,15 @@ export default function AuditLogPage({
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${ACTION_STYLES[action.action_type] || ACTION_STYLES.commented}`}>
                     {action.action_type === 'approved_unverified' ? 'Approved as Unverified' : action.action_type}
                   </span>
-                  <Link to={`/entries/${action.heritage_entry_id}`} className="text-sm text-gray-900 hover:underline">{action.entry_title}</Link>
+                  {action.blog_post_id ? (
+                    <Link to={`/blog/${action.blog_post_id}`} className="text-sm text-gray-900 hover:underline">
+                      Blog post: {action.blog_post_title}
+                    </Link>
+                  ) : (
+                    <Link to={`/entries/${action.heritage_entry_id}`} className="text-sm text-gray-900 hover:underline">
+                      {action.entry_title}
+                    </Link>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500">
                   by {action.validator_name}{action.comment && <span> — "{action.comment}"</span>}
@@ -144,7 +152,9 @@ export default function AuditLogPage({
               </div>
               <span className="text-xs text-gray-400 shrink-0">{new Date(action.action_date).toLocaleString()}</span>
             </div>
-            <ReviewAssessments action={action} fetchEntryHistory={fetchEntryHistory} />
+            {action.heritage_entry_id && (
+              <ReviewAssessments action={action} fetchEntryHistory={fetchEntryHistory} />
+            )}
           </div>
         ))}
       </div>

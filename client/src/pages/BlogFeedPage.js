@@ -51,14 +51,7 @@ export default function BlogFeedPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [writePostOpen, setWritePostOpen] = useState(false);
-  const [postSuccess, setPostSuccess] = useState(false);
   const canWritePost = Boolean(user && CONTRIBUTOR_ROLES.includes(user.role));
-
-  function handlePosted(post) {
-    if (post) setPosts((current) => [post, ...current.filter((item) => item.id !== post.id)]);
-    setWritePostOpen(false);
-    setPostSuccess(true);
-  }
 
   useEffect(() => {
     let active = true;
@@ -93,10 +86,7 @@ export default function BlogFeedPage({
           {canWritePost && (
             <button
               type="button"
-              onClick={() => {
-                setPostSuccess(false);
-                setWritePostOpen(true);
-              }}
+              onClick={() => setWritePostOpen(true)}
               className="blog-write-button"
             >
               <span aria-hidden="true">✎</span> Write a Post
@@ -104,11 +94,6 @@ export default function BlogFeedPage({
           )}
         </div>
 
-        {postSuccess && (
-          <p className="blog-feed-message blog-feed-success" role="status">
-            Your post was published.
-          </p>
-        )}
         {loading && <p className="blog-feed-state">Loading posts…</p>}
         {error && <p className="blog-feed-message blog-feed-error" role="alert">{error}</p>}
         {!loading && !error && posts.length === 0 && (
@@ -123,7 +108,7 @@ export default function BlogFeedPage({
 
       {writePostOpen && canWritePost && (
         <ActionDialog title="Write a Post" size="compact" onClose={() => setWritePostOpen(false)}>
-          <BlogComposer onSubmit={createPost} onPosted={handlePosted} />
+          <BlogComposer onSubmit={createPost} />
         </ActionDialog>
       )}
     </main>
