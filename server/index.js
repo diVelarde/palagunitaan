@@ -18,6 +18,7 @@ const blogRoutes = require('./routes/blogRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const heritageSiteRoutes = require('./routes/heritageSiteRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -65,6 +66,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/heritage-sites', heritageSiteRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/api/protected', requireAuth, (req, res) => { 
   res.json({ 

@@ -22,6 +22,7 @@ import highlightService from './services/highlightService';
 import blogService from './services/blogService';
 import heritageSiteService from './services/heritageSiteService';
 import roleRequestService from './services/roleRequestService';
+import reportService from './services/reportService';
 
 const EntryDetailPage = lazy(() => import('./pages/EntryDetailPage'));
 const MapPage = lazy(() => import('./pages/MapPage'));
@@ -92,6 +93,8 @@ function AppShell() {
                       submitReview={reviewService.submitReview}
                       fetchPendingBlogPosts={blogService.getPendingPosts}
                       reviewBlogPost={blogService.reviewPost}
+                      fetchOpenReports={reportService.getOpenReports}
+                      closeReport={reportService.closeReport}
                     />
                   }
                 />
@@ -118,6 +121,8 @@ function AppShell() {
                       fetchPending={reviewService.getPendingEntries}
                       fetchPendingBlogPosts={blogService.getPendingPosts}
                       reviewBlogPost={blogService.reviewPost}
+                      fetchOpenReports={reportService.getOpenReports}
+                      closeReport={reportService.closeReport}
                       fetchPosts={blogService.getPosts}
                       fetchSites={heritageSiteService.getSites}
                       createSite={heritageSiteService.createSite}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BlogModerationQueue from '../components/BlogModerationQueue';
+import ContentReportsQueue from '../components/ContentReportsQueue';
 
 const CLAIM_ASSESSMENT_FIELDS = [
   { field: 'sourceTypeFit', label: 'Source type', helper: 'Is this kind of source suitable for this claim?' },
@@ -190,6 +191,8 @@ export default function ValidatorDashboardPage({
   submitReview = async () => {},
   fetchPendingBlogPosts = async () => [],
   reviewBlogPost = async () => {},
+  fetchOpenReports = async () => [],
+  closeReport = async () => {},
 }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -228,7 +231,7 @@ export default function ValidatorDashboardPage({
         )}
       </header>
       <div className="mb-5 flex gap-2 border-b border-gray-200" role="tablist" aria-label="Review queues">
-        {['Entries', 'Blog posts'].map((tab) => (
+        {['Entries', 'Blog posts', 'Reports'].map((tab) => (
           <button
             key={tab}
             type="button"
@@ -245,6 +248,9 @@ export default function ValidatorDashboardPage({
       </div>
       {activeTab === 'Blog posts' && (
         <BlogModerationQueue fetchPending={fetchPendingBlogPosts} reviewPost={reviewBlogPost} />
+      )}
+      {activeTab === 'Reports' && (
+        <ContentReportsQueue fetchReports={fetchOpenReports} closeReport={closeReport} />
       )}
       {activeTab === 'Entries' && (
         <>

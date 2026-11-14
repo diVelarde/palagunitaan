@@ -4,6 +4,7 @@ import TranslationPanel from '../components/TranslationPanel';
 import { useAuth } from '../context/AuthContext';
 import heritageService from '../services/heritageService';
 import MediaUploader from '../components/MediaUploader';
+import ReportContentButton from '../components/ReportContentButton';
 import './EntryDetailPage.css';
 
 const VERIFICATION_STYLES = {
@@ -202,6 +203,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
       </div>
 
       <div className="entry-detail-extras">
+        {user && <ReportContentButton targetType="entry" targetId={entry.id} />}
         <MediaUploader
           entryId={entry.id}
           disabled={!user || (entry.user_id !== user.id && user.role !== 'admin')}

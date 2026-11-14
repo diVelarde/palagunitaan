@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ActionDialog from '../components/ActionDialog';
 import BlogComposer from '../components/BlogComposer';
+import CommunityPostLabel from '../components/CommunityPostLabel';
 import './BrowsePage.css';
 
 const CONTRIBUTOR_ROLES = ['contributor', 'validator', 'admin'];
@@ -36,6 +37,7 @@ function PostCard({ post }) {
         <span>{post.view_count || 0} views</span>
       </div>
       <h2>{post.title}</h2>
+      <CommunityPostLabel />
       <p className="blog-post-card-excerpt">{post.content}</p>
       <span className="blog-post-card-link">Read story →</span>
     </Link>

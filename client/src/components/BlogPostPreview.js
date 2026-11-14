@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import CommunityPostLabel from './CommunityPostLabel';
 
 function timeAgo(dateStr) {
   const seconds = Math.floor((Date.now() - new Date(dateStr)) / 1000);
@@ -19,6 +20,7 @@ export default function BlogPostPreview({ post }) {
         <span>{timeAgo(post.published_at)}</span>
       </div>
       <p className="text-sm font-medium text-gray-900">{post.title}</p>
+      <div className="mt-1"><CommunityPostLabel /></div>
     </Link>
   );
 }

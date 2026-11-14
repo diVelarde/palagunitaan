@@ -5,11 +5,12 @@ import ProfilePanel from '../components/ProfilePanel';
 import RoleRequestsTab from '../components/RoleRequestsTab';
 import AdminEntriesTab from '../components/AdminEntriesTab';
 import BlogModerationQueue from '../components/BlogModerationQueue';
+import ContentReportsQueue from '../components/ContentReportsQueue';
 import { useAuth } from '../context/AuthContext';
 import { validateImageFile } from '../utils/mediaValidation';
 import AuditLogPage from './AuditLogPage';
 
-const TABS = ['Platform Overview', 'Manage Entries', 'Moderate Blog Posts', 'Manage Users', 'Role Requests', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
+const TABS = ['Platform Overview', 'Manage Entries', 'Moderate Blog Posts', 'Reports', 'Manage Users', 'Role Requests', 'Categories & Regions', 'Heritage Sites', 'Audit Log', 'Highlights'];
 const EMPTY_ASYNC_LIST = async () => [];
 
 function RoleSelect({ value, onChange, disabled }) {
@@ -510,6 +511,8 @@ export default function AdminDashboardPage({
   fetchPending = async () => [],
   fetchPendingBlogPosts = async () => [],
   reviewBlogPost = async () => {},
+  fetchOpenReports = async () => [],
+  closeReport = async () => {},
   fetchPosts = async () => [],
   fetchSites = async () => [],
   createSite = async (data) => ({ id: Date.now(), ...data }),
@@ -574,6 +577,12 @@ export default function AdminDashboardPage({
         <div className="dashboard-admin-panel">
           <h2 className="mb-4">Moderate Blog Posts</h2>
           <BlogModerationQueue fetchPending={fetchPendingBlogPosts} reviewPost={reviewBlogPost} />
+        </div>
+      )}
+      {tab === 'Reports' && (
+        <div className="dashboard-admin-panel">
+          <h2 className="mb-4">Open Reports</h2>
+          <ContentReportsQueue fetchReports={fetchOpenReports} closeReport={closeReport} />
         </div>
       )}
       {tab === 'Role Requests' && (

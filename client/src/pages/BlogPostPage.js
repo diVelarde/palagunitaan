@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import CommunityPostLabel from '../components/CommunityPostLabel';
+import ReportContentButton from '../components/ReportContentButton';
 import './BlogPostPage.css';
 
 function formatDate(value) {
@@ -12,6 +15,7 @@ function formatDate(value) {
 
 export default function BlogPostPage({ fetchPost }) {
   const { id } = useParams();
+  const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,6 +55,12 @@ export default function BlogPostPage({ fetchPost }) {
         <article>
           <p className="blog-post-eyebrow">Community story</p>
           <h1>{post.title}</h1>
+          <div className="my-3">
+            <CommunityPostLabel />
+            <p className="mt-1 text-xs text-gray-600">
+              This community post has not been checked for historical accuracy.
+            </p>
+          </div>
           {post.cover_image_url && (
             <img
               src={post.cover_image_url}
@@ -66,6 +76,7 @@ export default function BlogPostPage({ fetchPost }) {
             <span>{post.view_count || 0} {post.view_count === 1 ? 'view' : 'views'}</span>
           </div>
           <div className="blog-post-body">{post.content}</div>
+          {user && <ReportContentButton targetType="blog_post" targetId={post.id} />}
         </article>
       )}
       </div>
