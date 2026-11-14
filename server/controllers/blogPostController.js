@@ -8,8 +8,8 @@ async function listPosts(req, res, next) {
     const offset = parseInt(req.query.offset, 10) || 0;
     const viewer = req.user ? { userId: req.user.id, role: req.user.role } : undefined;
     const posts = viewer
-      ? await blogPostModel.findAll({ limit, offset }, viewer)
-      : await blogPostModel.findAll({ limit, offset });
+      ? await blogPostModel.findAll({ limit, offset, ...(req.blogPostFilters || {}) }, viewer)
+      : await blogPostModel.findAll({ limit, offset, ...(req.blogPostFilters || {}) });
     res.json({ posts });
   } catch (err) { next(err); }
 }

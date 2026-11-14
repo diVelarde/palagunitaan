@@ -1,13 +1,13 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/authMiddleware');
-const { validateBlogPost } = require('../validators/blogPostValidators');
+const { validateBlogPost, validateBlogPostSearch } = require('../validators/blogPostValidators');
 const controller = require('../controllers/blogPostController');
 const { requireRole } = require('../middleware/roleMiddleware');
 const { uploadSingle } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
-router.get('/', controller.listPosts);
+router.get('/', validateBlogPostSearch, controller.listPosts);
 router.get('/mine', requireAuth, controller.listMine);
 router.get('/pending', requireAuth, requireRole('validator', 'admin'), controller.listPending);
 router.patch('/:id/review', requireAuth, requireRole('validator', 'admin'), controller.reviewPost);

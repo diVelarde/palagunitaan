@@ -1,7 +1,7 @@
 import api from '../api/axios';
 
-async function getPosts({ limit, offset } = {}) {
-  const res = await api.get('/api/blog', { params: { limit, offset } });
+async function getPosts({ limit, offset, q, author, from, to, sort } = {}) {
+  const res = await api.get('/api/blog', { params: { limit, offset, q, author, from, to, sort } });
   return res.data.posts;
 }
 

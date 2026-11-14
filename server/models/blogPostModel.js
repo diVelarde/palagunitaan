@@ -13,11 +13,58 @@ function visibilityFilter({ userId, role } = {}) {
   return { clause: 'bp.status = ?', params: ['published'] };
 }
 
-async function findAll({ limit = 20, offset = 0 } = {}, viewer) {
+function escapeLikeTerm(term) {
+  return term.replace(/[!%_]/g, '!$&');
+}
+
+function addDay(date) {
+  const nextDate = new Date(`${date}T00:00:00.000Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  return nextDate.toISOString().slice(0, 10);
+}
+
+async function findAll({
+  limit = 20,
+  offset = 0,
+  q,
+  authorId,
+  authorName,
+  from,
+  to,
+  sort = 'newest',
+} = {}, viewer) {
   const visibility = visibilityFilter(viewer);
+  const conditions = [visibility.clause];
+  const params = [...visibility.params];
+  if (q) {
+    const pattern = `%${escapeLikeTerm(q)}%`;
+    conditions.push("(bp.title LIKE ? ESCAPE '!' OR bp.content LIKE ? ESCAPE '!')");
+    params.push(pattern, pattern);
+  }
+  if (authorId != null) {
+    conditions.push('bp.user_id = ?');
+    params.push(authorId);
+  } else if (authorName) {
+    conditions.push('u.name = ?');
+    params.push(authorName);
+  }
+  if (from) {
+    conditions.push('bp.created_at >= ?');
+    params.push(`${from} 00:00:00`);
+  }
+  if (to) {
+    conditions.push('bp.created_at < ?');
+    params.push(`${addDay(to)} 00:00:00`);
+  }
+  const orderBy = sort === 'oldest'
+    ? 'bp.created_at ASC, bp.id ASC'
+    : 'bp.created_at DESC, bp.id DESC';
   const [rows] = await db.query(
-    `SELECT bp.*, u.name AS author_name FROM blog_posts bp JOIN users u ON u.id = bp.user_id WHERE ${visibility.clause} ORDER BY bp.published_at DESC LIMIT ? OFFSET ?`,
-    [...visibility.params, limit, offset]
+    `SELECT bp.*, u.name AS author_name
+     FROM blog_posts bp JOIN users u ON u.id = bp.user_id
+     WHERE ${conditions.join(' AND ')}
+     ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
   );
   return rows;
 }
