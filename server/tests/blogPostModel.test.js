@@ -114,12 +114,14 @@ describe('blogPostModel.incrementViewCount', () => {
         title: 'A story',
         content: 'A community story.',
         coverImageUrl: 'https://images.example/cover.jpg',
+        mentionsPeople: true,
+        consentConfirmed: true,
       });
 
       expect(db.query).toHaveBeenNthCalledWith(
         1,
-        "INSERT INTO blog_posts (user_id, title, content, cover_image_url, status) VALUES (?, ?, ?, ?, 'pending')",
-        [3, 'A story', 'A community story.', 'https://images.example/cover.jpg']
+        "INSERT INTO blog_posts (user_id, title, content, cover_image_url, status, mentions_people, consent_confirmed) VALUES (?, ?, ?, ?, 'pending', ?, ?)",
+        [3, 'A story', 'A community story.', 'https://images.example/cover.jpg', true, true]
       );
       expect(db.query).toHaveBeenNthCalledWith(
         2,

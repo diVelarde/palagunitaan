@@ -25,12 +25,19 @@ async function reviewPost(id, decision, reason) {
   return res.data;
 }
 
-async function createPost({ title, content, coverImage }) {
-  let payload = { title, content };
+async function createPost({ title, content, coverImage, mentionsPeople, consentConfirmed }) {
+  let payload = {
+    title,
+    content,
+    mentions_people: mentionsPeople,
+    consent_confirmed: consentConfirmed,
+  };
   if (coverImage) {
     payload = new FormData();
     payload.append('title', title);
     payload.append('content', content);
+    payload.append('mentions_people', String(mentionsPeople));
+    payload.append('consent_confirmed', String(consentConfirmed));
     payload.append('coverImage', coverImage);
   }
   const res = await api.post('/api/blog', payload);

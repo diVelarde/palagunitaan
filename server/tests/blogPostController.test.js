@@ -107,6 +107,7 @@ describe('blogPostController.getPostById', () => {
       await createPost({
         user: { id: 9 },
         body: { title: ' A story ', content: ' A community story. ' },
+        blogPostConsent: { mentionsPeople: false, consentConfirmed: true },
       }, res, jest.fn());
 
       expect(blogPostModel.create).toHaveBeenCalledWith({
@@ -114,6 +115,8 @@ describe('blogPostController.getPostById', () => {
         title: 'A story',
         content: 'A community story.',
         coverImageUrl: null,
+        mentionsPeople: false,
+        consentConfirmed: true,
       });
       expect(cloudinaryService.uploadBuffer).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
@@ -132,6 +135,7 @@ describe('blogPostController.getPostById', () => {
       await createPost({
         user: { id: 9 },
         body: { title: 'A story', content: 'A community story.' },
+        blogPostConsent: { mentionsPeople: true, consentConfirmed: true },
         file: { buffer: Buffer.from('image'), mimetype: 'image/jpeg' },
       }, res, jest.fn());
 
@@ -141,6 +145,8 @@ describe('blogPostController.getPostById', () => {
       );
       expect(blogPostModel.create).toHaveBeenCalledWith(expect.objectContaining({
         coverImageUrl: post.cover_image_url,
+        mentionsPeople: true,
+        consentConfirmed: true,
       }));
       expect(res.json).toHaveBeenCalledWith({
         post,

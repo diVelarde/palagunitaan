@@ -1,0 +1,3 @@
+ALTER TABLE blog_posts
+  ADD COLUMN mentions_people TINYINT(1) NOT NULL DEFAULT 0,
+  ADD COLUMN consent_confirmed TINYINT(1) NOT NULL DEFAULT 0;

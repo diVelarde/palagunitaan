@@ -69,10 +69,17 @@ async function markReviewed(id, { status, reviewedBy, reason = null }) {
   return findById(id, { userId: reviewedBy, role: 'validator' });
 }
 
-async function create({ userId, title, content, coverImageUrl }) {
+async function create({
+  userId,
+  title,
+  content,
+  coverImageUrl,
+  mentionsPeople = false,
+  consentConfirmed = false,
+}) {
   const [result] = await db.query(
-    "INSERT INTO blog_posts (user_id, title, content, cover_image_url, status) VALUES (?, ?, ?, ?, 'pending')",
-    [userId, title, content, coverImageUrl || null]
+    "INSERT INTO blog_posts (user_id, title, content, cover_image_url, status, mentions_people, consent_confirmed) VALUES (?, ?, ?, ?, 'pending', ?, ?)",
+    [userId, title, content, coverImageUrl || null, mentionsPeople, consentConfirmed]
   );
   return findById(result.insertId, { userId });
 }

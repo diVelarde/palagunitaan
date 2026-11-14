@@ -12,6 +12,8 @@ function validate({ title, content }) {
 export default function BlogComposer({ onSubmit = async (data) => console.log('post', data), onPosted = () => {} }) {
   const [form, setForm] = useState({ title: '', content: '' });
   const [coverImage, setCoverImage] = useState(null);
+  const [mentionsPeople, setMentionsPeople] = useState(false);
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [coverError, setCoverError] = useState('');
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -20,14 +22,22 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
   async function handleSubmit(e) {
     e.preventDefault();
     const fieldErrors = validate(form);
+    if (!consentConfirmed) fieldErrors.consent = 'Confirm consent or public availability before posting.';
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length) return;
 
     setSubmitting(true);
     try {
-      const post = await onSubmit({ ...form, coverImage });
+      const post = await onSubmit({
+        ...form,
+        coverImage,
+        mentionsPeople,
+        consentConfirmed,
+      });
       setForm({ title: '', content: '' });
       setCoverImage(null);
+      setMentionsPeople(false);
+      setConsentConfirmed(false);
       setCoverError('');
       setSubmitted(true);
       onPosted(post);
@@ -84,7 +94,37 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
         />
       </div>
 
-      <button type="submit" disabled={submitting} className="rounded-lg bg-[#ad482d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#873720] disabled:opacity-50">
+      <fieldset className="space-y-3 rounded-md border border-[#e1d7ca] bg-[#faf7f2] p-3">
+        <legend className="px-1 text-sm font-medium text-[#493126]">People and family information</legend>
+        <label className="flex items-start gap-2 text-sm text-[#493126]">
+          <input
+            type="checkbox"
+            checked={mentionsPeople}
+            onChange={(e) => setMentionsPeople(e.target.checked)}
+            className="mt-1 accent-[#ad482d]"
+          />
+          <span>This post names or describes real people or families.</span>
+        </label>
+        <p className="text-xs text-gray-600">
+          Indicate when a post includes identifiable people or family details.
+        </p>
+        <label className="flex items-start gap-2 text-sm text-[#493126]">
+          <input
+            type="checkbox"
+            required
+            checked={consentConfirmed}
+            onChange={(e) => setConsentConfirmed(e.target.checked)}
+            className="mt-1 accent-[#ad482d]"
+          />
+          <span>If this post names or describes real people or families, I have their consent or the information is already public.</span>
+        </label>
+        <p className="text-xs text-gray-600">
+          Please confirm before sharing identifying details. This confirmation is required for every post.
+        </p>
+        {errors.consent && <p className="text-xs text-red-700" role="alert">{errors.consent}</p>}
+      </fieldset>
+
+      <button type="submit" disabled={submitting || !consentConfirmed} className="rounded-lg bg-[#ad482d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#873720] disabled:opacity-50">
         {submitting ? 'Posting…' : 'Post'}
       </button>
     </form>

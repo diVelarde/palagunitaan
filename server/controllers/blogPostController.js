@@ -71,6 +71,8 @@ async function createPost(req, res, next) {
       title: title.trim(),
       content: content.trim(),
       coverImageUrl,
+      mentionsPeople: req.blogPostConsent.mentionsPeople,
+      consentConfirmed: req.blogPostConsent.consentConfirmed,
     });
     res.status(201).json({ post, message: 'Your post is waiting for review' });
   } catch (err) { next(err); }
