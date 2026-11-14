@@ -19,10 +19,72 @@ describe('blogPostModel.findAll', () => {
 
     await expect(findAll({ limit: 5, offset: 10 })).resolves.toEqual([]);
 
-    expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE bp.status = ?'),
-      ['published', 5, 10]
-    );
+    const [sql, params] = db.query.mock.calls[0];
+    expect(sql).toContain('WHERE bp.status = ?');
+    expect(sql).toContain('ORDER BY bp.created_at DESC, bp.id DESC');
+    expect(params).toEqual(['published', 5, 10]);
+  });
+
+  it('filters by author id or exact author name with bound values', async () => {
+    db.query.mockResolvedValue([[]]);
+
+    await findAll({ authorId: 12 });
+    expect(db.query.mock.calls[0][0]).toContain('bp.user_id = ?');
+    expect(db.query.mock.calls[0][1]).toEqual(['published', 12, 20, 0]);
+
+    db.query.mockClear();
+    await findAll({ authorName: 'María Santos' });
+    expect(db.query.mock.calls[0][0]).toContain('u.name = ?');
+    expect(db.query.mock.calls[0][1]).toEqual(['published', 'María Santos', 20, 0]);
+  });
+
+  it('binds keyword terms and escapes LIKE wildcards instead of interpolating them into SQL', async () => {
+    db.query.mockResolvedValue([[]]);
+
+    await findAll({ q: "' OR 1=1 --" });
+    let [sql, params] = db.query.mock.calls[0];
+    expect(sql).toContain('bp.title LIKE ?');
+    expect(sql).toContain('bp.content LIKE ?');
+    expect(sql).not.toContain("' OR 1=1 --");
+    expect(params).toContain("%' OR 1=1 --%");
+
+    db.query.mockClear();
+    await findAll({ q: '%' });
+    [sql, params] = db.query.mock.calls[0];
+    expect(sql).not.toContain('%');
+    expect(params).toContain('%!%%');
+  });
+
+  it('combines keyword, author, inclusive date bounds, and oldest sorting', async () => {
+    db.query.mockResolvedValue([[]]);
+
+    await findAll({
+      q: 'aswang',
+      authorId: 8,
+      from: '2026-01-01',
+      to: '2026-01-31',
+      sort: 'oldest',
+      limit: 4,
+      offset: 3,
+    });
+
+    const [sql, params] = db.query.mock.calls[0];
+    expect(sql).toContain('WHERE bp.status = ?');
+    expect(sql).toContain('(bp.title LIKE ? ESCAPE \'!\' OR bp.content LIKE ? ESCAPE \'!\')');
+    expect(sql).toContain('bp.user_id = ?');
+    expect(sql).toContain('bp.created_at >= ?');
+    expect(sql).toContain('bp.created_at < ?');
+    expect(sql).toContain('ORDER BY bp.created_at ASC, bp.id ASC');
+    expect(params).toEqual([
+      'published',
+      '%aswang%',
+      '%aswang%',
+      8,
+      '2026-01-01 00:00:00',
+      '2026-02-01 00:00:00',
+      4,
+      3,
+    ]);
   });
 
   it('also returns an author’s own unpublished posts', async () => {

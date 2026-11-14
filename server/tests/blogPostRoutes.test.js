@@ -108,6 +108,32 @@ describe('blog moderation routes', () => {
     expect(blogPostModel.findAll).toHaveBeenCalledWith({ limit: 20, offset: 0 });
   });
 
+  it('validates and forwards blog search filters to the model', async () => {
+    const response = await makeRequest({
+      path: '/api/blog?q=aswang&author=42&from=2026-01-01&to=2026-01-31&sort=oldest',
+    });
+
+    expect(response.status).toBe(200);
+    expect(blogPostModel.findAll).toHaveBeenCalledWith({
+      limit: 20,
+      offset: 0,
+      q: 'aswang',
+      authorId: 42,
+      from: '2026-01-01',
+      to: '2026-01-31',
+      sort: 'oldest',
+    });
+  });
+
+  it('returns 400 for an invalid search date without querying the model', async () => {
+    const response = await makeRequest({
+      path: '/api/blog?from=2026-02-30',
+    });
+
+    expect(response.status).toBe(400);
+    expect(blogPostModel.findAll).not.toHaveBeenCalled();
+  });
+
   it.each(['pending', 'rejected'])('returns 404 for a stranger requesting a %s post', async (status) => {
     blogPostModel.findById.mockImplementation((id, viewer) => {
       const post = { id: 12, user_id: 7, status };
