@@ -6,10 +6,10 @@ const ROLE_LABELS = {
 };
 
 const ROLE_COLORS = {
-  public: 'bg-gray-100 text-gray-700',
-  contributor: 'bg-green-100 text-green-700',
-  validator: 'bg-blue-100 text-blue-700',
-  admin: 'bg-amber-100 text-amber-700',
+  public: 'bg-paper text-muted',
+  contributor: 'bg-accent text-paper',
+  validator: 'bg-ink text-paper',
+  admin: 'bg-surface text-accent',
 };
 
 export default function RoleBadge({ role }) {

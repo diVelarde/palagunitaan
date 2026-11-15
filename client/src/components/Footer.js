@@ -16,11 +16,11 @@ export default function Footer() {
         <div>
           <h3 className="site-footer-heading mb-4 text-sm font-bold uppercase tracking-[.14em]">Discover</h3>
           <div className="site-footer-links flex flex-col items-start gap-3 text-sm">
-            <Link to="/" className="hover:text-white">Explore</Link>
-            <Link to="/map" className="hover:text-white">Places</Link>
-            <Link to="/browse" className="hover:text-white">Collections</Link>
-            <Link to="/timeline" className="hover:text-white">Timeline</Link>
-            <Link to="/blog" className="hover:text-white">Community stories</Link>
+            <Link to="/" className="hover:text-[var(--site-footer-ink)]">Explore</Link>
+            <Link to="/map" className="hover:text-[var(--site-footer-ink)]">Places</Link>
+            <Link to="/browse" className="hover:text-[var(--site-footer-ink)]">Collections</Link>
+            <Link to="/timeline" className="hover:text-[var(--site-footer-ink)]">Timeline</Link>
+            <Link to="/blog" className="hover:text-[var(--site-footer-ink)]">Community stories</Link>
           </div>
         </div>
         <div>

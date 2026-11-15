@@ -4,65 +4,71 @@
 
 :root {
   color-scheme: light;
-  --site-gold: #fbd116;
-  --site-deep-gold: #c99f00;
-  --site-paper: #f8f6f0;
-  --site-paper-rgb: 248 246 240;
-  --site-card: #fffdf8;
-  --site-card-rgb: 255 253 248;
-  --site-ink: #181816;
-  --site-charcoal: #34332f;
-  --site-muted: #77746b;
-  --site-link-accent: #806300;
-  --site-border: #d8d3c8;
-  --site-gray-50: 248 246 240;
-  --site-gray-100: 255 253 248;
-  --site-gray-200: 216 211 200;
-  --site-gray-300: 216 211 200;
-  --site-gray-400: 145 140 130;
-  --site-gray-500: 119 116 107;
-  --site-gray-600: 86 83 76;
-  --site-gray-700: 52 51 47;
-  --site-gray-800: 35 34 31;
-  --site-gray-900: 24 24 22;
+  --site-paper: #fbf3df;
+  --site-paper-rgb: 251 243 223;
+  --site-surface: #ffffff;
+  --site-surface-rgb: 255 255 255;
+  --site-ink: #52341b;
+  --site-ink-rgb: 82 52 27;
+  --site-rule: #826458;
+  --site-rule-rgb: 130 100 88;
+  --site-accent: #922b05;
+  --site-accent-rgb: 146 43 5;
+  --site-accent-gold: #b8860b;
+  --site-accent-gold-rgb: 184 134 11;
+  --site-muted: #826458;
+  --site-muted-rgb: 130 100 88;
+  --site-font-family: 'Source Sans 3', system-ui, sans-serif;
+  --site-display-font-family: 'EB Garamond', Georgia, serif;
+
+  /* Compatibility aliases for existing component styles and utilities. */
+  --site-card: var(--site-surface);
+  --site-card-rgb: var(--site-surface-rgb);
+  --site-border: var(--site-rule);
+  --site-link-accent: var(--site-accent);
+  --site-gold: var(--site-accent-gold);
+  --site-deep-gold: var(--site-accent);
+  --site-charcoal: var(--site-muted);
+  --site-gray-50: var(--site-paper-rgb);
+  --site-gray-100: var(--site-surface-rgb);
+  --site-gray-200: var(--site-rule-rgb);
+  --site-gray-300: var(--site-rule-rgb);
+  --site-gray-400: var(--site-muted-rgb);
+  --site-gray-500: var(--site-muted-rgb);
+  --site-gray-600: var(--site-muted-rgb);
+  --site-gray-700: var(--site-ink-rgb);
+  --site-gray-800: var(--site-ink-rgb);
+  --site-gray-900: var(--site-ink-rgb);
   --site-success-bg: 232 242 233;
   --site-success-text: 61 114 80;
   --site-warning-bg: 251 241 216;
-  --site-warning-text: 145 103 31;
+  --site-warning-text: 128 91 20;
   --site-info-bg: 239 237 230;
   --site-info-text: 70 83 111;
   --site-error-bg: 255 241 235;
   --site-error-text: 139 59 43;
-  --site-footer-bg: #181816;
-  --site-footer-ink: #f8f2e8;
-  --site-footer-muted: #d8d3c8;
-  --site-font-family: 'Source Sans 3', system-ui, sans-serif;
-  --site-display-font-family: 'EB Garamond', Georgia, serif;
+  --site-footer-bg: #211a12;
+  --site-footer-ink: #f3dfb1;
+  --site-footer-muted: #b9a394;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --site-paper: #181816;
-    --site-paper-rgb: 24 24 22;
-    --site-card: #24231f;
-    --site-card-rgb: 36 35 31;
-    --site-ink: #fffdf8;
-    --site-charcoal: #d8d3c8;
-    --site-muted: #c2bdb2;
-    --site-link-accent: #fbd116;
-    --site-border: #45433d;
-    --site-deep-gold: #fbd116;
-    --site-gray-50: 24 24 22;
-    --site-gray-100: 36 35 31;
-    --site-gray-200: 69 67 61;
-    --site-gray-300: 80 77 70;
-    --site-gray-400: 150 146 136;
-    --site-gray-500: 194 189 178;
-    --site-gray-600: 216 211 200;
-    --site-gray-700: 230 226 216;
-    --site-gray-800: 245 242 233;
-    --site-gray-900: 255 253 248;
+    --site-paper: #17130f;
+    --site-paper-rgb: 23 19 15;
+    --site-surface: #2b241d;
+    --site-surface-rgb: 43 36 29;
+    --site-ink: #f3dfb1;
+    --site-ink-rgb: 243 223 177;
+    --site-rule: #b9a394;
+    --site-rule-rgb: 185 163 148;
+    --site-accent: #e8865e;
+    --site-accent-rgb: 232 134 94;
+    --site-accent-gold: #e1b84c;
+    --site-accent-gold-rgb: 225 184 76;
+    --site-muted: #b9a394;
+    --site-muted-rgb: 185 163 148;
     --site-success-bg: 38 61 44;
     --site-success-text: 175 224 183;
     --site-warning-bg: 73 58 26;
@@ -71,9 +77,9 @@
     --site-info-text: 184 204 238;
     --site-error-bg: 68 38 32;
     --site-error-text: 255 184 167;
-    --site-footer-bg: #181816;
-    --site-footer-ink: #fffdf8;
-    --site-footer-muted: #c2bdb2;
+    --site-footer-bg: #100d0a;
+    --site-footer-ink: #f3dfb1;
+    --site-footer-muted: #b9a394;
   }
 }
 
@@ -119,8 +125,67 @@ textarea {
 }
 
 ::selection {
-  color: #181816;
-  background: var(--site-gold);
+  color: var(--site-paper);
+  background: var(--site-accent);
+}
+
+.paper-card {
+  border: 1px solid var(--site-rule);
+  border-radius: 0.5rem;
+  background-color: var(--site-surface);
+  color: var(--site-ink);
+}
+
+.section-rule {
+  border: 0;
+  border-top: 1px solid var(--site-rule);
+}
+
+.ornament-divider {
+  position: relative;
+  height: 7px;
+  border-block: 1px solid var(--site-rule);
+}
+
+.ornament-divider::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--site-accent-gold);
+  background-color: var(--site-paper);
+  content: '';
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.sepia-photo {
+  filter: sepia(0.28) saturate(0.82) contrast(1.04);
+}
+
+.caption-plate {
+  border: 3px double var(--site-rule);
+  background-color: var(--site-paper);
+  color: var(--site-ink);
+  padding: 0.75rem 1rem;
+}
+
+.btn-outline {
+  border: 1px solid var(--site-accent);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--site-accent);
+  padding: 0.5rem 0.875rem;
+}
+
+.btn-outline:hover {
+  background-color: var(--site-accent);
+  color: var(--site-paper);
+}
+
+.btn-outline:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -130,6 +195,10 @@ textarea {
 }
 
 @media (prefers-color-scheme: dark) {
+  .bg-white {
+    background-color: var(--site-surface);
+  }
+
   html,
   body,
   #root,
@@ -256,14 +325,14 @@ textarea {
   .blog-write-button,
   .submit-entry-submit,
   .map-add-site-button {
-    color: #181816 !important;
-    background-color: var(--site-gold) !important;
+    color: var(--site-paper) !important;
+    background-color: var(--site-accent) !important;
   }
 
   .blog-write-button:hover,
   .submit-entry-submit:hover:not(:disabled),
   .map-add-site-button:hover {
-    background-color: var(--site-deep-gold) !important;
+    filter: brightness(0.92);
   }
 
   .map-add-site-cancel {
@@ -302,8 +371,8 @@ textarea {
   }
 
   :where(button[class*="bg-[#"]) {
-    color: #181816 !important;
-    background-color: var(--site-gold) !important;
+    color: var(--site-paper) !important;
+    background-color: var(--site-accent) !important;
   }
 
   :where([class*="border-[#"]) {

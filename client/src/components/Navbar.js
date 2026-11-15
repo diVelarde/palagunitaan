@@ -102,7 +102,7 @@ export default function Navbar() {
               <Link
                 to="/dashboard"
                 aria-label={`Dashboard for ${user.name || firstName}`}
-                className="navbar-account flex items-center gap-2 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FBD116] focus:ring-offset-2"
+                className="navbar-account flex items-center gap-2 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
               >
                 {user.avatarUrl ? (
                   <img

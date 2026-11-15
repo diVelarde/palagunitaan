@@ -12,14 +12,14 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #fffdf8;
+  color: var(--site-footer-ink);
   backdrop-filter: none;
   box-shadow: none;
   transition: background-color .22s ease, backdrop-filter .22s ease, box-shadow .22s ease;
 }
 
 .site-navbar.site-navbar-landing.site-navbar-scrolled {
-  background: rgb(24 24 22 / 94%);
+  background: color-mix(in srgb, var(--site-footer-bg) 94%, transparent);
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
 }
@@ -32,25 +32,26 @@
 .site-navbar-landing .navbar-search-button,
 .site-navbar-landing .navbar-menu-button,
 .site-navbar-landing .navbar-sign-in {
-  color: #fffdf8;
+  color: var(--site-footer-ink);
 }
 
 .site-navbar-landing .navbar-search-button,
 .site-navbar-landing .navbar-menu-button,
 .site-navbar-landing .navbar-sign-in {
-  border-color: rgb(255 253 248 / 45%);
+  border-color: color-mix(in srgb, var(--site-footer-ink) 45%, transparent);
 }
 
 .site-navbar-landing .navbar-search-button:hover,
 .site-navbar-landing .navbar-menu-button:hover,
 .site-navbar-landing .navbar-sign-in:hover {
-  border-color: var(--site-gold);
-  color: #181816;
+  border-color: var(--site-accent);
+  background-color: var(--site-accent);
+  color: var(--site-paper);
 }
 
 .site-navbar-landing .navbar-mobile-panel {
-  border-color: rgb(255 253 248 / 20%);
-  background: rgb(24 24 22 / 94%);
+  border-color: color-mix(in srgb, var(--site-footer-ink) 20%, transparent);
+  background: color-mix(in srgb, var(--site-footer-bg) 94%, transparent);
 }
 
 @media (max-width: 767px) {
@@ -73,7 +74,7 @@
 }
 
 .site-footer-heading {
-  color: var(--site-gold);
+  color: var(--site-footer-ink);
 }
 
 .site-footer-links a:hover {
@@ -81,7 +82,7 @@
 }
 
 .site-footer-about-link {
-  color: var(--site-gold);
+  color: var(--site-footer-ink);
   text-decoration: none;
 }
 
@@ -159,9 +160,9 @@
 }
 
 .navbar-search-button:hover {
-  border-color: var(--site-gold);
-  background: var(--site-gold);
-  color: #181816;
+  border-color: var(--site-accent);
+  background: var(--site-accent);
+  color: var(--site-paper);
 }
 
 .navbar-account {
@@ -173,8 +174,8 @@
 }
 
 .navbar-avatar {
-  background-color: var(--site-gold);
-  color: #181816;
+  background-color: var(--site-accent);
+  color: var(--site-paper);
 }
 
 .navbar-avatar-image {
@@ -189,9 +190,9 @@
 
 .navbar-sign-in:hover,
 .navbar-menu-button:hover {
-  background-color: var(--site-gold);
-  border-color: var(--site-gold);
-  color: #181816;
+  background-color: var(--site-accent);
+  border-color: var(--site-accent);
+  color: var(--site-paper);
 }
 
 .navbar-mobile-panel {
