@@ -10,6 +10,7 @@ import heritageSiteService from '../services/heritageSiteService';
 import MapFilterSidebar, { defaultFilters, applyFilters } from '../components/MapFilterSidebar';
 import AddSiteClickListener from '../components/AddSiteClickListener';
 import AdminSiteMarkerForm from '../components/AdminSiteMarkerForm';
+import { SITE_TEXT } from '../config/siteText';
 import './MapPage.css';
 
 const DEFAULT_CENTER = [13.6218, 123.1948];
@@ -139,7 +140,7 @@ export default function MapPage({
         <div className="heritage-map-toolbar">
           <div>
             <h1>Explore the Heritage Map</h1>
-            <p>Stories and heritage sites across Camarines Sur and the Bicol Region.</p>
+            <p>{SITE_TEXT.mapIntroduction}</p>
           </div>
           {isAdmin && (
             <button

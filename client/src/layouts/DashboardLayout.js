@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { SITE_TEXT } from '../config/siteText';
 import './DashboardLayout.css';
 
 const ROLE_WORKSPACES = {
@@ -62,7 +63,7 @@ export default function DashboardLayout() {
         </nav>
         <div className="dashboard-sidebar-note">
           <span>Stories worth keeping.</span>
-          <p>Document and share the living heritage of Bicol.</p>
+          <p>{SITE_TEXT.dashboardNote}</p>
         </div>
       </aside>
       <main className="dashboard-content">

@@ -46,6 +46,20 @@
   line-height: 1.6;
 }
 
+.timeline-page-all-link {
+  display: inline-block;
+  margin: -25px 0 30px;
+  color: var(--timeline-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.timeline-page-all-link:focus-visible {
+  outline: 2px solid var(--timeline-accent);
+  outline-offset: 3px;
+}
+
 .timeline-period {
   margin: 0 0 35px;
 }

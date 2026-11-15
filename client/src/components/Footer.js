@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { SITE_TEXT } from '../config/siteText';
 
 export default function Footer() {
   return (
@@ -6,9 +7,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-[1.6fr_1fr_1fr]">
         <div>
           <h2 className="mb-3 font-serif text-2xl font-bold">Palagunitaan</h2>
-          <p className="site-footer-copy max-w-md text-sm leading-6">
-            A cultural heritage information system for documenting, validating, and preserving Philippine regional folklore and intangible cultural heritage. Piloted in Camarines Sur, Bicol Region.
-          </p>
+          <p className="site-footer-copy max-w-md text-sm leading-6">{SITE_TEXT.footerArchiveDescription}</p>
           <Link to="/about" className="site-footer-about-link mt-5 inline-block text-xs font-semibold uppercase tracking-[.1em]">
             About the archive <span aria-hidden="true">→</span>
           </Link>
@@ -25,7 +24,7 @@ export default function Footer() {
         </div>
         <div>
           <h3 className="site-footer-heading mb-4 text-sm font-bold uppercase tracking-[.14em]">Contribute</h3>
-          <p className="site-footer-copy mb-4 text-sm leading-6">Help preserve Bicolano folklore for future generations.</p>
+          <p className="site-footer-copy mb-4 text-sm leading-6">{SITE_TEXT.footerContributionDescription}</p>
           <Link to="/dashboard" className="site-footer-about-link text-xs font-semibold uppercase tracking-[.1em]">
             Join the archive <span aria-hidden="true">→</span>
           </Link>

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ActionDialog from '../components/ActionDialog';
 import BlogComposer from '../components/BlogComposer';
 import CommunityPostLabel from '../components/CommunityPostLabel';
+import { SITE_TEXT } from '../config/siteText';
 import './BrowsePage.css';
 
 const CONTRIBUTOR_ROLES = ['contributor', 'validator', 'admin'];
@@ -138,9 +139,7 @@ export default function BlogFeedPage({
           <div>
             <p className="blog-feed-eyebrow">Community voices</p>
             <h1>From the Blog</h1>
-            <p className="blog-feed-intro">
-              Notes, reflections, and stories from the people documenting and preserving Bicol’s living heritage.
-            </p>
+            <p className="blog-feed-intro">{SITE_TEXT.blogIntroduction}</p>
           </div>
           {canWritePost && (
             <button

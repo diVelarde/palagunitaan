@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { HISTORICAL_PERIODS } from '../components/HistoricalPeriodSelector';
 import blogService from '../services/blogService';
 import heritageService from '../services/heritageService';
 import highlightService from '../services/highlightService';
 import mapService from '../services/mapService';
 import multimediaService from '../services/multimediaService';
+import { SITE_REGIONS, SITE_TEXT } from '../config/siteText';
 import './LandingPage.css';
 
 const MAP_CENTER = [13.58, 123.29];
@@ -21,13 +23,6 @@ const CATEGORIES = [
   { title: 'Oral Traditions', subtitle: 'Spoken knowledge', image: 'photo-1470770841072-f978cf4d019e' },
   { title: 'Beliefs & Superstitions', subtitle: 'Folk beliefs', image: 'photo-1500534623283-312aade485b7' },
   { title: 'Crafts', subtitle: 'Material culture', image: 'photo-1452860606245-08befc0ff44b' },
-];
-
-const REGIONS = [
-  { name: 'Naga City', area: 'Camarines Sur' },
-  { name: 'Camarines Sur', area: 'Bicol Region' },
-  { name: 'Pili', area: 'Camarines Sur' },
-  { name: 'Iriga City', area: 'Camarines Sur' },
 ];
 
 const HERO_IMAGE = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Mt.%20Isarog%20Landscape.jpg?width=2200';
@@ -77,13 +72,13 @@ function getEntryPreview(content) {
   return sentences ? sentences.slice(0, 2).join(' ').trim() : normalizedContent;
 }
 
-function HighlightCard({ entry }) {
+function HighlightCard({ entry, label }) {
   const preview = getEntryPreview(entry.raw_content || entry.euphemistic_content);
 
   return (
     <Link
-      to={`/entries/${entry.id}`}
-      className="lp-featured-story lp-featured-story-lead"
+      to={`/entries/${entry.id || entry.heritage_entry_id}`}
+      className="lp-featured-story"
     >
       <div className="lp-featured-photo">
         {entry.cover_image_url ? (
@@ -94,7 +89,7 @@ function HighlightCard({ entry }) {
       </div>
       <div className="lp-featured-copy">
         <p className="lp-featured-meta">
-          Highlight of the week{entry.category_auto ? ` · ${entry.category_auto}` : ''}
+          {label}{entry.category_auto ? ` · ${entry.category_auto}` : ''}
         </p>
         <h3>{entry.title}</h3>
         {preview && <p className="lp-featured-description">{preview}</p>}
@@ -104,9 +99,9 @@ function HighlightCard({ entry }) {
   );
 }
 
-function HighlightSiteCard({ site }) {
+function HighlightSiteCard({ site, label }) {
   return (
-    <Link to="/map" className="lp-featured-story lp-featured-story-lead">
+    <Link to="/map" className="lp-featured-story">
       <div className="lp-featured-photo">
         {site.site_image_url ? (
           <img src={site.site_image_url} alt="" />
@@ -115,7 +110,7 @@ function HighlightSiteCard({ site }) {
         )}
       </div>
       <div className="lp-featured-copy">
-        <p className="lp-featured-meta">Heritage site · Highlight of the week</p>
+        <p className="lp-featured-meta">Heritage site · {label}</p>
         <h3>{site.site_name}</h3>
         {site.site_description && <p className="lp-featured-description">{site.site_description}</p>}
         <span className="lp-featured-link">Explore heritage sites <span aria-hidden="true">→</span></span>
@@ -137,14 +132,12 @@ function FitLandingMarkers({ markers }) {
 }
 
 export default function LandingPage() {
-  const navigate = useNavigate();
   const audioRef = useRef(null);
   const playAfterTrackChange = useRef(false);
-  const [keyword, setKeyword] = useState('');
   const [entries, setEntries] = useState([]);
   const [audioTracks, setAudioTracks] = useState([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [highlight, setHighlight] = useState(null);
+  const [highlights, setHighlights] = useState({ week: null, month: null });
   const [posts, setPosts] = useState([]);
   const [errors, setErrors] = useState({});
   const [mapMarkers, setMapMarkers] = useState([]);
@@ -189,7 +182,7 @@ export default function LandingPage() {
       }
 
       if (highlightResult.status === 'fulfilled') {
-        setHighlight(highlightResult.value?.week || null);
+        setHighlights(highlightResult.value || { week: null, month: null });
       } else {
         setErrors((current) => ({ ...current, highlight: 'The weekly highlight is temporarily unavailable.' }));
       }
@@ -266,34 +259,24 @@ export default function LandingPage() {
     ));
   }
 
-  function handleSearch(event) {
-    event.preventDefault();
-    const query = keyword.trim();
-    navigate(query ? `/browse?keyword=${encodeURIComponent(query)}` : '/browse');
-  }
-
   return (
     <main className="lp-home">
-      <section className="lp-hero" style={{ '--lp-hero-image': `url("${HERO_IMAGE}")` }}>
+      <section className="lp-hero">
+        <img
+          className="lp-hero-photo"
+          src={HERO_IMAGE}
+          alt={`Mountain landscape at Mount Isarog, ${SITE_TEXT.regionLabel}`}
+        />
+        <div className="lp-hero-overlay" aria-hidden="true" />
         <div className="lp-hero-content">
-          <p className="lp-eyebrow">A living folklore archive · Bicol, Philippines</p>
-          <h1>Preserving the Stories of <span>Bicol</span></h1>
+          <p className="lp-eyebrow">A living folklore archive · {SITE_TEXT.regionLabel}</p>
+          <h1>Palagunitaan</h1>
           <p className="lp-hero-description">
-            A living archive of Philippine regional folklore and intangible cultural heritage.
+            A community archive for the stories, practices, and knowledge carried across generations.
           </p>
-          <form className="lp-search" onSubmit={handleSearch}>
-            <input
-              aria-label="Search the heritage archive"
-              type="search"
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="Search legends, songs, rituals..."
-            />
-            <button type="submit">Search</button>
-          </form>
           <div className="lp-hero-links">
-            <Link to="/browse" className="lp-hero-primary-link">Browse the archives <span aria-hidden="true">→</span></Link>
-            <span className="lp-hero-index">Field notes from Camarines Sur</span>
+            <Link to="/browse" className="lp-button lp-button-primary">Browse stories</Link>
+            <Link to="/dashboard/submit" className="lp-button lp-button-outline">Share a story</Link>
           </div>
           <p className="lp-photo-credit">
             Mount Isarog photo by <a href="https://commons.wikimedia.org/wiki/User:MarvinBikolano" target="_blank" rel="noreferrer">MarvinBikolano</a>
@@ -303,55 +286,93 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="lp-archive-feature" aria-labelledby="lp-archive-feature-title">
-        <div className="lp-archive-feature-copy">
-          <p className="lp-archive-feature-kicker">From the archive</p>
-          <h2 id="lp-archive-feature-title">Let every story show where it came from.</h2>
-          <p className="lp-archive-feature-description">
-            Folklore lives in more than its telling. We preserve the places, people, memories, and source details that give each account its history.
-          </p>
-          <Link to="/browse" className="lp-archive-feature-link">
-            Explore collection records <span aria-hidden="true">→</span>
-          </Link>
+      <hr className="section-rule lp-section-rule" />
+
+      <section className="lp-intro lp-section" aria-labelledby="lp-intro-title">
+        <div className="lp-intro-heading">
+          <p className="lp-section-kicker">A living archive</p>
+          <h2 id="lp-intro-title">Where history meets heritage</h2>
         </div>
-        <div className="lp-archive-artifact" aria-label="Illustration of an archival field note">
-          <div className="lp-archive-paper-back" aria-hidden="true" />
-          <article className="lp-archive-paper">
-            <div className="lp-archive-stamp" aria-hidden="true">
-              <span>PALAGUNITAAN</span>
-              <span>FIELD RECORD</span>
-              <span>019</span>
-            </div>
-            <p className="lp-archive-paper-kicker">Field notes · oral tradition</p>
-            <h3>A mountain remembered at dusk</h3>
-            <blockquote>
-              “As evening settled, the elders spoke of the mountain as a presence—known by name, watched over, and spoken of with care.”
-            </blockquote>
-            <p className="lp-archive-paper-note">
-              A story is held not only in its words, but in the voices and places that carry it.
-            </p>
-            <div className="lp-archive-paper-rule" />
-            <p className="lp-archive-paper-meta">Camarines Sur · Oral tradition · Archive preview</p>
-          </article>
+        <div className="lp-intro-copy">
+          <p>
+            Folklore lives in the voices, practices, places, and memories of the people who carry it.
+            Palagunitaan brings accounts together with their sources and context, while recognizing
+            that stories may have many tellings.
+          </p>
+          <p>{SITE_TEXT.aboutIntroduction}</p>
+          <Link to="/about" className="btn-outline">Learn more</Link>
         </div>
       </section>
 
-      {highlight && (
-        <section className="lp-section lp-featured-section" aria-labelledby="lp-featured-title">
-          <div className="lp-featured-heading">
-            <div>
-              <p className="lp-featured-kicker">Administration selection</p>
-              <h2 id="lp-featured-title">Highlight of the week.</h2>
-            </div>
+      <section className="lp-section lp-era-section" aria-labelledby="lp-era-title">
+        <div className="lp-section-heading">
+          <div>
+            <p className="lp-section-kicker">Stories across time</p>
+            <h2 id="lp-era-title">Browse by Era</h2>
           </div>
-          <div className="lp-featured-grid lp-featured-grid-solo">
-            {highlight.target_type === 'site'
-              ? <HighlightSiteCard site={highlight} />
-              : <HighlightCard entry={{ ...highlight, id: highlight.heritage_entry_id }} />}
+          <Link to="/timeline" className="lp-text-link">View the full timeline <span aria-hidden="true">→</span></Link>
+        </div>
+        <nav className="lp-era-list" aria-label="Browse timeline by historical era">
+          {HISTORICAL_PERIODS.map((period) => (
+            <Link
+              key={period}
+              to={`/timeline?period=${encodeURIComponent(period)}`}
+              className="lp-era-link"
+            >
+              <span>{period}</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+          ))}
+        </nav>
+      </section>
+
+      <section className="lp-verification-section" aria-labelledby="lp-verification-title">
+        <div className="lp-section">
+          <p className="lp-section-kicker">Reading the archive</p>
+          <h2 id="lp-verification-title">How verification works</h2>
+          <div className="lp-verification-row">
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-verified">Verified</span>
+              <p>Reviewed with supporting sources or evidence.</p>
+            </article>
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-unverified">Unverified</span>
+              <p>Recorded, but not yet verified against available sources.</p>
+            </article>
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-disputed">Disputed</span>
+              <p>Accounts differ; their differences are preserved with care.</p>
+            </article>
           </div>
-        </section>
-      )}
-      {errors.highlight && <p className="lp-feed-error">{errors.highlight}</p>}
+        </div>
+      </section>
+
+      <section className="lp-section lp-featured-section" aria-labelledby="lp-featured-title">
+        <div className="lp-section-heading">
+          <div>
+            <p className="lp-section-kicker">Selected from the archive</p>
+            <h2 id="lp-featured-title">Featured highlights</h2>
+          </div>
+        </div>
+        {errors.highlight ? (
+          <p className="lp-feed-error" role="status">{errors.highlight}</p>
+        ) : (
+          <div className="lp-featured-grid">
+            {[
+              { label: 'Highlight of the week', item: highlights.week },
+              { label: 'Highlight of the month', item: highlights.month },
+            ].map(({ label, item }) => {
+              if (!item) return null;
+              return item.target_type === 'site'
+                ? <HighlightSiteCard key={label} site={item} label={label} />
+                : <HighlightCard key={label} entry={item} label={label} />;
+            })}
+            {!highlights.week && !highlights.month && (
+              <p className="lp-empty-message">No highlights are scheduled at the moment.</p>
+            )}
+          </div>
+        )}
+      </section>
 
       <section className="lp-section lp-media-section" aria-labelledby="lp-media-title">
         <p className="lp-media-kicker">Voices of the archive</p>
@@ -368,7 +389,7 @@ export default function LandingPage() {
               }}
               aria-label={`Open ${currentTrack.entry.title}`}
             >
-              <span>Field recording · {formatAudioLocation(currentTrack.entry) || 'Bicol'}</span>
+              <span>Field recording · {formatAudioLocation(currentTrack.entry) || SITE_TEXT.regionName}</span>
             </Link>
             <div className="lp-audio-content">
               <p className="lp-audio-label">Archive recording</p>
@@ -456,7 +477,7 @@ export default function LandingPage() {
         <div className="lp-region-explorer">
           <div className="lp-region-list">
             <p className="lp-region-kicker">Stories by place</p>
-            {REGIONS.map((region, index) => (
+            {SITE_REGIONS.map((region, index) => (
               <Link
                 key={region.name}
                 to={`/browse?region=${encodeURIComponent(region.name)}`}
@@ -476,7 +497,7 @@ export default function LandingPage() {
               center={MAP_CENTER}
               zoom={9}
               scrollWheelZoom={false}
-              aria-label="Map of heritage locations in Camarines Sur"
+              aria-label={SITE_TEXT.mapDescription}
             >
               <FitLandingMarkers markers={validMapMarkers} />
               <TileLayer

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import './TimelinePage.css';
 
 const VERIFICATION_STYLES = {
@@ -39,6 +39,11 @@ function PeriodSection({ period, entries }) {
 export default function TimelinePage({ fetchTimeline = async () => [] }) {
   const [timeline, setTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const selectedPeriod = searchParams.get('period');
+  const visibleTimeline = selectedPeriod
+    ? timeline.filter((group) => group.period === selectedPeriod)
+    : timeline;
 
   useEffect(() => {
     let active = true;
@@ -53,11 +58,19 @@ export default function TimelinePage({ fetchTimeline = async () => [] }) {
       <div className="timeline-page-content">
         <p className="timeline-page-eyebrow">The archive, in time</p>
         <h1>Timeline</h1>
-        <p className="timeline-page-intro">Entries by historical period, earliest first.</p>
+        <p className="timeline-page-intro">
+          {selectedPeriod
+            ? `Entries in ${selectedPeriod}.`
+            : 'Entries by historical period, earliest first.'}
+        </p>
+        {selectedPeriod && <Link to="/timeline" className="timeline-page-all-link">View all periods</Link>}
 
         {loading && <p className="timeline-page-state">Loading…</p>}
         {!loading && timeline.length === 0 && <p className="timeline-page-empty">No entries have a historical period set yet.</p>}
-        {!loading && timeline.map((group) => <PeriodSection key={group.period} period={group.period} entries={group.entries} />)}
+        {!loading && timeline.length > 0 && visibleTimeline.length === 0 && (
+          <p className="timeline-page-empty">No entries are listed for this period yet.</p>
+        )}
+        {!loading && visibleTimeline.map((group) => <PeriodSection key={group.period} period={group.period} entries={group.entries} />)}
       </div>
     </main>
   );

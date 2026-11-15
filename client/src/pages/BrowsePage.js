@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import HistoricalPeriodSelector from '../components/HistoricalPeriodSelector';
 import heritageService from '../services/heritageService';
 import mapService from '../services/mapService';
+import { SITE_TEXT } from '../config/siteText';
 import './BrowsePage.css';
 
 const VERIFICATION_OPTIONS = ['verified', 'disputed', 'unverified'];
@@ -116,7 +117,7 @@ export default function BrowsePage({
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mb-1">Browse Heritage</h1>
-            <p>Explore published folklore and cultural heritage entries from the Bicol Region.</p>
+            <p>{SITE_TEXT.browseIntroduction}</p>
           </div>
         </div>
 
