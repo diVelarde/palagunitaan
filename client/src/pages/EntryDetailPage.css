@@ -11,28 +11,21 @@
 }
 
 .entry-detail-hero {
-  position: relative;
-  display: flex;
-  min-height: 174px;
-  align-items: flex-end;
-  overflow: hidden;
-  color: white;
-  background-color: #181816;
-  background-image: linear-gradient(90deg, rgba(24, 24, 22, .86), rgba(24, 24, 22, .58)), var(--entry-hero-image, linear-gradient(120deg, #34332f, #181816));
-  background-size: cover;
-  background-position: center;
+  border-bottom: 1px solid var(--entry-line);
+  color: var(--entry-ink);
+  background: var(--site-paper);
 }
 
 .entry-detail-hero-inner {
   width: min(100% - 48px, 1190px);
   margin: 0 auto;
-  padding: 24px 0 27px;
+  padding: 34px 0 27px;
 }
 
 .entry-back-link {
   display: inline-block;
   margin-bottom: 13px;
-  color: var(--site-gold);
+  color: var(--entry-accent);
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
@@ -44,6 +37,7 @@
 
 .entry-detail-hero h1 {
   margin: 0 0 10px;
+  color: var(--entry-ink);
   font-family: var(--site-display-font-family);
   font-size: clamp(29px, 4.5vw, 42px);
   font-weight: 500;
@@ -52,7 +46,7 @@
 
 .entry-alternate-names {
   margin: -2px 0 11px;
-  color: rgba(255, 255, 255, .88);
+  color: var(--entry-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -61,7 +55,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 15px;
-  color: rgba(255, 255, 255, .9);
+  color: var(--entry-muted);
   font-size: 12px;
 }
 
@@ -71,7 +65,7 @@
   grid-template-columns: minmax(0, 1.9fr) minmax(285px, .95fr);
   align-items: start;
   gap: 22px;
-  margin: 42px auto 0;
+  margin: 30px auto 0;
 }
 
 .entry-story-card,
@@ -79,7 +73,6 @@
   border: 1px solid var(--entry-line);
   border-radius: 2px;
   background: var(--entry-surface);
-  box-shadow: 0 5px 18px rgba(61, 42, 31, .035);
 }
 
 .entry-story-card {
@@ -90,9 +83,18 @@
   display: block;
   width: 100%;
   max-height: 355px;
-  margin-bottom: 19px;
-  border-radius: 9px;
   object-fit: cover;
+}
+
+.entry-cover-figure {
+  margin: 0 0 20px;
+}
+
+.entry-cover-figure .caption-plate {
+  border-top: 0;
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .entry-status-row {
@@ -104,11 +106,13 @@
 }
 
 .entry-status {
-  border-radius: 999px;
-  padding: 5px 9px;
+  border: 3px double currentColor;
+  border-radius: 0;
+  padding: 4px 8px;
   font-size: 10px;
   font-weight: 700;
-  text-transform: capitalize;
+  letter-spacing: .09em;
+  text-transform: uppercase;
 }
 
 .entry-status-verified {
@@ -128,10 +132,11 @@
 
 .entry-dispute-note {
   margin: 0 0 16px;
-  border-left: 3px solid #ad482d;
+  border: 1px solid var(--entry-line);
+  border-left: 3px solid var(--entry-accent);
   padding: 9px 12px;
   color: var(--entry-ink);
-  background: #f4eee6;
+  background: var(--site-paper);
 }
 
 .entry-dispute-note h2 {
@@ -150,17 +155,18 @@
 
 .entry-unverified-disclaimer {
   margin: 0 0 16px;
-  border-left: 3px solid #ad482d;
+  border: 1px solid var(--entry-line);
+  border-left: 3px solid var(--entry-accent);
   padding: 9px 12px;
   color: var(--entry-ink);
-  background: #f4eee6;
+  background: var(--site-paper);
   font-size: 12px;
   line-height: 1.55;
 }
 
 .entry-category-label {
   color: var(--entry-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -244,7 +250,7 @@
   display: grid;
   gap: 5px;
   border: 1px solid var(--entry-line);
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 12px;
   color: var(--entry-ink);
   font-size: 12px;
@@ -312,6 +318,8 @@
 
 .entry-info-card dt {
   color: var(--entry-muted);
+  font-variant: small-caps;
+  letter-spacing: .04em;
 }
 
 .entry-info-card dd {
@@ -341,6 +349,13 @@
   text-decoration: underline;
 }
 
+.entry-info-card > a:focus-visible,
+.entry-history-list li > a:focus-visible,
+.entry-back-link:focus-visible {
+  outline: 2px solid var(--entry-accent);
+  outline-offset: 3px;
+}
+
 .entry-reading-mode-card > p {
   margin-bottom: 12px;
 }
@@ -357,7 +372,7 @@
 .entry-reading-switch button {
   min-height: 36px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 1px;
   padding: 7px;
   color: var(--entry-muted);
   background: transparent;

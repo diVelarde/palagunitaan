@@ -178,35 +178,37 @@
 
 .browse-entry-card {
   display: flex;
-  gap: 19px;
-  border-bottom: 1px solid var(--archive-line);
-  padding: 19px 0;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 2px;
   color: inherit;
-  background: transparent;
   text-decoration: none;
-  transition: background-color .16s ease, padding .16s ease;
+  transition: transform .16s ease, box-shadow .16s ease;
 }
 
-.browse-entry-card:first-child {
-  border-top: 1px solid var(--archive-line);
+.browse-entry-card:not(.browse-entry-card-has-image) {
+  border-color: var(--archive-line);
+  background: var(--archive-paper);
 }
 
 .browse-entry-card:hover {
-  padding-right: 10px;
-  padding-left: 10px;
-  background: var(--archive-card);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgb(var(--site-ink-rgb) / 12%);
 }
 
 .browse-entry-image {
-  width: 112px;
-  height: 112px;
-  flex: none;
-  border: 1px solid var(--archive-line);
+  display: block;
+  width: 100%;
+  height: 190px;
+  border-bottom: 1px solid var(--archive-line);
   object-fit: cover;
 }
 
 .browse-entry-copy {
   min-width: 0;
+  flex: 1;
+  padding: 18px;
 }
 
 .browse-entry-meta {
@@ -219,26 +221,25 @@
 
 .browse-status,
 .timeline-status {
-  display: inline-block;
-  border: 1px solid var(--archive-line);
-  border-radius: 999px;
-  padding: 3px 8px;
+  display: inline-flex;
+  align-items: center;
+  border: 3px double currentColor;
+  border-radius: 0;
+  padding: 3px 7px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: .03em;
-  text-transform: capitalize;
+  letter-spacing: .09em;
+  text-transform: uppercase;
 }
 
 .browse-status-verified,
 .timeline-status-verified {
-  border-color: transparent;
   color: rgb(var(--site-success-text));
   background: rgb(var(--site-success-bg));
 }
 
 .browse-status-disputed,
 .timeline-status-disputed {
-  border-color: transparent;
   color: rgb(var(--site-warning-text));
   background: rgb(var(--site-warning-bg));
 }
@@ -246,7 +247,7 @@
 .browse-status-unverified,
 .timeline-status-unverified {
   color: var(--archive-muted);
-  background: var(--archive-card);
+  background: var(--archive-paper);
 }
 
 .browse-entry-category,
@@ -255,6 +256,12 @@
   font-size: 10px;
   letter-spacing: .11em;
   text-transform: uppercase;
+}
+
+.browse-entry-category {
+  font-variant: small-caps;
+  font-weight: 700;
+  letter-spacing: .12em;
 }
 
 .browse-entry-card h2 {
@@ -441,14 +448,12 @@
     min-width: 0;
   }
 
-  .browse-entry-card {
-    gap: 12px;
-    padding: 15px 0;
+  .browse-entry-image {
+    height: 160px;
   }
 
-  .browse-entry-image {
-    width: 84px;
-    height: 84px;
+  .browse-entry-copy {
+    padding: 15px;
   }
 
   .browse-entry-card h2 {

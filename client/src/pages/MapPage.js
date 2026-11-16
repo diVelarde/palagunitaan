@@ -172,12 +172,12 @@ export default function MapPage({
               {visibleMarkers.map((marker) => (
                 <Marker key={`${marker.type}-${marker.id}`} position={[marker.latitude, marker.longitude]} icon={iconFor(marker)}>
                   <Popup>
-                    <div className="text-sm">
-                      <p className="font-medium text-gray-900 mb-1">{marker.title}</p>
+                    <div className="map-popup-card">
+                      <p className="map-popup-title">{marker.title}</p>
                       {marker.type === 'entry' ? (
                         <>
-                          {marker.category && <p className="text-gray-500 text-xs mb-2">{marker.category}</p>}
-                          {marker.approximateLocation && <p className="text-gray-500 text-xs mb-2">Approximate province location</p>}
+                          {marker.category && <p className="map-popup-detail">{marker.category}</p>}
+                          {marker.approximateLocation && <p className="map-popup-detail">Approximate province location</p>}
                           <Link to={`/entries/${marker.id}`} className="map-popup-link">View entry →</Link>
                         </>
                       ) : (
@@ -189,7 +189,7 @@ export default function MapPage({
                               className="map-popup-photo"
                             />
                           )}
-                          {marker.description && <p className="text-gray-600 text-xs">{marker.description}</p>}
+                          {marker.description && <p className="map-popup-description">{marker.description}</p>}
                         </>
                       )}
                     </div>

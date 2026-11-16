@@ -4,7 +4,11 @@ jest.mock('../config/db', () => ({
 }));
 
 const db = require('../config/db');
-const { create, updateAlternateNames } = require('../models/heritageEntryModel');
+const {
+  create,
+  updateAlternateNames,
+  findAllPublishedForTimeline,
+} = require('../models/heritageEntryModel');
 
 const connection = {
   beginTransaction: jest.fn(),
@@ -18,6 +22,37 @@ describe('heritageEntryModel alternate names', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     db.getConnection.mockResolvedValue(connection);
+  });
+
+  describe('heritageEntryModel timeline entries', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns the existing timeline rows with preview, region, and claimed-year fields', async () => {
+      const rows = [{
+        id: 8,
+        title: 'The Moon Eater',
+        historical_period: 'Pre-Colonial',
+        cover_image_url: 'https://example.test/moon-eater.jpg',
+        euphemistic_content: 'A short educational account.',
+        region_name: 'Bicol',
+        region_province: 'Camarines Sur',
+        claimed_year_start: 1750,
+        claimed_year_end: 1780,
+      }];
+      db.query.mockResolvedValueOnce([rows]);
+
+      await expect(findAllPublishedForTimeline()).resolves.toEqual(rows);
+
+      const [sql] = db.query.mock.calls[0];
+      expect(sql).toContain('he.cover_image_url');
+      expect(sql).toContain('he.euphemistic_content');
+      expect(sql).toContain('r.name AS region_name');
+      expect(sql).toContain('AS claimed_year_start');
+      expect(sql).toContain('AS claimed_year_end');
+      expect(sql).toContain('ORDER BY he.published_at DESC');
+    });
   });
 
   it('stores alternate names as JSON text and returns them as an array', async () => {

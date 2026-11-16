@@ -251,10 +251,19 @@ async function setEducationalAiExcluded(id, excluded) {
 
 async function findAllPublishedForTimeline() {
   const [rows] = await db.query(
-    `SELECT id, title, historical_period, verification_status, category_auto, published_at
-     FROM heritage_entries
-     WHERE status = 'published' AND historical_period IS NOT NULL
-     ORDER BY published_at DESC
+    `SELECT he.id, he.title, he.historical_period, he.verification_status, he.category_auto,
+            he.cover_image_url, he.euphemistic_content, he.published_at,
+            r.name AS region_name, r.province AS region_province,
+            (SELECT MIN(hehc.claimed_year)
+             FROM heritage_entry_history_claims hehc
+             WHERE hehc.heritage_entry_id = he.id) AS claimed_year_start,
+            (SELECT MAX(hehc.claimed_year)
+             FROM heritage_entry_history_claims hehc
+             WHERE hehc.heritage_entry_id = he.id) AS claimed_year_end
+     FROM heritage_entries he
+     LEFT JOIN regions r ON r.id = he.region_id
+     WHERE he.status = 'published' AND he.historical_period IS NOT NULL
+     ORDER BY he.published_at DESC
      LIMIT 500`
   );
   return rows;

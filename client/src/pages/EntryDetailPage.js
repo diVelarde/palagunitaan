@@ -13,6 +13,12 @@ const VERIFICATION_STYLES = {
   unverified: 'entry-status-unverified',
 };
 
+const VERIFICATION_LABELS = {
+  verified: 'Verified',
+  disputed: 'Disputed',
+  unverified: 'Unverified',
+};
+
 function formatLocation(entry) {
   return [entry.location_name, entry.region_name, entry.region_province]
     .filter((part, index, parts) => part && parts.indexOf(part) === index)
@@ -66,10 +72,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
 
   return (
     <main className="entry-detail-page">
-      <header
-        className="entry-detail-hero"
-        style={entry.cover_image_url ? { '--entry-hero-image': `url("${entry.cover_image_url}")` } : undefined}
-      >
+      <header className="entry-detail-hero">
         <div className="entry-detail-hero-inner">
           <Link to="/browse" className="entry-back-link">← Back to Browse</Link>
           <h1>{entry.title}</h1>
@@ -80,8 +83,8 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
           )}
           <div className="entry-hero-meta">
             {entry.category_auto && <span>{entry.category_auto}</span>}
-            {location && <span>⌖ &nbsp;{location}</span>}
-            {entry.historical_period && <span>◷ &nbsp;{entry.historical_period}</span>}
+            {location && <span>{location}</span>}
+            {entry.historical_period && <span>{entry.historical_period}</span>}
           </div>
         </div>
       </header>
@@ -89,13 +92,16 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
       <div className="entry-detail-layout">
         <article className="entry-story-card">
           {entry.cover_image_url && (
-            <img className="entry-cover-image" src={entry.cover_image_url} alt={`Cover for ${entry.title}`} />
+            <figure className="entry-cover-figure">
+              <img className="entry-cover-image sepia-photo" src={entry.cover_image_url} alt={`Cover for ${entry.title}`} />
+              <figcaption className="caption-plate">Image associated with “{entry.title}”.</figcaption>
+            </figure>
           )}
 
           <div className="entry-status-row">
             {entry.verification_status && (
               <span className={`entry-status ${VERIFICATION_STYLES[entry.verification_status] || VERIFICATION_STYLES.unverified}`}>
-                {entry.verification_status}
+                {VERIFICATION_LABELS[entry.verification_status] || 'Unverified'}
               </span>
             )}
             {entry.category_auto && <span className="entry-category-label">{entry.category_auto}</span>}
@@ -166,12 +172,12 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
 
         <aside className="entry-detail-sidebar">
           <section className="entry-info-card">
-            <h2>Entry Details</h2>
+            <h2>Archive metadata</h2>
             <dl>
               {entry.category_auto && <div><dt>Category</dt><dd>{entry.category_auto}</dd></div>}
               {location && <div><dt>Region</dt><dd>{location}</dd></div>}
               {entry.historical_period && <div><dt>Period</dt><dd>{entry.historical_period}</dd></div>}
-              <div><dt>Verification</dt><dd>{entry.verification_status || 'Not yet reviewed'}</dd></div>
+              <div><dt>Verification</dt><dd>{VERIFICATION_LABELS[entry.verification_status] || 'Not yet reviewed'}</dd></div>
               {entry.source_type && <div><dt>Source</dt><dd>{entry.source_type}</dd></div>}
             </dl>
           </section>
@@ -202,7 +208,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
           <section className="entry-info-card">
             <h2>Location</h2>
             {location ? <p>{location}</p> : <p>No location has been pinned for this entry.</p>}
-            {mapUrl && <a href={mapUrl} target="_blank" rel="noreferrer">View pinned location on map →</a>}
+            {mapUrl && <a href={mapUrl} target="_blank" rel="noreferrer">View on map →</a>}
           </section>
         </aside>
       </div>

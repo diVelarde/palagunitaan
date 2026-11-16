@@ -27,12 +27,15 @@ function EntryCard({ entry }) {
     : 'unverified';
 
   return (
-    <Link to={`/entries/${entry.id}`} className="browse-entry-card">
+    <Link
+      to={`/entries/${entry.id}`}
+      className={`browse-entry-card paper-card${entry.cover_image_url ? ' browse-entry-card-has-image' : ''}`}
+    >
       {entry.cover_image_url && (
         <img
           src={entry.cover_image_url}
           alt=""
-          className="browse-entry-image"
+          className="browse-entry-image sepia-photo"
         />
       )}
       <div className="browse-entry-copy">
@@ -174,7 +177,7 @@ export default function BrowsePage({
         ) : searchError ? null : entries.length === 0 ? (
           <p className="text-sm text-gray-500">No entries match your search.</p>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {entries.map((entry) => <EntryCard key={entry.id} entry={entry} />)}
           </div>
         )}
