@@ -119,8 +119,8 @@
 }
 
 .submit-entry-control:focus {
-  border-color: var(--site-gold);
-  outline: 2px solid rgb(251 209 22 / 28%);
+  border-color: var(--site-accent);
+  outline: 2px solid var(--site-accent);
 }
 
 .submit-entry-alternate-list {

@@ -411,8 +411,8 @@
 
 .heritage-map-page .heritage-map-canvas > form input:focus,
 .heritage-map-page .heritage-map-canvas > form textarea:focus {
-  border-color: var(--site-gold);
-  outline: 2px solid rgb(251 209 22 / 28%);
+  border-color: var(--site-accent);
+  outline: 2px solid var(--site-accent);
 }
 
 .heritage-map-page .heritage-map-canvas > form button[type="submit"] {
@@ -455,7 +455,7 @@
 
 .heritage-map-page .map-add-site-button:focus-visible,
 .heritage-map-page :is(select, input, textarea, button):focus-visible {
-  outline: 2px solid var(--site-gold);
+  outline: 2px solid var(--site-accent);
   outline-offset: 2px;
 }
 

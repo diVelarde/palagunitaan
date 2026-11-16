@@ -113,9 +113,22 @@ h4 {
   background-color: var(--site-paper);
 }
 
+.site-app-shell > .flex-1 {
+  min-width: 0;
+}
+
 .site-page-surface {
   min-height: 100%;
   font-family: var(--site-font-family);
+}
+
+.leaflet-control-attribution {
+  color: var(--site-ink);
+  background: var(--site-surface);
+}
+
+.leaflet-control-attribution a {
+  color: var(--site-accent);
 }
 
 input,

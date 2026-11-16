@@ -61,10 +61,10 @@
   min-height: 44px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--site-gold);
+  border: 1px solid var(--site-accent);
   padding: 11px 17px;
-  color: #181816;
-  background: var(--site-gold);
+  color: var(--site-paper);
+  background: var(--site-accent);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .08em;
@@ -74,8 +74,15 @@
 }
 
 .status-primary:hover {
-  border-color: var(--site-deep-gold);
-  background: var(--site-deep-gold);
+  border-color: var(--site-accent);
+  background: var(--site-accent);
+  filter: brightness(.92);
+}
+
+.status-primary:focus-visible,
+.status-link:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 3px;
 }
 
 .status-link {

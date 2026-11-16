@@ -6,10 +6,13 @@
   --dashboard-muted: var(--site-muted);
   --dashboard-soft: var(--site-paper);
   --dashboard-accent: var(--site-accent);
+  box-sizing: border-box;
   display: grid;
-  width: min(100% - 64px, 1320px);
+  width: calc(100% - 64px);
+  max-width: 1320px;
+  min-width: 0;
   min-height: calc(100vh - 140px);
-  grid-template-columns: 250px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 250px) minmax(0, 1fr);
   align-items: start;
   gap: clamp(24px, 4vw, 56px);
   margin: 42px auto 76px;
@@ -22,6 +25,7 @@
   position: sticky;
   top: 88px;
   display: flex;
+  min-width: 0;
   min-height: 620px;
   flex-direction: column;
   overflow: hidden;
@@ -245,6 +249,10 @@
 
 .dashboard-content a:not(.dashboard-nav-link):not(.dashboard-action-link) {
   color: var(--dashboard-accent);
+}
+
+.dashboard-content a:not(.dashboard-nav-link):not(.dashboard-action-link).bg-accent {
+  color: var(--site-paper);
 }
 
 .dashboard-content a:hover {
@@ -996,8 +1004,8 @@
 
 @media (max-width: 900px) {
   .dashboard-shell {
-    width: min(100% - 40px, 1320px);
-    grid-template-columns: 220px minmax(0, 1fr);
+    width: calc(100% - 40px);
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
     gap: 24px;
     margin-top: 28px;
   }
@@ -1005,7 +1013,7 @@
 
 @media (max-width: 760px) {
   .dashboard-shell {
-    width: min(100% - 36px, 1320px);
+    width: calc(100% - 36px);
     min-height: auto;
     grid-template-columns: 1fr;
     gap: 20px;
@@ -1052,7 +1060,7 @@
 
 @media (max-width: 600px) {
   .dashboard-shell {
-    width: min(100% - 28px, 1320px);
+    width: calc(100% - 28px);
     gap: 16px;
     margin-bottom: 42px;
   }

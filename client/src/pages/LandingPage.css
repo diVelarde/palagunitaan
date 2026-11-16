@@ -272,7 +272,7 @@
 }
 
 .lp-era-link > span:last-child {
-  color: var(--site-accent-gold);
+  color: var(--site-accent);
   font-family: var(--site-font-family);
   font-size: 17px;
 }
@@ -1171,6 +1171,7 @@
 
 .lp-region-map .leaflet-control-attribution {
   color: var(--site-ink);
+  background: var(--site-surface);
 }
 
 @media (max-width: 850px) {
