@@ -29,7 +29,7 @@ function EntryCard({ entry }) {
   return (
     <Link
       to={`/entries/${entry.id}`}
-      className={`browse-entry-card paper-card${entry.cover_image_url ? ' browse-entry-card-has-image' : ''}`}
+      className={`browse-entry-card paper-card paper-texture-card${entry.cover_image_url ? ' browse-entry-card-has-image' : ''}`}
     >
       {entry.cover_image_url && (
         <img
@@ -115,7 +115,7 @@ export default function BrowsePage({
   }, [keyword, verificationStatus, historicalPeriod, category, regionId, searchEntries]);
 
   return (
-    <main className="browse-page site-page-surface">
+    <main className="browse-page site-page-surface paper-texture">
       <div className="browse-page-content">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>

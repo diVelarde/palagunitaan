@@ -41,7 +41,7 @@ export default function BlogPostPage({ fetchPost }) {
   }, [fetchPost, id]);
 
   return (
-    <main className="site-page-surface blog-post-page">
+    <main className="site-page-surface blog-post-page paper-texture">
       <div className="blog-post-content">
       <Link to="/blog" className="blog-post-back-link">
         ← Back to the blog

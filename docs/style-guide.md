@@ -67,6 +67,10 @@ text directly over a photograph and assume a filter guarantees contrast: the
 rendered image varies. Place hero copy over a solid or sufficiently opaque
 overlay field and verify the final rendered contrast is at least 4.5:1. Gold
 is deliberately excluded from the text pairs because it is not a text colour.
+The paper texture and edge gradients are tuned to keep muted text above AA at
+their strongest light and dark extremes: at least 4.60:1 on the light page,
+4.70:1 on a light paper card, 6.87:1 on the dark page, and 5.85:1 on a dark
+card.
 
 ## Typography
 
@@ -100,9 +104,14 @@ is deliberately excluded from the text pairs because it is not a text colour.
 
 ## Textures and motifs
 
-- A very subtle paper-grain texture may sit over large paper areas. Keep it
-  low-contrast, non-distracting, and behind content; provide a plain-colour
-  fallback and avoid texture that interferes with text.
+- Use the `--paper-texture` token in `client/src/index.css` for the lightweight,
+  seamless SVG grain and warm edge gradient on Landing, About, Browse, Timeline,
+  and Blog page backgrounds. Use `--paper-card-texture` or the
+  `.paper-texture-card` helper for a lighter grain on public paper cards.
+  `.paper-texture` applies the page treatment where a page needs an explicit
+  helper class. Keep the texture behind content; it is disabled for increased
+  contrast and forced-colour preferences. Do not apply it to maps, forms, or
+  dense dashboard, admin, and validator screens.
 - An optional Bicolano weaving-inspired pattern may be used as a section
   divider. Treat it as a respectful, restrained motif, not a generic cultural
   decoration; use it only when its source and meaning are understood.

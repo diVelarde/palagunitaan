@@ -2,27 +2,58 @@ import { Link } from 'react-router-dom';
 import { SITE_TEXT } from '../config/siteText';
 import './AboutPage.css';
 
+const ABOUT_HERO_IMAGE = '/images/about-bell-tower.jpg';
+
 export default function AboutPage() {
   return (
     <main className="about-page site-page-surface">
       <section className="about-hero">
-        <img
-          className="about-hero-photo"
-          src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Mt.%20Isarog%20Landscape.jpg?width=1800"
-          alt="A mountain landscape at Mount Isarog"
-        />
-        <div className="about-hero-overlay" aria-hidden="true" />
-        <div className="about-page-inner">
-          <p className="about-eyebrow">About the archive</p>
-          <h1>Stories are held by the communities who carry them.</h1>
-          <p className="about-hero-deck">{SITE_TEXT.aboutIntroduction}</p>
+        <figure className="about-hero-image">
+          <img
+            src={ABOUT_HERO_IMAGE}
+            alt="AI-generated sepia illustration of a Philippine stone church and bell tower beneath a mountain sky"
+            width="1536"
+            height="1024"
+            loading="lazy"
+          />
+          <figcaption className="about-hero-credit">
+            AI-generated illustration
+          </figcaption>
+        </figure>
+        <div className="about-page-inner about-hero-layout">
+          <div className="about-hero-copy">
+            <p className="about-eyebrow">About the archive</p>
+            <h1>Stories are held by the communities who carry them.</h1>
+            <p className="about-hero-deck">{SITE_TEXT.aboutIntroduction}</p>
+          </div>
         </div>
-        <p className="about-photo-credit">
-          Mount Isarog photo by <a href="https://commons.wikimedia.org/wiki/User:MarvinBikolano" target="_blank" rel="noreferrer">MarvinBikolano</a>
-          {' '}via <a href="https://commons.wikimedia.org/wiki/File:Mt._Isarog_Landscape.jpg" target="_blank" rel="noreferrer">Wikimedia Commons</a>
-          {' '}· <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>
-        </p>
       </section>
+
+      <nav className="about-explore about-page-inner" aria-label="Explore Palagunitaan">
+        <Link to="/browse" className="about-explore-link">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M4 5h16v4H4zM6 9v10h12V9M9 13h6M9 16h6" />
+          </svg>
+          <span className="about-explore-title">Collections</span>
+          <span className="about-explore-description">Browse stories and cultural records.</span>
+        </Link>
+        <Link to="/map" className="about-explore-link">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M19 10.1c0 5.2-7 11-7 11s-7-5.8-7-11a7 7 0 1 1 14 0Z" />
+            <circle cx="12" cy="10" r="2.2" />
+          </svg>
+          <span className="about-explore-title">Heritage Sites</span>
+          <span className="about-explore-description">Explore the places connected to local heritage.</span>
+        </Link>
+        <Link to="/browse?category=Legends%20%26%20Myths" className="about-explore-link">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M5 4.5h5.5A3.5 3.5 0 0 1 14 8v12a3.5 3.5 0 0 0-3.5-3.5H5z" />
+            <path d="M19 4.5h-1.5A3.5 3.5 0 0 0 14 8m5-3.5v13h-1.5A3.5 3.5 0 0 0 14 21" />
+          </svg>
+          <span className="about-explore-title">Folklore</span>
+          <span className="about-explore-description">Read legends, myths, and oral traditions.</span>
+        </Link>
+      </nav>
 
       <section className="about-story about-page-inner">
         <div>
@@ -31,17 +62,13 @@ export default function AboutPage() {
         </div>
         <div className="about-story-copy">
           <p>
-            It is knowledge shared across generations—in stories, songs, practices, beliefs,
-            crafts, foodways, and everyday memory.
+            Folklore is more than a record of the past. It is knowledge shared across generations—in legends, songs, rituals, beliefs, crafts, food, and everyday memory.
           </p>
           <p>
-            Palagunitaan brings accounts together with the places, sources, and context people
-            choose to share. Community knowledge and lived experience matter alongside written
-            records.
+            Palagunitaan is a community-centered archive for gathering these accounts, connecting them to their places and sources, and making them easier to discover and learn from.
           </p>
           <p>
-            An archive entry is one record of a living tradition, not a substitute for the
-            people who practice, remember, and interpret it.
+            Each entry is part of a living tradition. The archive aims to preserve context and recognize the contributors and communities whose knowledge makes it possible.
           </p>
           <Link to="/browse" className="about-action-link">Explore the archive <span aria-hidden="true">→</span></Link>
         </div>

@@ -23,7 +23,7 @@ function PostCard({ post }) {
   return (
     <Link
       to={`/blog/${post.id}`}
-      className="blog-post-card"
+      className="blog-post-card paper-texture-card"
     >
       {post.cover_image_url && (
         <img
@@ -133,7 +133,7 @@ export default function BlogFeedPage({
   }
 
   return (
-    <main className="site-page-surface blog-feed-page">
+    <main className="site-page-surface blog-feed-page paper-texture">
       <div className="blog-feed-content">
         <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
           <div>

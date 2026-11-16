@@ -62,7 +62,7 @@ function TimelineEntry({ entry, side, dated = false }) {
       ref={ref}
       className={`timeline-item timeline-item-${side}${isInView ? ' timeline-item-visible' : ''}`}
     >
-      <Link to={`/entries/${entry.id}`} className="timeline-entry-link">
+      <Link to={`/entries/${entry.id}`} className="timeline-entry-link paper-texture-card">
         {dated && <span className="timeline-entry-year">{getEntryYear(entry)}</span>}
         <EntryArchiveMeta entry={entry} />
         <h3 className="timeline-entry-title">{entry.title}</h3>
@@ -159,7 +159,7 @@ export default function TimelinePage({ fetchTimeline = async () => [] }) {
   }, [fetchTimeline]);
 
   return (
-    <main className="site-page-surface timeline-page">
+    <main className="site-page-surface timeline-page paper-texture">
       <div className="timeline-page-content">
         <p className="timeline-page-eyebrow">The archive, in time</p>
         <h1>Timeline</h1>

@@ -28,11 +28,15 @@ const CATEGORIES = [
 const HERO_IMAGE = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Mt.%20Isarog%20Landscape.jpg?width=2200';
 const CRAFT_IMAGE = 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1800&q=85';
 
-function SectionHeading({ children, linkTo, linkLabel = 'View All →' }) {
+function SectionHeading({ children, linkTo, linkLabel = 'View all' }) {
   return (
     <div className="lp-section-heading">
       <h2>{children}</h2>
-      {linkTo && <Link to={linkTo}>{linkLabel}</Link>}
+      {linkTo && (
+        <Link to={linkTo} className="lp-text-link">
+          {linkLabel} <span aria-hidden="true">→</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -72,17 +76,17 @@ function getEntryPreview(content) {
   return sentences ? sentences.slice(0, 2).join(' ').trim() : normalizedContent;
 }
 
-function HighlightCard({ entry, label }) {
+function HighlightCard({ entry, label, reversed }) {
   const preview = getEntryPreview(entry.raw_content || entry.euphemistic_content);
 
   return (
     <Link
       to={`/entries/${entry.id || entry.heritage_entry_id}`}
-      className="lp-featured-story"
+      className={`lp-featured-story${reversed ? ' lp-featured-story-reversed' : ''}`}
     >
       <div className="lp-featured-photo">
         {entry.cover_image_url ? (
-          <img src={entry.cover_image_url} alt="" />
+          <img src={entry.cover_image_url} alt="" loading="lazy" />
         ) : (
           <span aria-hidden="true">{entry.title?.charAt(0) || 'P'}</span>
         )}
@@ -99,12 +103,12 @@ function HighlightCard({ entry, label }) {
   );
 }
 
-function HighlightSiteCard({ site, label }) {
+function HighlightSiteCard({ site, label, reversed }) {
   return (
-    <Link to="/map" className="lp-featured-story">
+    <Link to="/map" className={`lp-featured-story${reversed ? ' lp-featured-story-reversed' : ''}`}>
       <div className="lp-featured-photo">
         {site.site_image_url ? (
-          <img src={site.site_image_url} alt="" />
+          <img src={site.site_image_url} alt="" loading="lazy" />
         ) : (
           <span aria-hidden="true">{site.site_name?.charAt(0) || 'P'}</span>
         )}
@@ -305,65 +309,6 @@ export default function LandingPage() {
 
       <hr className="section-rule lp-section-rule" />
 
-      <section className="lp-intro lp-section" aria-labelledby="lp-intro-title">
-        <div className="lp-intro-heading">
-          <p className="lp-section-kicker">A living archive</p>
-          <h2 id="lp-intro-title">Where history meets heritage</h2>
-        </div>
-        <div className="lp-intro-copy">
-          <p>
-            Folklore lives in the voices, practices, places, and memories of the people who carry it.
-            Palagunitaan brings accounts together with their sources and context, while recognizing
-            that stories may have many tellings.
-          </p>
-          <p>{SITE_TEXT.aboutIntroduction}</p>
-          <Link to="/about" className="btn-outline">Learn more</Link>
-        </div>
-      </section>
-
-      <section className="lp-section lp-era-section" aria-labelledby="lp-era-title">
-        <div className="lp-section-heading">
-          <div>
-            <p className="lp-section-kicker">Stories across time</p>
-            <h2 id="lp-era-title">Browse by Era</h2>
-          </div>
-          <Link to="/timeline" className="lp-text-link">View the full timeline <span aria-hidden="true">→</span></Link>
-        </div>
-        <nav className="lp-era-list" aria-label="Browse timeline by historical era">
-          {HISTORICAL_PERIODS.map((period) => (
-            <Link
-              key={period}
-              to={`/timeline?period=${encodeURIComponent(period)}`}
-              className="lp-era-link"
-            >
-              <span>{period}</span>
-              <span aria-hidden="true">↗</span>
-            </Link>
-          ))}
-        </nav>
-      </section>
-
-      <section className="lp-verification-section" aria-labelledby="lp-verification-title">
-        <div className="lp-section">
-          <p className="lp-section-kicker">Reading the archive</p>
-          <h2 id="lp-verification-title">How verification works</h2>
-          <div className="lp-verification-row">
-            <article className="lp-verification-item">
-              <span className="lp-stamp lp-stamp-verified">Verified</span>
-              <p>Reviewed with supporting sources or evidence.</p>
-            </article>
-            <article className="lp-verification-item">
-              <span className="lp-stamp lp-stamp-unverified">Unverified</span>
-              <p>Recorded, but not yet verified against available sources.</p>
-            </article>
-            <article className="lp-verification-item">
-              <span className="lp-stamp lp-stamp-disputed">Disputed</span>
-              <p>Accounts differ; their differences are preserved with care.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
       <section className="lp-archive-feature" aria-labelledby="lp-archive-feature-title">
         <div className="lp-archive-feature-copy">
           <p className="lp-archive-feature-kicker">From the archive</p>
@@ -398,6 +343,31 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section
+        className="lp-verification-section"
+        aria-labelledby="lp-verification-title"
+        style={{ '--lp-section-image': 'url("/images/mount-isarog.jpg")' }}
+      >
+        <div className="lp-section">
+          <p className="lp-section-kicker">Reading the archive</p>
+          <h2 id="lp-verification-title">How verification works</h2>
+          <div className="lp-verification-row">
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-verified">Verified</span>
+              <p>Reviewed with supporting sources or evidence.</p>
+            </article>
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-unverified">Unverified</span>
+              <p>Recorded, but not yet verified against available sources.</p>
+            </article>
+            <article className="lp-verification-item">
+              <span className="lp-stamp lp-stamp-disputed">Disputed</span>
+              <p>Accounts differ; their differences are preserved with care.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section className="lp-section lp-featured-section" aria-labelledby="lp-featured-title">
         <div className="lp-section-heading">
           <div>
@@ -408,15 +378,15 @@ export default function LandingPage() {
         {errors.highlight ? (
           <p className="lp-feed-error" role="status">{errors.highlight}</p>
         ) : (
-          <div className="lp-featured-grid">
+          <div className={`lp-featured-grid lp-featured-grid-count-${[highlights.week, highlights.month].filter(Boolean).length}`}>
             {[
               { label: 'Highlight of the week', item: highlights.week },
               { label: 'Highlight of the month', item: highlights.month },
-            ].map(({ label, item }) => {
-              if (!item) return null;
+            ].filter(({ item }) => item).map(({ label, item }, index) => {
+              const reversed = index % 2 === 1;
               return item.target_type === 'site'
-                ? <HighlightSiteCard key={label} site={item} label={label} />
-                : <HighlightCard key={label} entry={item} label={label} />;
+                ? <HighlightSiteCard key={label} site={item} label={label} reversed={reversed} />
+                : <HighlightCard key={label} entry={item} label={label} reversed={reversed} />;
             })}
             {!highlights.week && !highlights.month && (
               <p className="lp-empty-message">No highlights are scheduled at the moment.</p>
@@ -501,7 +471,7 @@ export default function LandingPage() {
       </section>
 
       <section className="lp-section">
-        <SectionHeading linkTo="/browse">Browse by Category</SectionHeading>
+        <SectionHeading linkTo="/browse" linkLabel="View all categories">Browse by Category</SectionHeading>
         <div className="lp-category-grid">
           {CATEGORIES.map((category) => (
             <Link
@@ -523,8 +493,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="lp-section lp-era-section" aria-labelledby="lp-era-title">
+        <div className="lp-section-heading">
+          <div>
+            <p className="lp-section-kicker">Stories across time</p>
+            <h2 id="lp-era-title">Browse by Era</h2>
+          </div>
+          <Link to="/timeline" className="lp-text-link">View the full timeline <span aria-hidden="true">→</span></Link>
+        </div>
+        <nav className="lp-era-list" aria-label="Browse timeline by historical era">
+          {HISTORICAL_PERIODS.map((period) => (
+            <Link
+              key={period}
+              to={`/timeline?period=${encodeURIComponent(period)}`}
+              className="lp-era-link"
+            >
+              <span>{period}</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+          ))}
+        </nav>
+      </section>
+
       <section className="lp-section lp-region-section">
-        <SectionHeading linkTo="/map" linkLabel="Open the map →">Explore the Region</SectionHeading>
+        <SectionHeading linkTo="/map" linkLabel="View the map">Explore the Region</SectionHeading>
         <div className="lp-region-explorer">
           <div className="lp-region-list">
             <p className="lp-region-kicker">Stories by place</p>
@@ -636,7 +628,7 @@ export default function LandingPage() {
       </section>
 
       <section className="lp-section lp-blog-section">
-        <SectionHeading linkTo="/blog" linkLabel="All Posts →">From the Blog</SectionHeading>
+        <SectionHeading linkTo="/blog" linkLabel="View all posts">From the Blog</SectionHeading>
         {errors.posts ? (
           <p className="lp-feed-error">{errors.posts}</p>
         ) : posts.length > 0 ? (
@@ -653,6 +645,28 @@ export default function LandingPage() {
         ) : (
           <p className="lp-empty-message">There are no community posts yet.</p>
         )}
+      </section>
+
+      <section
+        className="lp-verification-section lp-living-archive-section"
+        aria-labelledby="lp-intro-title"
+        style={{ '--lp-section-image': 'url("/images/mount-isarog.jpg")' }}
+      >
+        <div className="lp-section lp-intro">
+          <div className="lp-intro-heading">
+            <p className="lp-section-kicker">A living archive</p>
+            <h2 id="lp-intro-title">Where history meets heritage</h2>
+          </div>
+          <div className="lp-intro-copy">
+            <p>
+              Folklore lives in the voices, practices, places, and memories of the people who carry it.
+              Palagunitaan brings accounts together with their sources and context, while recognizing
+              that stories may have many tellings.
+            </p>
+            <p>{SITE_TEXT.aboutIntroduction}</p>
+            <Link to="/about" className="btn-outline">Learn more</Link>
+          </div>
+        </div>
       </section>
 
     </main>
