@@ -9,7 +9,7 @@ import heritageService from '../services/heritageService';
 import highlightService from '../services/highlightService';
 import mapService from '../services/mapService';
 import multimediaService from '../services/multimediaService';
-import { SITE_REGIONS, SITE_TEXT } from '../config/siteText';
+import { ARCHIVE_PREVIEW, SITE_REGIONS, SITE_TEXT } from '../config/siteText';
 import './LandingPage.css';
 
 const MAP_CENTER = [13.58, 123.29];
@@ -239,6 +239,23 @@ export default function LandingPage() {
       && marker.longitude >= -180
       && marker.longitude <= 180
     )), [mapMarkers]);
+  const archiveEntry = entries[0] || null;
+  const archiveEntryQuote = archiveEntry
+    ? getEntryPreview(archiveEntry.euphemistic_content || archiveEntry.raw_content)
+    : '';
+  const archiveUsesPreview = !archiveEntry || !archiveEntryQuote;
+  const archiveTitle = archiveEntry?.title || ARCHIVE_PREVIEW.title;
+  const archiveQuote = archiveEntryQuote || ARCHIVE_PREVIEW.quote;
+  const archiveStampNumber = archiveEntry?.id
+    ? String(archiveEntry.id).padStart(3, '0')
+    : ARCHIVE_PREVIEW.stampNumber;
+  const archiveFooter = archiveUsesPreview
+    ? ARCHIVE_PREVIEW.sampleFooter
+    : [
+      archiveEntry.region || SITE_TEXT.provinceName,
+      archiveEntry.source_type || archiveEntry.category_auto || ARCHIVE_PREVIEW.sourceType,
+      ARCHIVE_PREVIEW.publishedLabel,
+    ].join(' · ');
 
   useEffect(() => {
     if (!playAfterTrackChange.current || !audioRef.current) return;
@@ -344,6 +361,40 @@ export default function LandingPage() {
               <p>Accounts differ; their differences are preserved with care.</p>
             </article>
           </div>
+        </div>
+      </section>
+
+      <section className="lp-archive-feature" aria-labelledby="lp-archive-feature-title">
+        <div className="lp-archive-feature-copy">
+          <p className="lp-archive-feature-kicker">From the archive</p>
+          <h2 id="lp-archive-feature-title">Let every story show where it came from.</h2>
+          <p className="lp-archive-feature-description">
+            Folklore lives in more than its telling. We preserve the places, people, memories, and source details
+            that give each account its history.
+          </p>
+          <Link to="/browse" className="lp-archive-feature-link">
+            Explore collection records <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+        <div className="lp-archive-artifact">
+          <div className="lp-archive-paper-back" aria-hidden="true" />
+          <article className="lp-archive-paper">
+            <div className="lp-archive-stamp" aria-hidden="true">
+              <span>{ARCHIVE_PREVIEW.stampBrand}</span>
+              <span>{ARCHIVE_PREVIEW.stampType}</span>
+              <span>{archiveStampNumber}</span>
+            </div>
+            <p className="lp-archive-paper-kicker">
+              {archiveUsesPreview
+                ? `${ARCHIVE_PREVIEW.previewLabel} · ${ARCHIVE_PREVIEW.kicker}`
+                : ARCHIVE_PREVIEW.kicker}
+            </p>
+            <h3>{archiveTitle}</h3>
+            <blockquote>{archiveQuote}</blockquote>
+            <p className="lp-archive-paper-note">{ARCHIVE_PREVIEW.note}</p>
+            <div className="lp-archive-paper-rule" />
+            <p className="lp-archive-paper-meta">{archiveFooter}</p>
+          </article>
         </div>
       </section>
 
