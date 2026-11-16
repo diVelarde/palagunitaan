@@ -58,7 +58,7 @@ function UsersTab({ fetchUsers, updateUserRole }) {
     <div>
       {error && <p className="dashboard-error" role="alert">{error}</p>}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[480px]">
+        <table className="dashboard-data-table w-full min-w-[480px] text-sm">
           <thead>
             <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
               <th className="py-2">Name</th>

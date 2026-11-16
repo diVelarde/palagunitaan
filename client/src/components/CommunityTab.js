@@ -21,9 +21,9 @@ export default function CommunityTab({ fetchMyPosts = async () => [] }) {
   }, [fetchMyPosts]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">Your posts</h3>
+    <div className="dashboard-community-tab space-y-6">
+      <div className="dashboard-community-posts">
+        <h3 className="dashboard-subsection-heading mb-2 text-sm font-semibold">Your posts</h3>
         {error && <p className="dashboard-error" role="alert">{error}</p>}
         {loading ? (
           <p className="text-sm text-gray-500">Loading…</p>

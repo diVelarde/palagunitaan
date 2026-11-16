@@ -50,22 +50,22 @@ export default function NotificationDropdown({
       </button>
 
       {open && (
-        <div className="navbar-notification-popup absolute right-0 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-lg border shadow-lg z-10">
-          <div className="navbar-notification-heading border-b px-4 py-3"><h3 className="text-sm font-semibold">Notifications</h3></div>
+        <div className="navbar-notification-popup dashboard-notification-popup absolute right-0 z-10 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-lg border shadow-lg">
+          <div className="navbar-notification-heading dashboard-notification-heading px-4 py-3"><h3 className="text-sm font-semibold">Notifications</h3></div>
           {error && <p className="px-4 py-3 text-xs text-red-700" role="alert">{error}</p>}
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <p className="navbar-notification-empty py-8 text-center text-sm">Nothing yet.</p>
+              <p className="navbar-notification-empty dashboard-notification-empty py-8 text-center text-sm">Nothing yet.</p>
             ) : (
               notifications.map((n) => (
                 <Link
                   key={n.id}
                   to={n.heritage_entry_id ? `/entries/${n.heritage_entry_id}` : '#'}
                   onClick={() => !n.is_read && onMarkRead(n.id)}
-                  className={`navbar-notification-item block border-b px-4 py-3 last:border-0 ${n.is_read ? '' : 'is-unread'}`}
+                  className={`navbar-notification-item dashboard-notification-item block border-b px-4 py-3 last:border-0 ${n.is_read ? '' : 'is-unread'}`}
                 >
                   <p className="text-sm">{n.message}</p>
-                  <p className="navbar-notification-time mt-1 text-xs">{timeAgo(n.created_at)}</p>
+                  <p className="navbar-notification-time dashboard-notification-time mt-1 text-xs">{timeAgo(n.created_at)}</p>
                 </Link>
               ))
             )}

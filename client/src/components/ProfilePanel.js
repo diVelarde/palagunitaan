@@ -12,21 +12,21 @@ export default function ProfilePanel({ showIdentity = true }) {
   return (
     <div className="profile-panel border border-gray-200 rounded-lg p-6 flex items-center gap-5">
       {user.avatarUrl ? (
-        <img src={user.avatarUrl} alt={user.name} className="w-16 h-16 rounded-full object-cover" />
+        <img src={user.avatarUrl} alt={user.name} className="profile-panel-avatar h-16 w-16 rounded-full object-cover" />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-500">
+        <div className="profile-panel-avatar profile-panel-avatar-fallback flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold">
           {user.name?.trim()?.[0]?.toUpperCase() || '?'}
         </div>
       )}
       <div className="profile-panel-details">
         {showIdentity && (
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-lg font-semibold text-gray-900">{user.name}</h2>
+            <h2 className="profile-panel-name text-lg font-semibold">{user.name}</h2>
             <RoleBadge role={user.role} />
           </div>
         )}
-        <p className="text-sm text-gray-500">{user.email}</p>
-        {joined && <p className="text-xs text-gray-400 mt-1">Member since {joined}</p>}
+        <p className="profile-panel-email text-sm">{user.email}</p>
+        {joined && <p className="profile-panel-joined mt-1 text-xs">Member since {joined}</p>}
       </div>
       <button type="button" onClick={logout} className="dashboard-action-link profile-panel-logout">
         Log out

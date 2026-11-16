@@ -41,7 +41,7 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
   if (loading) return <p className="text-sm text-muted">Loading requests…</p>;
 
   return (
-    <div>
+    <div className="dashboard-role-requests">
       <h4 className="font-display text-lg text-ink mb-1">Role upgrade requests</h4>
       {error && <p className="text-sm text-primary-600 mb-3">{error}</p>}
       <p className="text-sm text-muted mb-4">
@@ -50,7 +50,7 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
 
       <div className="space-y-3">
         {requests.map((req) => (
-          <div key={req.id} className="border border-parchment-300 rounded-lg p-4">
+          <div key={req.id} className="dashboard-role-request rounded-lg p-4">
             <div>
               <p className="text-sm text-ink">
                 <strong>{req.user_name}</strong> ({req.user_email}) wants to become a{' '}
@@ -64,13 +64,13 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
                 <strong>Message:</strong> {req.message || 'Not provided.'}
               </p>
               {ROLE_CRITERIA[req.requested_role] && (
-                <div className="mt-3">
+                <div className="dashboard-role-request-checklist mt-3">
                   <h5 className="text-sm font-medium text-ink">{ROLE_CRITERIA[req.requested_role].label} approval checklist</h5>
                   <ul className="mt-1 space-y-1">
                     {ROLE_CRITERIA[req.requested_role].items.map((item) => (
                       <li key={item}>
                         <label className="flex items-start gap-2 text-sm text-ink">
-                          <input type="checkbox" className="mt-1 accent-[#ad482d]" />
+                          <input type="checkbox" className="dashboard-radio mt-1" />
                           <span>{item}</span>
                         </label>
                       </li>
@@ -92,13 +92,13 @@ export default function RoleRequestsTab({ fetchPending = async () => [], reviewR
                     value={denialReasons[req.id] || ''}
                     onChange={(e) => setDenialReasons((prev) => ({ ...prev, [req.id]: e.target.value }))}
                     rows={2}
-                    className="w-full border border-parchment-300 rounded-md px-3 py-2 text-sm"
+                    className="dashboard-role-request-field w-full rounded-md px-3 py-2 text-sm"
                     placeholder="Explain why this request is not approved."
                   />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleDecision(req.id, 'approved')} disabled={decidingId === req.id} className="px-3 py-1.5 bg-forest-700 text-parchment text-sm rounded-md hover:bg-forest-800 disabled:opacity-50">Approve</button>
-                  <button onClick={() => handleDecision(req.id, 'denied')} disabled={decidingId === req.id || !(denialReasons[req.id] || '').trim()} className="px-3 py-1.5 border border-parchment-300 text-ink text-sm rounded-md hover:bg-parchment-200 disabled:opacity-50">Deny</button>
+                  <button onClick={() => handleDecision(req.id, 'approved')} disabled={decidingId === req.id} className="dashboard-role-request-action disabled:opacity-50">Approve</button>
+                  <button onClick={() => handleDecision(req.id, 'denied')} disabled={decidingId === req.id || !(denialReasons[req.id] || '').trim()} className="dashboard-role-request-action dashboard-role-request-action-secondary disabled:opacity-50">Deny</button>
                 </div>
               </div>
             )}

@@ -51,7 +51,7 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
 
   return (
     <div className="dashboard-page dashboard-overview-page">
-      <section className="dashboard-section-card">
+      <section className="dashboard-section-card dashboard-account-overview">
         <div className="dashboard-overview-section-heading">
           <div>
             <p className="dashboard-overview-eyebrow">Dashboard</p>
@@ -65,7 +65,7 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
       </section>
 
       {isContributor && (
-        <section className="dashboard-section-card">
+        <section className="dashboard-section-card dashboard-submission-overview">
           <h2>Submission overview</h2>
           {entriesError && <div className="dashboard-error" role="alert">{entriesError}</div>}
           <div className="dashboard-stats" aria-label="Submission summary">
@@ -97,13 +97,13 @@ export default function DashboardPage({ fetchMyEntries = heritageService.getMyEn
         </section>
       )}
 
-      <div className="dashboard-section-card">
+      <div className="dashboard-section-card dashboard-community-section">
         <h2>Community posts</h2>
         <CommunityTab fetchMyPosts={blogService.getMyPosts} />
       </div>
 
       {!isContributor && (
-        <div className="dashboard-section-card">
+        <div className="dashboard-section-card dashboard-contribution-section">
           <h2>Start contributing</h2>
           <BecomeContributorPrompt />
         </div>

@@ -81,7 +81,7 @@ function PendingEntryRow({ entry, onReview }) {
           <div className="flex flex-wrap items-center gap-2">
             <Link to={`/entries/${entry.id}`} className="font-medium text-gray-900 hover:underline">{entry.title}</Link>
             {entry.claims_conflict && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+              <span className="dashboard-claim-conflict-label rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
                 Claims disagree
               </span>
             )}
@@ -93,7 +93,7 @@ function PendingEntryRow({ entry, onReview }) {
 
       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{entry.raw_content}</p>
       {entry.claims_conflict && (
-        <p role="note" className="mb-4 border-l-2 border-[#ad482d] bg-[#f4eee6] px-3 py-2 text-sm text-gray-700">
+        <p role="note" className="dashboard-claim-conflict-note mb-4 px-3 py-2 text-sm">
           Sources give different claimed years. Record what each source says.
         </p>
       )}
@@ -105,7 +105,7 @@ function PendingEntryRow({ entry, onReview }) {
         if (!assessment) return null;
 
         return (
-          <section key={claim.id} className="mb-4 rounded-md border border-gray-200 bg-[#f4eee6] p-4">
+          <section key={claim.id} className="dashboard-claim-assessment mb-4 p-4">
             <h3 className="mb-1 text-sm font-semibold text-gray-900">
               Claimed origin year: {claim.claimed_year}
             </h3>
@@ -131,7 +131,7 @@ function PendingEntryRow({ entry, onReview }) {
                         value={value}
                         checked={assessment[field] === value}
                         onChange={() => updateAssessment(claim.id, field, value)}
-                        className="accent-[#ad482d]"
+                        className="dashboard-radio"
                       />
                       {value === 'not_met' ? 'Not met' : value.charAt(0).toUpperCase() + value.slice(1)}
                     </label>
@@ -158,7 +158,7 @@ function PendingEntryRow({ entry, onReview }) {
           onChange={(e) => setComment(e.target.value)}
           placeholder="Notes for the contributor (at least 20 characters when disputing or explaining conflicting years)"
           rows={2}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm mb-3"
+          className="dashboard-review-comment mb-3 w-full rounded-md px-3 py-2 text-sm"
         />
       )}
 
@@ -170,7 +170,7 @@ function PendingEntryRow({ entry, onReview }) {
           <span className="block text-[10px] font-normal">Source corroborated</span>
           {suggestVerified && <span className="block text-[10px] font-semibold">Suggested</span>}
         </button>
-        <button onClick={() => handleDecision('approved_unverified')} disabled={submitting !== null || !assessmentsComplete} className="dashboard-review-approve disabled:opacity-50">
+        <button onClick={() => handleDecision('approved_unverified')} disabled={submitting !== null || !assessmentsComplete} className="dashboard-review-approve dashboard-review-approve-unverified disabled:opacity-50">
           {submitting === 'approved_unverified' ? 'Approving as Unverified…' : 'Approve as Unverified'}
           <span className="block text-[10px] font-normal">Publish with disclaimer</span>
         </button>
@@ -180,7 +180,7 @@ function PendingEntryRow({ entry, onReview }) {
         <button onClick={() => handleDecision('rejected')} disabled={submitting !== null} className="dashboard-review-reject disabled:opacity-50">
           {submitting === 'rejected' ? 'Rejecting…' : 'Reject'}
         </button>
-        {!expanded && !entry.claims_conflict && <button onClick={() => setExpanded(true)} className="text-xs text-gray-500 hover:text-gray-700 ml-2">+ add note</button>}
+        {!expanded && !entry.claims_conflict && <button onClick={() => setExpanded(true)} className="dashboard-quiet-action ml-2">+ add note</button>}
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ export default function ValidatorDashboardPage({
     <div className="dashboard-page dashboard-validator-page">
       <header className="dashboard-page-heading">
         <p className="dashboard-page-eyebrow">Editorial desk</p>
-        <h1 className="mb-1 text-3xl font-semibold">Review Queue</h1>
+        <h1>Review Queue</h1>
         <p className="text-sm text-gray-600">Validators cannot review their own entries.</p>
         {activeTab === 'Entries' && (
           <p className="text-sm text-gray-600">
@@ -230,7 +230,7 @@ export default function ValidatorDashboardPage({
           </p>
         )}
       </header>
-      <div className="mb-5 flex gap-2 border-b border-gray-200" role="tablist" aria-label="Review queues">
+      <div className="dashboard-review-tabs mb-5" role="tablist" aria-label="Review queues">
         {['Entries', 'Blog posts', 'Reports'].map((tab) => (
           <button
             key={tab}
@@ -238,8 +238,8 @@ export default function ValidatorDashboardPage({
             role="tab"
             aria-selected={activeTab === tab}
             onClick={() => setActiveTab(tab)}
-            className={`border-b-2 px-3 py-2 text-sm font-medium ${
-              activeTab === tab ? 'border-[#ad482d] text-[#ad482d]' : 'border-transparent text-gray-600'
+            className={`dashboard-review-tab ${
+              activeTab === tab ? 'dashboard-review-tab-active' : ''
             }`}
           >
             {tab}

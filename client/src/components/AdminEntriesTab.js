@@ -67,7 +67,7 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducatio
         <p className="text-sm text-gray-500">No entries on this page.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[850px]">
+          <table className="dashboard-data-table w-full min-w-[850px] text-sm">
             <thead>
               <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-gray-200">
                 <th className="py-2">Title</th>
@@ -136,7 +136,7 @@ export default function AdminEntriesTab({ fetchEntries, deleteEntry, setEducatio
           </table>
         </div>
       )}
-      <div className="mt-4 flex items-center gap-3">
+      <div className="dashboard-admin-pagination">
         <button type="button" onClick={() => setOffset((current) => Math.max(0, current - PAGE_SIZE))} disabled={loading || offset === 0}>
           Previous
         </button>
