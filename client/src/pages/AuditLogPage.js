@@ -70,7 +70,7 @@ function ReviewAssessments({ action, fetchEntryHistory }) {
           {!loading && !error && assessments?.map((assessment) => (
             <article key={assessment.id} className="mb-3 last:mb-0">
               <h3 className="text-xs font-semibold text-gray-900">
-                Claimed origin year: {assessment.claimed_year}
+                Claimed origin year: {assessment.claimed_year ?? 'Not stated'}
               </h3>
               {assessment.source_description && (
                 <p className="mt-1 text-xs text-gray-600">{assessment.source_description}</p>

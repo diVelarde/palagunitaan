@@ -22,7 +22,7 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
   async function handleSubmit(e) {
     e.preventDefault();
     const fieldErrors = validate(form);
-    if (!consentConfirmed) fieldErrors.consent = 'Confirm consent or public availability before posting.';
+    if (mentionsPeople && !consentConfirmed) fieldErrors.consent = 'Confirm consent or public availability before posting.';
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length) return;
 
@@ -32,7 +32,7 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
         ...form,
         coverImage,
         mentionsPeople,
-        consentConfirmed,
+        consentConfirmed: mentionsPeople ? consentConfirmed : false,
       });
       setForm({ title: '', content: '' });
       setCoverImage(null);
@@ -108,23 +108,27 @@ export default function BlogComposer({ onSubmit = async (data) => console.log('p
         <p className="text-xs text-gray-600">
           Indicate when a post includes identifiable people or family details.
         </p>
-        <label className="flex items-start gap-2 text-sm text-[#493126]">
-          <input
-            type="checkbox"
-            required
-            checked={consentConfirmed}
-            onChange={(e) => setConsentConfirmed(e.target.checked)}
-            className="mt-1 accent-[#ad482d]"
-          />
-          <span>If this post names or describes real people or families, I have their consent or the information is already public.</span>
-        </label>
-        <p className="text-xs text-gray-600">
-          Please confirm before sharing identifying details. This confirmation is required for every post.
-        </p>
+        {mentionsPeople && (
+          <>
+            <label className="flex items-start gap-2 text-sm text-[#493126]">
+              <input
+                type="checkbox"
+                required
+                checked={consentConfirmed}
+                onChange={(e) => setConsentConfirmed(e.target.checked)}
+                className="mt-1 accent-[#ad482d]"
+              />
+              <span>I have their consent, or the information is already public.</span>
+            </label>
+            <p className="text-xs text-gray-600">
+              Please confirm before sharing identifying details about real people or families.
+            </p>
+          </>
+        )}
         {errors.consent && <p className="text-xs text-red-700" role="alert">{errors.consent}</p>}
       </fieldset>
 
-      <button type="submit" disabled={submitting || !consentConfirmed} className="rounded-lg bg-[#ad482d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#873720] disabled:opacity-50">
+      <button type="submit" disabled={submitting || (mentionsPeople && !consentConfirmed)} className="rounded-lg bg-[#ad482d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#873720] disabled:opacity-50">
         {submitting ? 'Posting…' : 'Post'}
       </button>
     </form>

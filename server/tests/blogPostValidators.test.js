@@ -15,15 +15,28 @@ function validate(body) {
 describe('blog post validation', () => {
   const validContent = { title: 'A post', content: 'A community story.' };
 
-  it('requires consent_confirmed to be true', () => {
+  it('requires consent_confirmed to be true when the post mentions real people', () => {
     const { next, res } = validate({
       ...validContent,
+      mentions_people: 'true',
       consent_confirmed: false,
     });
 
     expect(next).not.toHaveBeenCalled();
     expect(res.statusCode).toBe(400);
-    expect(res.payload.errors).toContain('consent_confirmed must be true.');
+    expect(res.payload.errors).toContain('consent_confirmed must be true when the post mentions real people.');
+  });
+
+  it('does not require consent when the post does not mention real people', () => {
+    const { req, res, next } = validate({
+      ...validContent,
+      mentions_people: 'false',
+      consent_confirmed: 'false',
+    });
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.statusCode).toBe(200);
+    expect(req.blogPostConsent).toEqual({ mentionsPeople: false, consentConfirmed: false });
   });
 
   it.each([true, 'true', '1'])('accepts explicit true consent values', (consentConfirmed) => {

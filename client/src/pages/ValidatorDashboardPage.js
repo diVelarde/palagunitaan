@@ -107,7 +107,7 @@ function PendingEntryRow({ entry, onReview }) {
         return (
           <section key={claim.id} className="dashboard-claim-assessment mb-4 p-4">
             <h3 className="mb-1 text-sm font-semibold text-gray-900">
-              Claimed origin year: {claim.claimed_year}
+              Claimed origin year: {claim.claimed_year ?? 'Not stated'}
             </h3>
             <p className="mb-4 text-xs text-gray-600">
               {claim.source_description || 'No source description supplied.'}
@@ -115,7 +115,7 @@ function PendingEntryRow({ entry, onReview }) {
             {CLAIM_ASSESSMENT_FIELDS.map(({ field, label, helper }) => (
               <fieldset
                 key={field}
-                aria-label={`${label} for claim ${claim.claimed_year}`}
+                aria-label={`${label} for claim ${claim.claimed_year ?? 'with no year stated'}`}
                 className="mb-3"
               >
                 <legend className="mb-1 text-xs font-semibold text-gray-800">

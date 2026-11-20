@@ -12,8 +12,11 @@ function validateBlogPost(req, res, next) {
   if (!content || !content.trim()) errors.push('content is required.');
   const mentionsPeople = rawMentionsPeople == null ? false : parseBoolean(rawMentionsPeople);
   if (mentionsPeople === undefined) errors.push('mentions_people must be true or false.');
-  const consentConfirmed = parseBoolean(rawConsentConfirmed);
-  if (consentConfirmed !== true) errors.push('consent_confirmed must be true.');
+  const parsedConsent = rawConsentConfirmed == null ? false : parseBoolean(rawConsentConfirmed);
+  if (parsedConsent === undefined) errors.push('consent_confirmed must be true or false.');
+  // Consent is only needed when the post names or describes real people or families (FR-34).
+  if (mentionsPeople === true && parsedConsent !== true) errors.push('consent_confirmed must be true when the post mentions real people.');
+  const consentConfirmed = parsedConsent === true;
   if (errors.length) return res.status(400).json({ message: 'Invalid post.', errors });
   req.blogPostConsent = { mentionsPeople, consentConfirmed };
   next();

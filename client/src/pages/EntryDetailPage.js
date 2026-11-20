@@ -146,7 +146,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
               <p className="entry-history-intro">
                 These are source-backed claims about when the story originated. The source's own publication or recording year is shown separately.
               </p>
-              {new Set(entry.history_claims.map((claim) => claim.claimed_year)).size > 1 && (
+              {new Set(entry.history_claims.map((claim) => claim.claimed_year).filter((year) => year != null)).size > 1 && (
                 <p className="entry-history-difference" role="note">
                   Sources give different claimed origin years. The archive preserves these differences rather than choosing one as definitive.
                 </p>
@@ -154,7 +154,7 @@ export default function EntryDetailPage({ fetchEntry = async () => null }) {
               <ol className="entry-history-list">
                 {entry.history_claims.map((claim) => (
                   <li key={claim.id}>
-                    <strong>Claimed origin year: {claim.claimed_year}</strong>
+                    <strong>Claimed origin year: {claim.claimed_year ?? 'Not stated'}</strong>
                     {claim.source_type && <span className="entry-history-source-type">{claim.source_type}</span>}
                     <p>{claim.source_description}</p>
                     {claim.source_year && <span>Source recorded/published: {claim.source_year}</span>}
