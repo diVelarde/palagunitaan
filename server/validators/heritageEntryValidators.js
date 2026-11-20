@@ -70,8 +70,8 @@ async function validateSubmission(req, res, next) {
         return;
       }
       const prefix = `historyClaims[${index}]`;
-      if (!isValidYear(claim.claimedYear)) {
-        errors.push(`${prefix}.claimedYear must be a year between 1 and 9999.`);
+      if (claim.claimedYear != null && claim.claimedYear !== '' && !isValidYear(claim.claimedYear)) {
+        errors.push(`${prefix}.claimedYear must be a year between 1 and 9999, or left blank if the source gives no year.`);
       }
       if (typeof claim.sourceDescription !== 'string' || !claim.sourceDescription.trim()) {
         errors.push(`${prefix}.sourceDescription is required.`);

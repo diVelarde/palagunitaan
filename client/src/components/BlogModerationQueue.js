@@ -54,11 +54,15 @@ function PendingBlogPost({ post, onReview }) {
         </button>
       </div>
       {error && <p className="mt-3 text-sm text-red-700" role="alert">{error}</p>}
-      <p className="mt-2 text-xs font-medium text-[#315b45]">
-        {Number(post.consent_confirmed) === 1 ? 'Author confirmed consent' : 'Consent confirmation not on record'}
-      </p>
-      {Number(post.mentions_people) === 1 && (
-        <p className="mt-1 text-xs text-gray-600">This post names or describes real people or families.</p>
+      {Number(post.mentions_people) === 1 ? (
+        <>
+          <p className="mt-2 text-xs font-medium text-[#315b45]">
+            {Number(post.consent_confirmed) === 1 ? 'Author confirmed consent' : 'Consent confirmation not on record'}
+          </p>
+          <p className="mt-1 text-xs text-gray-600">This post names or describes real people or families.</p>
+        </>
+      ) : (
+        <p className="mt-2 text-xs text-gray-600">Author did not mark this post as naming real people.</p>
       )}
       <p className="mt-1 text-xs text-gray-600">
         Check that named people or families are treated respectfully.

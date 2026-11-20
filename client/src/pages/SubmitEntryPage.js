@@ -25,8 +25,8 @@ function validate({ title, rawContent, historyClaims, alternateNames }) {
   else if (rawContent.trim().length < 20) errors.rawContent = 'Please write at least 20 characters.';
 
   if (historyClaims.length > 20) errors.historyClaims = 'You can add up to 20 source claims.';
-  else if (historyClaims.some((claim) => !claim.claimedYear || !claim.sourceDescription.trim())) {
-    errors.historyClaims = 'Each source claim needs a claimed origin year and source description.';
+  else if (historyClaims.some((claim) => !claim.sourceDescription.trim())) {
+    errors.historyClaims = 'Each source claim needs a source description. The claimed year can be left blank if the source gives none.';
   }
 
   if (alternateNames.length > 10) errors.alternateNames = 'You can add up to 10 alternate names.';
@@ -228,7 +228,7 @@ export default function SubmitEntryPage({
         longitude: form.longitude === '' ? undefined : Number(form.longitude),
         historyClaims: form.historyClaims.map((claim) => ({
           ...claim,
-          claimedYear: Number(claim.claimedYear),
+          claimedYear: claim.claimedYear === '' ? null : Number(claim.claimedYear),
           sourceYear: claim.sourceYear ? Number(claim.sourceYear) : null,
           sourceDescription: claim.sourceDescription.trim(),
           sourceUrl: claim.sourceUrl.trim() || null,
@@ -549,7 +549,7 @@ export default function SubmitEntryPage({
               <legend>Source claim {index + 1}</legend>
               <div className="submit-entry-grid">
                 <div>
-                  <label className="submit-entry-label" htmlFor={`claim-year-${index}`}>Claimed origin year <span>*</span></label>
+                  <label className="submit-entry-label" htmlFor={`claim-year-${index}`}>Claimed origin year <span className="font-normal">(leave blank if the source gives no year)</span></label>
                   <input
                     id={`claim-year-${index}`}
                     type="number"

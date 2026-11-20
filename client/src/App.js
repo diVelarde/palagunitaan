@@ -6,6 +6,7 @@ import Footer from './components/Footer.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import DashboardLayout from './layouts/DashboardLayout';
 import RouteLoadingFallback from './components/RouteLoadingFallback';
+import ScrollToTop from './components/ScrollToTop';
 
 import LandingPage from './pages/LandingPage.js';
 import DashboardPage from './pages/DashboardPage.js';
@@ -36,6 +37,7 @@ const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'));
 function AppShell() {
   return (
     <div className="site-app-shell min-h-screen flex flex-col">
+      <ScrollToTop />
       <Navbar />
       <div className="flex-1">
         <Suspense fallback={<RouteLoadingFallback />}>

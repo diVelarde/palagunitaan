@@ -1,7 +1,9 @@
 const db = require('../config/db');
 
 function claimsHaveDifferentYears(historyClaims) {
-  return new Set(historyClaims.map((claim) => claim.claimed_year)).size > 1;
+  return new Set(
+    historyClaims.map((claim) => claim.claimed_year).filter((year) => year != null)
+  ).size > 1;
 }
 
 function parseAlternateNames(value) {
@@ -181,7 +183,7 @@ async function create({
       const values = historyClaims.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
       const params = historyClaims.flatMap((claim) => [
         entryId,
-        claim.claimedYear,
+        claim.claimedYear === '' || claim.claimedYear == null ? null : claim.claimedYear,
         claim.sourceType || null,
         claim.sourceDescription.trim(),
         claim.sourceYear || null,
